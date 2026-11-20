@@ -102,11 +102,10 @@ export default function PitchCanvas({
                 <button
                   type="button"
                   onClick={() => setShowChannels(!showChannels)}
-                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                    showChannels
-                      ? "bg-[#1A1A1A] text-white border-white/20"
-                      : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                  }`}
+                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${showChannels
+                    ? "bg-[#1A1A1A] text-white border-white/20"
+                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                    }`}
                   title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
                 >
                   <Layers className="w-3 h-3 text-[#FF2636]" />
@@ -117,11 +116,10 @@ export default function PitchCanvas({
                 <button
                   type="button"
                   onClick={() => setPillMode(pillMode === "pills" ? "minimal" : "pills")}
-                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                    pillMode === "pills"
-                      ? "bg-[#1A1A1A] text-white border-white/20"
-                      : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                  }`}
+                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${pillMode === "pills"
+                    ? "bg-[#1A1A1A] text-white border-white/20"
+                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                    }`}
                   title="Toggle between sleek glass pills and minimal labels"
                 >
                   <Sparkles className="w-3 h-3 text-[#FF2636]" />

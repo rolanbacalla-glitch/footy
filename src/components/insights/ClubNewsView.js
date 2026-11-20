@@ -480,9 +480,6 @@ export default function ClubNewsView() {
                 Free Live News Sources
               </h3>
             </div>
-            <span className="text-[10px] font-semibold text-[#FF2636] bg-[#E31B23]/14 px-2 py-0.5 rounded-full border border-[#E31B23]/25">
-              Zero API Key
-            </span>
           </div>
 
           <div className="space-y-2">
