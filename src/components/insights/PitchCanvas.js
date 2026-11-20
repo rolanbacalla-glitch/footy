@@ -8,7 +8,9 @@ export default function PitchCanvas({
   overlayMode,
   selectedPlayer,
   setSelectedPlayer,
+  lineupStatus = null, // "predicted" | "confirmed" | null (matchday only)
 }) {
+  const isPredicted = lineupStatus === "predicted";
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
@@ -139,6 +141,19 @@ export default function PitchCanvas({
               <Compass className="w-3 h-3 text-[#FF2636]" />
               The Kop: <span className="text-[#FF2636] font-bold">Right ➔</span>
             </div>
+
+            {/* Matchday line-up status */}
+            {lineupStatus && (
+              <div
+                className={`text-[11px] font-semibold px-3 py-1 rounded-full border ${
+                  isPredicted
+                    ? "bg-[#F1B82D]/12 text-[#F1B82D] border-[#F1B82D]/35 border-dashed"
+                    : "bg-[#00DAC3]/12 text-[#00DAC3] border-[#00DAC3]/35"
+                }`}
+              >
+                {isPredicted ? "Predicted XI" : "Confirmed XI"}
+              </div>
+            )}
 
             {selectedPlayer && (
               <button
@@ -520,9 +535,11 @@ export default function PitchCanvas({
                       cy={player.y}
                       r={radius}
                       fill={isActive ? "url(#playerBadgeActive)" : "url(#playerBadgeRed)"}
+                      fillOpacity={isPredicted && !isActive ? 0.55 : 1}
                       stroke="#FFFFFF"
                       strokeOpacity="0.95"
                       strokeWidth={isActive ? "0.65" : "0.45"}
+                      strokeDasharray={isPredicted ? "0.9, 0.6" : undefined}
                       filter={isActive ? "url(#activePlayerHalo)" : "url(#nodeDropShadow)"}
                     />
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from "../components/insights/Header";
 import LiveScoreboard from "../components/insights/LiveScoreboard";
+import { isLineupConfirmed } from "../components/insights/PreMatchPanel";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import MomentumChart from "../components/insights/MomentumChart";
 import TimeMachineView from "../components/insights/TimeMachineView";
@@ -47,6 +48,7 @@ export default function AnfieldInsightsDashboard() {
   const [selectedMatchId, setSelectedMatchId] = useState(MATCH_LIBRARY[0].id);
   const [overlayMode, setOverlayMode] = useState("pass"); // 'pass' | 'heat' | 'shots'
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [matchdayPhase, setMatchdayPhase] = useState("BUILD_UP");
 
   // Restore & persist active tab across reloads, browser hibernation, and navigation
   useEffect(() => {
@@ -188,7 +190,11 @@ export default function AnfieldInsightsDashboard() {
           <div className="w-full flex flex-col gap-3.5 min-h-0">
             {/* Live Match Scoreboard View — Available during matchday and live in-play */}
             {(activeMatch?.type === "LIVE" || activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday) && (
-              <LiveScoreboard activeMatch={activeMatch} />
+              <LiveScoreboard
+                key={activeMatch.id}
+                activeMatch={activeMatch}
+                onPhaseChange={setMatchdayPhase}
+              />
             )}
 
             {/* Tactical Pitch Canvas & Match Momentum */}
@@ -200,6 +206,13 @@ export default function AnfieldInsightsDashboard() {
                   overlayMode={overlayMode}
                   selectedPlayer={selectedPlayer}
                   setSelectedPlayer={setSelectedPlayer}
+                  lineupStatus={
+                    activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday
+                      ? isLineupConfirmed(matchdayPhase)
+                        ? "confirmed"
+                        : "predicted"
+                      : null
+                  }
                 />
               </div>
 
@@ -211,6 +224,13 @@ export default function AnfieldInsightsDashboard() {
                   setOverlayMode={setOverlayMode}
                   selectedPlayer={selectedPlayer}
                   setSelectedPlayer={setSelectedPlayer}
+                  lineupStatus={
+                    activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday
+                      ? isLineupConfirmed(matchdayPhase)
+                        ? "confirmed"
+                        : "predicted"
+                      : null
+                  }
                 />
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import PreMatchPanel, { getMatchdayPhase, isLineupConfirmed } from "./PreMatchPanel";
 import {
   Shield,
   Clock,
@@ -29,9 +30,11 @@ export function getTeamCrest(teamName = "") {
   return null;
 }
 
-export default function LiveScoreboard({ activeMatch }) {
+export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const [seconds, setSeconds] = useState(42);
   const [countdownSeconds, setCountdownSeconds] = useState(16155); // ~4 hours 29 mins 15 secs
+  const [previewOffset, setPreviewOffset] = useState(null);
+  const [realCountdown, setRealCountdown] = useState(null);
   const [expandedStats, setExpandedStats] = useState(true);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
 
@@ -64,8 +67,40 @@ export default function LiveScoreboard({ activeMatch }) {
   const countdownMinutes = Math.floor((countdownSeconds % 3600) / 60);
   const countdownSecs = countdownSeconds % 60;
 
+  // Matchday phase (Predicted XI until line-ups are published at T-75)
+  const phase = getMatchdayPhase(countdownSeconds);
+  const lineupConfirmed = isLineupConfirmed(phase.id);
+  const isPreviewing = previewOffset !== null;
+
+  useEffect(() => {
+    if (isMatchdayPreMatch && onPhaseChange) onPhaseChange(phase.id);
+  }, [isMatchdayPreMatch, phase.id, onPhaseChange]);
+
+  const handlePreviewPhase = (secondsBeforeKickoff) => {
+    if (previewOffset === null) setRealCountdown(countdownSeconds);
+    setPreviewOffset(secondsBeforeKickoff);
+    setCountdownSeconds(secondsBeforeKickoff);
+  };
+
+  const handleResetPreview = () => {
+    setCountdownSeconds(realCountdown ?? 16155);
+    setPreviewOffset(null);
+  };
+
+  const PHASE_ATMOSPHERE = {
+    BUILD_UP: "Matchday build-up • Turnstiles open 14:30",
+    GATES: "Turnstiles open • Fans arriving",
+    LINEUPS: "Team news is in",
+    WARMUPS: "Warm-ups underway",
+    TUNNEL: "Teams in the tunnel • YNWA",
+    KICKOFF: "Kick-off",
+  };
+
   // Timeline events: in-play match incidents OR pre-match matchday itinerary
-  const incidents = activeMatch?.incidents || (
+  const preMatchNotes = isMatchdayPreMatch && activeMatch?.preMatch?.milestones
+    ? activeMatch.preMatch.milestones.map((text) => ({ min: "★", type: "note", text, team: "info" }))
+    : null;
+  const incidents = preMatchNotes || activeMatch?.incidents || (
     isMatchdayPreMatch
       ? [
           { min: "15:30", type: "news", text: "Official starting lineups submitted & confirmed to Premier League", team: "info" },
@@ -137,7 +172,7 @@ export default function LiveScoreboard({ activeMatch }) {
             {isMatchdayPreMatch ? (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1B82D]/15 border border-[#F1B82D]/40 text-[#F1B82D] font-bold text-[11px] tracking-wide shadow-[0_0_12px_rgba(241,184,45,0.25)]">
                 <Clock className="w-3.5 h-3.5 text-[#F1B82D] animate-pulse" />
-                MATCHDAY • KICK-OFF {kickoffTime}
+                {phase.id === "BUILD_UP" ? "MATCHDAY" : phase.label.toUpperCase()} • KICK-OFF {kickoffTime}
                 <span className="text-white/80 font-mono text-[10px] ml-1 bg-black/50 px-2 py-0.5 rounded-full border border-white/10 tabular-nums">
                   T-{countdownHours}h {countdownMinutes}m {countdownSecs < 10 ? `0${countdownSecs}` : countdownSecs}s
                 </span>
@@ -177,7 +212,7 @@ export default function LiveScoreboard({ activeMatch }) {
               <Volume2 className="w-3.5 h-3.5 text-[#FF2636] animate-pulse" />
               <span className="hidden md:inline">Atmosphere:</span>
               <strong className="text-white font-medium">
-                {isMatchdayPreMatch ? "Anfield Gates Open • Warm-ups Underway" : "104 dB (The Kop Singing)"}
+                {isMatchdayPreMatch ? PHASE_ATMOSPHERE[phase.id] : "104 dB (The Kop Singing)"}
               </strong>
             </span>
 
@@ -214,9 +249,9 @@ export default function LiveScoreboard({ activeMatch }) {
 
               {/* Status / Scorers */}
               {isMatchdayPreMatch ? (
-                <div className="flex items-center md:justify-end gap-1.5 mt-2 text-[11px] text-[#00DAC3] font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00DAC3] animate-pulse" />
-                  <span>Confirmed Starting Lineup</span>
+                <div className={`flex items-center md:justify-end gap-1.5 mt-2 text-[11px] font-semibold ${lineupConfirmed ? "text-[#00DAC3]" : "text-[#F1B82D]"}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-[#00DAC3]" : "border border-[#F1B82D] border-dashed"} animate-pulse`} />
+                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Line-ups at 15:15"}</span>
                 </div>
               ) : (
                 homeScorers.length > 0 && (
@@ -316,9 +351,9 @@ export default function LiveScoreboard({ activeMatch }) {
 
               {/* Status / Scorers */}
               {isMatchdayPreMatch ? (
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-[#00DAC3] font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00DAC3] animate-pulse" />
-                  <span>Confirmed Starting Lineup</span>
+                <div className={`flex items-center gap-1.5 mt-2 text-[11px] font-semibold ${lineupConfirmed ? "text-[#00DAC3]" : "text-[#F1B82D]"}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-[#00DAC3]" : "border border-[#F1B82D] border-dashed"} animate-pulse`} />
+                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Line-ups at 15:15"}</span>
                 </div>
               ) : (
                 awayScorers.length > 0 && (
@@ -341,71 +376,14 @@ export default function LiveScoreboard({ activeMatch }) {
         {expandedStats && (
           <div className="pt-3 border-t border-white/[0.08] space-y-3">
             {isMatchdayPreMatch ? (
-              /* Pre-Match Stream Gate Notice & Projections */
-              <div className="space-y-3">
-                <div className="p-3 rounded-xl bg-[#F1B82D]/10 border border-[#F1B82D]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#F1B82D]">
-                  <div className="flex items-center gap-2.5">
-                    <Activity className="w-4 h-4 text-[#F1B82D] animate-pulse shrink-0" />
-                    <div>
-                      <span className="font-bold text-white tracking-wide">Matchday Data Stream Ready:</span>
-                      <span className="text-[#EBEBF5]/80 ml-1.5">
-                        Ball possession duel, xG accumulation, shot vectors, and in-game incidents will start streaming dynamically from 00:00 Kick-off ({kickoffTime}).
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#F1B82D]/20 text-[#F1B82D] border border-[#F1B82D]/35 self-start sm:self-auto shrink-0">
-                    Standby For Kick-off
-                  </span>
-                </div>
-
-                {/* Pre-Match Model Projections & Baseline Indicators */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
-                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Forecast xG Target
-                    </span>
-                    <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-[#FF2636] font-mono">2.54</span>
-                      <span className="text-[10px] text-white/30">vs</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">0.92</span>
-                    </div>
-                    <span className="text-[9px] text-[#FF4D5A] block mt-0.5 font-medium">+1.62 xG Advantage</span>
-                  </div>
-
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
-                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Projected Possession
-                    </span>
-                    <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-white font-mono">62%</span>
-                      <span className="text-[10px] text-white/30">-</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">38%</span>
-                    </div>
-                    <span className="text-[9px] text-white/40 block mt-0.5">Anfield Baseline</span>
-                  </div>
-
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
-                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Pressing Intensity Target
-                    </span>
-                    <div className="flex items-center justify-center gap-1.5 mt-0.5">
-                      <span className="font-bold text-sm text-[#00DAC3] font-mono">6.4 PPDA</span>
-                    </div>
-                    <span className="text-[9px] text-[#00DAC3]/80 block mt-0.5">Iraola Vertical Press</span>
-                  </div>
-
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
-                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Pitch &amp; Attendance
-                    </span>
-                    <div className="flex items-center justify-center gap-1 mt-0.5">
-                      <span className="font-bold text-sm text-white font-mono">12°C</span>
-                      <span className="text-[10px] text-white/60">Mist</span>
-                    </div>
-                    <span className="text-[9px] text-[#F1B82D] block mt-0.5 font-medium">61,276 Sold Out</span>
-                  </div>
-                </div>
-              </div>
+              <PreMatchPanel
+                activeMatch={activeMatch}
+                phase={phase}
+                countdownSeconds={countdownSeconds}
+                onPreviewPhase={handlePreviewPhase}
+                isPreviewing={isPreviewing}
+                onResetPreview={handleResetPreview}
+              />
             ) : (
               /* Live In-Play Match Telemetry */
               <div className="space-y-3">
@@ -499,7 +477,7 @@ export default function LiveScoreboard({ activeMatch }) {
                 : "bg-[#E31B23]/20 text-[#FF4D5A] border-[#E31B23]/30"
             }`}>
               <Zap className="w-3 h-3 text-[#FF2636]" />
-              {isMatchdayPreMatch ? "Matchday Schedule" : "Match Incident"}
+              {isMatchdayPreMatch ? "Matchday Notes" : "Match Incident"}
             </span>
             <span className="font-mono text-[11px] font-bold text-[#F1B82D] shrink-0">
               {incidents[activeIncidentIndex]?.min}
@@ -510,7 +488,7 @@ export default function LiveScoreboard({ activeMatch }) {
           </div>
 
           <div className="hidden sm:flex items-center gap-1 text-[10px] text-[#8E8E93] shrink-0 pl-2">
-            <span>{activeIncidentIndex + 1} of {incidents.length} events</span>
+            <span>{activeIncidentIndex + 1} of {incidents.length} {isMatchdayPreMatch ? "notes" : "events"}</span>
           </div>
         </div>
       </div>

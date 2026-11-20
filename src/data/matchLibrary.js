@@ -37,13 +37,72 @@ export const MATCH_LIBRARY = [
       fouls: [0, 0],
       yellowCards: [0, 0],
     },
-    incidents: [
-      { min: "15:30", type: "news", text: "Official starting lineups submitted & confirmed to Premier League", team: "info" },
-      { min: "15:55", type: "warmup", text: "Liverpool & Man United squads emerge onto Anfield turf for warm-up drills", team: "info" },
-      { min: "16:15", type: "atmosphere", text: "The Kop stand fills to capacity as heritage flags and banners are unfurled", team: "home" },
-      { min: "16:25", type: "hymn", text: "'You'll Never Walk Alone' sung in unison across all 4 stands; teams line up in tunnel", team: "home" },
-      { min: "16:30", type: "kickoff", text: "Scheduled Kick-Off • Live match data, xG, and pass vectors will start streaming", team: "info" },
-    ],
+    incidents: [],
+    preMatch: {
+      kickoffHour: 16,
+      winProbability: { home: 58, draw: 23, away: 19 },
+      winProbabilitySource: "Elo rating blended with market odds; adjusted for team news",
+      projectedXg: [2.54, 0.92],
+      // Oldest → most recent
+      form: {
+        home: ["W", "W", "W", "W", "D", "W"],
+        away: ["W", "L", "D", "W", "L", "L"],
+      },
+      // [xG for, xG against] per match, oldest → most recent
+      xgTrend: {
+        home: [[1.42, 1.88], [2.05, 1.21], [2.61, 1.52], [1.94, 0.71], [2.18, 1.12], [2.64, 1.04]],
+        away: [[1.71, 1.10], [1.22, 1.64], [1.35, 1.29], [1.48, 1.02], [0.94, 1.71], [1.02, 1.83]],
+      },
+      teamNews: {
+        home: [
+          { name: "Giovanni Leoni", status: "out", detail: "ACL • back Mar 2027" },
+          { name: "Alexis Mac Allister", status: "doubt", detail: "Hamstring • late fitness test" },
+          { name: "Milos Kerkez", status: "booking", detail: "4 yellow cards" },
+        ],
+        away: [
+          { name: "Lisandro Martínez", status: "out", detail: "Knee • back Jan 2027" },
+          { name: "Mason Mount", status: "doubt", detail: "Calf • assessed on the day" },
+          { name: "Casemiro", status: "booking", detail: "4 yellow cards" },
+        ],
+      },
+      keyDuel: {
+        home: { name: "Bradley Barcola", number: 29, stat: "4.1", label: "successful dribbles /90" },
+        away: { name: "Patrick Dorgu", number: 13, stat: "1.9", label: "times dribbled past /90" },
+        takeaway: "Barcola v Dorgu on Liverpool's right is the matchup to watch. Frimpong's overlaps make it 2 v 1, and that's where the chances should come from.",
+      },
+      headToHead: [
+        { date: "19 Oct 2025", fixture: "Liverpool 1–2 Man United", score: "1–2", result: "L", venue: "Anfield" },
+        { date: "5 Jan 2025", fixture: "Liverpool 2–2 Man United", score: "2–2", result: "D", venue: "Anfield" },
+        { date: "1 Sep 2024", fixture: "Man United 0–3 Liverpool", score: "3–0", result: "W", venue: "Old Trafford" },
+        { date: "7 Apr 2024", fixture: "Man United 2–2 Liverpool", score: "2–2", result: "D", venue: "Old Trafford" },
+        { date: "17 Mar 2024", fixture: "Man United 4–3 Liverpool (FA Cup, aet)", score: "3–4", result: "L", venue: "Old Trafford" },
+      ],
+      tactical: {
+        ppda: 6.4,
+        opponentTurnovers: 14,
+        takeaway: "United play out from the back through a back three. Against our press they lose the ball about 14 times a game in their own third. Expect early turnovers.",
+      },
+      setPieces: {
+        home: { for: 0.38, against: 0.21 },
+        away: { for: 0.29, against: 0.34 },
+        takeaway: "United concede more from set pieces than they create. Liverpool's corners could be the tiebreaker.",
+      },
+      rest: {
+        home: { days: 6, last: "Crystal Palace (A), Sat" },
+        away: { days: 3, last: "Carabao Cup (A), Tue" },
+        flag: "United are playing on three days' rest, which usually means a drop in intensity after 60 minutes.",
+      },
+      officials: { referee: "Anthony Taylor", var: "Darren England", cardsPerGame: "4.1", pensPerGame: "0.24" },
+      conditions: { tempC: 9, rainPct: 40, windKmh: 18, summary: "Overcast" },
+      pitch: "Hybrid grass • excellent",
+      attendance: "61,276 • Sold out",
+      milestones: [
+        "Virgil van Dijk is set to make his 350th Premier League appearance",
+        "Florian Wirtz has 6 goal involvements in his last 5 league matches",
+        "Alexander Isak needs one more goal to reach 10 for the season",
+        "Liverpool are unbeaten in six since the 3–0 home defeat to Man City in October",
+      ],
+    },
     expectedShape: "4-2-3-1 (Iraola High-Intensity Vertical Press)",
     keyTacticalBattle: "Wirtz (#7) & Barcola (#29) half-space transitions feeding Alexander Isak (#9)",
     metrics: {
