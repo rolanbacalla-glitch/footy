@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Shield, Activity, Newspaper, Clock, UserSearch, Radio } from "lucide-react";
 
 export default function Header({ activeTab, setActiveTab, activeMatch }) {
@@ -48,8 +49,16 @@ export default function Header({ activeTab, setActiveTab, activeMatch }) {
         {/* Brand Emblem & SF Pro Wordmark */}
         <div className="flex items-center justify-between w-full sm:w-auto">
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-9 h-9 rounded-[12px] glass-crimson-card shrink-0">
-              <Shield className="w-[18px] h-[18px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" strokeWidth={2.2} />
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-[12px] glass-crimson-card shrink-0 p-1">
+              <Image
+                src="/crests/liverpool.svg"
+                alt="Liverpool FC Official Crest"
+                width={28}
+                height={28}
+                unoptimized
+                priority
+                className="w-full h-full object-contain filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+              />
               <span
                 aria-hidden="true"
                 className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5"
@@ -88,11 +97,13 @@ export default function Header({ activeTab, setActiveTab, activeMatch }) {
                 <span className="font-bold text-[#FF4D5A] tracking-[0.04em] uppercase text-[10px] bg-[#FF2636]/15 px-2 py-0.5 rounded-full border border-[#FF2636]/30 animate-pulse">
                   LIVE {activeMatch.minute || 68}&apos;
                 </span>
-                <span className="font-semibold text-white tracking-[-0.01em]">
+                <span className="font-semibold text-white tracking-[-0.01em] flex items-center gap-1.5">
+                  <Image src="/crests/liverpool.svg" alt="Liverpool" width={16} height={16} unoptimized priority className="w-4 h-4 object-contain" />
                   {activeMatch.homeTeam || "Liverpool"}{" "}
                   <span className="font-mono text-[#F1B82D] font-bold">
                     {activeMatch.homeScore ?? 2} - {activeMatch.awayScore ?? 1}
                   </span>{" "}
+                  <Image src={activeMatch?.awayCrest || "/crests/manutd.svg"} alt={activeMatch.awayTeam || "Man United"} width={16} height={16} unoptimized priority className="w-4 h-4 object-contain" />
                   {activeMatch.awayTeam || "Man United"}
                 </span>
                 <span className="text-white/20">•</span>
@@ -112,8 +123,10 @@ export default function Header({ activeTab, setActiveTab, activeMatch }) {
                 <span className="font-bold text-[#F1B82D] tracking-[0.04em] uppercase text-[10px] bg-[#F1B82D]/15 px-2 py-0.5 rounded-full border border-[#F1B82D]/30">
                   MATCHDAY • {activeMatch.statusText || "TODAY 16:30"}
                 </span>
-                <span className="font-semibold text-white tracking-[-0.01em]">
+                <span className="font-semibold text-white tracking-[-0.01em] flex items-center gap-1.5">
+                  <Image src="/crests/liverpool.svg" alt="Liverpool" width={16} height={16} unoptimized priority className="w-4 h-4 object-contain" />
                   {activeMatch.homeTeam || "Liverpool"} vs {activeMatch.awayTeam || "Man United"}
+                  <Image src={activeMatch?.awayCrest || "/crests/manutd.svg"} alt={activeMatch.awayTeam || "Man United"} width={16} height={16} unoptimized priority className="w-4 h-4 object-contain" />
                 </span>
                 <span className="text-white/20">•</span>
                 <span className="text-[#F1B82D] font-medium">{activeMatch.competition}</span>
