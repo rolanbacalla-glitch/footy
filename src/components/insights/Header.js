@@ -48,7 +48,7 @@ export default function Header({ activeTab, setActiveTab }) {
               setActiveTab("boot-room");
             }}
             className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2636] rounded-xl"
-            aria-label="Anfield Insights — home"
+            aria-label="Football Insights — home"
           >
             <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#E31B23]/25 via-white/[0.05] to-black/80 border border-white/15 shrink-0 p-1 group-hover:border-[#FF2636]/60 transition-colors shadow-sm">
               <Shield
@@ -67,14 +67,14 @@ export default function Header({ activeTab, setActiveTab }) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">
-                  Anfield <span className="text-[#FF2636]">Insights</span>
+                  Football <span className="text-[#FF2636]">Insights</span>
                 </span>
                 <span className="hidden sm:inline-block px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-full bg-[#E31B23]/15 text-white/90 border border-[#E31B23]/30">
-                  2026/27 • Iraola Era
+                  2026/27 • Premier League
                 </span>
               </div>
               <p className="text-[11px] text-[#8E8E93] tracking-tight hidden md:block">
-                Liverpool FC Tactical &amp; Recruitment Intelligence
+                Tactical, Statistical &amp; Recruitment Intelligence
               </p>
             </div>
           </Link>
@@ -145,7 +145,7 @@ export default function Header({ activeTab, setActiveTab }) {
             <div className="flex items-center gap-2.5">
               <Shield className="w-6 h-6 text-[#FF2636]" strokeWidth={2} />
               <span className="text-lg font-bold tracking-tight">
-                Anfield <span className="text-[#FF2636]">Insights</span>
+                Football <span className="text-[#FF2636]">Insights</span>
               </span>
             </div>
             <button

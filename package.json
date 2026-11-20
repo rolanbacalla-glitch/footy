@@ -1,6 +1,6 @@
 {
-  "name": "anfield-insights",
-  "description": "Anfield Insights — Liverpool FC Tactical & Recruitment Data Engine",
+  "name": "football-insights",
+  "description": "Football Insights — Premier League Tactical & Recruitment Data Engine",
   "version": "0.2.0",
   "private": true,
   "scripts": {

@@ -19,10 +19,10 @@ export default function Footer({ setActiveTab }) {
                 href="/"
                 className="text-2xl sm:text-3xl font-extrabold tracking-[-0.03em] text-white mb-4 block"
               >
-                Anfield <span className="text-[#FF2636]">Insights</span>
+                Football <span className="text-[#FF2636]">Insights</span>
               </Link>
               <p className="text-[#8E8E93] text-sm max-w-md mb-6 leading-relaxed">
-                Independent real-time tactical intelligence, spatial pass telemetry, and performance analytics for Liverpool FC. Engineered with live Premier League feeds, Opta spatial matrices, and DeepMind TacticAI set-piece evaluation models.
+                Independent real-time tactical intelligence, spatial pass telemetry, and performance analytics for Premier League football. Engineered with live feeds, Opta spatial matrices, and DeepMind TacticAI set-piece evaluation models.
               </p>
 
               {/* Real-Time Engine Trust Indicators */}
@@ -129,12 +129,12 @@ export default function Footer({ setActiveTab }) {
           {/* Bottom Utility Bar: Copyright & Mandatory Legal Disclaimers */}
           <div className="pt-8 border-t border-white/[0.08] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#8E8E93]">
             <div className="flex items-center gap-2">
-              <span>© {new Date().getFullYear()} Anfield Insights. All rights reserved.</span>
+              <span>© {new Date().getFullYear()} Football Insights. All rights reserved.</span>
             </div>
 
             {/* Editorial Disclaimer */}
             <div className="text-[11px] text-[#8E8E93]/70 text-center md:text-right max-w-xl">
-              Anfield Insights is an independent analytical publication and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Liverpool FC or the Premier League.
+              Football Insights is an independent analytical publication and is not affiliated, associated, authorised, endorsed by, or in any way officially connected with any club or the Premier League.
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function Footer({ setActiveTab }) {
                 {modalType === "terms" && <FileText className="w-5 h-5 text-[#FF2636]" />}
                 {modalType === "disclaimer" && <ShieldCheck className="w-5 h-5 text-[#FF2636]" />}
                 <span>
-                  {modalType === "about" && "About Anfield Insights"}
+                  {modalType === "about" && "About Football Insights"}
                   {modalType === "cookies" && "Cookie & Storage Preferences"}
                   {modalType === "privacy" && "Privacy Notice & Data Protection"}
                   {modalType === "terms" && "Terms of Service"}
@@ -181,7 +181,7 @@ export default function Footer({ setActiveTab }) {
               {modalType === "about" && (
                 <>
                   <p>
-                    <strong>Anfield Insights</strong> is an independent digital analytics publication dedicated to providing supporters, analysts, and tacticians with rigorous, data-driven match intelligence for Liverpool Football Club.
+                    <strong>Football Insights</strong> is an independent digital analytics publication dedicated to providing supporters, analysts, and tacticians with rigorous, data-driven match intelligence for Premier League football.
                   </p>
                   <p>
                     Our mission is to bridge high-tier professional performance metrics with accessible, publication-grade interactive visualisations. We combine live Premier League telemetry feeds, verified Opta spatial coordinates, and predictive Expected Goals (xG) models into a unified, distraction-free command centre.
@@ -195,7 +195,7 @@ export default function Footer({ setActiveTab }) {
               {modalType === "cookies" && (
                 <>
                   <p>
-                    Anfield Insights uses strict minimal local storage (<code className="text-white text-xs bg-white/10 px-1 py-0.5 rounded">anfield_active_tab</code>) to preserve your workspace navigation state between sessions.
+                    Football Insights uses strict minimal local storage (<code className="text-white text-xs bg-white/10 px-1 py-0.5 rounded">football_active_tab</code>) to preserve your workspace navigation state between sessions.
                   </p>
                   <p>
                     We do not deploy intrusive third-party cross-site tracking cookies or marketing pixels. Any external telemetry queries are transmitted directly through edge APIs to public football feeds.
@@ -217,10 +217,10 @@ export default function Footer({ setActiveTab }) {
               {modalType === "terms" && (
                 <>
                   <p>
-                    By accessing Anfield Insights, you acknowledge that all mathematical projections, Expected Goals (xG), and On-Ball Value (OBV) data models are provided strictly for educational and journalistic analysis.
+                    By accessing Football Insights, you acknowledge that all mathematical projections, Expected Goals (xG), and On-Ball Value (OBV) data models are provided strictly for educational and journalistic analysis.
                   </p>
                   <p>
-                    Anfield Insights does not offer betting advice or gambling facilitation. Content may not be scraped or mirrored for commercial exploitation without prior written consent.
+                    Football Insights does not offer betting advice or gambling facilitation. Content may not be scraped or mirrored for commercial exploitation without prior written consent.
                   </p>
                 </>
               )}
@@ -228,10 +228,10 @@ export default function Footer({ setActiveTab }) {
               {modalType === "disclaimer" && (
                 <>
                   <p>
-                    <strong>Editorial Independence:</strong> Anfield Insights is an independent sports analytics platform.
+                    <strong>Editorial Independence:</strong> Football Insights is an independent sports analytics platform.
                   </p>
                   <p>
-                    All club trademarks, team names, and stadium references are used solely for descriptive, nominative, and identification purposes under UK Fair Dealing provisions. No official affiliation or licensing agreement with Liverpool Football Club or the Premier League is implied.
+                    All club trademarks, team names, and stadium references are used solely for descriptive, nominative, and identification purposes under UK Fair Dealing provisions. No official affiliation or licensing agreement with any football club or the Premier League is implied.
                   </p>
                 </>
               )}

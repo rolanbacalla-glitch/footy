@@ -30,7 +30,7 @@ function resolveTabName(raw) {
   return null;
 }
 
-export default function AnfieldInsightsDashboard() {
+export default function FootballInsightsDashboard() {
   const [activeTab, setActiveTabState] = useState(() => {
     if (typeof window === "undefined") return "boot-room";
     const fromHash = resolveTabName(window.location.hash);
@@ -43,7 +43,9 @@ export default function AnfieldInsightsDashboard() {
     }
     let fromStorage = null;
     try {
-      fromStorage = resolveTabName(localStorage.getItem("anfield_active_tab"));
+      fromStorage = resolveTabName(
+        localStorage.getItem("football_active_tab") || localStorage.getItem("anfield_active_tab")
+      );
     } catch {
       // Storage unavailable
     }
@@ -102,7 +104,7 @@ export default function AnfieldInsightsDashboard() {
     const valid = resolveTabName(tabId) || tabId;
     setActiveTabState(valid);
     try {
-      localStorage.setItem("anfield_active_tab", valid);
+      localStorage.setItem("football_active_tab", valid);
       if (window.location.hash !== `#${valid}`) {
         window.history.replaceState(null, "", `#${valid}`);
       }

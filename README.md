@@ -1,8 +1,8 @@
-# ANFIELD INSIGHTS // LFC Tactical Data Engine
+# FOOTBALL INSIGHTS // Premier League Tactical Data Engine
 
-A high-performance Single Page Application (SPA) tactical intelligence and player recruitment dashboard built strictly for **Liverpool FC** supporters, Kopites, and sports data scientists.
+A high-performance Single Page Application (SPA) tactical intelligence and player recruitment dashboard built for football supporters, tacticians, and sports data scientists.
 
-![Anfield Insights](https://img.shields.io/badge/LFC-Anfield_Insights-C8102E?style=for-the-badge&logo=liverpoolfc&logoColor=white)
+![Football Insights](https://img.shields.io/badge/PL-Football_Insights-FF2636?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js_16-React_19-black?style=for-the-badge&logo=next.js)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS_v4-00B2A9?style=for-the-badge&logo=tailwindcss)
 
@@ -55,7 +55,7 @@ Run the development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view Anfield Insights.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view Football Insights.
 
 ---
 

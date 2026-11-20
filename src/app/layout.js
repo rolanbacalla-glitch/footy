@@ -8,18 +8,17 @@ const appleSans = Inter({
 });
 
 export const metadata = {
-  title: "Anfield Insights — Liverpool FC Tactical Intelligence",
+  title: "Football Insights — Live Tactical Intelligence",
   description:
-    "Elite tactical intelligence, pass networks, and recruitment analytics engineered for Liverpool FC supporters and sports analysts.",
+    "Elite tactical intelligence, pass networks, and recruitment analytics engineered for supporters and sports analysts.",
   keywords: [
-    "Liverpool FC",
-    "LFC Analytics",
+    "Football Insights",
+    "Premier League Analytics",
     "Pass Network",
-    "Anfield Insights",
     "Tactical Data",
     "OBV",
     "xG",
-    "Kopites",
+    "Football Analysis",
   ],
 };
 
