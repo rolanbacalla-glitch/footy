@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Header from "../components/insights/Header";
+import LiveScoreboard from "../components/insights/LiveScoreboard";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import MomentumChart from "../components/insights/MomentumChart";
 import TimeMachineView from "../components/insights/TimeMachineView";
@@ -95,7 +96,11 @@ export default function AnfieldInsightsDashboard() {
       </div>
 
       {/* 1. Persistent Apple Liquid Glass Navigation Header */}
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        activeMatch={activeMatch}
+      />
 
       {/* 2. Main Body Dashboard Viewport */}
       <div className="relative z-10 flex-1 min-h-0 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto gap-3.5 max-w-[1680px] w-full mx-auto">
@@ -114,6 +119,7 @@ export default function AnfieldInsightsDashboard() {
             {MATCH_LIBRARY.map((m) => {
               const isSelected = m.id === selectedMatchId;
               const isUpcoming = m.type === "UPCOMING";
+              const isLive = m.type === "LIVE" || m.isLive;
 
               return (
                 <button
@@ -132,19 +138,23 @@ export default function AnfieldInsightsDashboard() {
                 >
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
-                      isUpcoming
-                        ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
-                        : isSelected
-                          ? "bg-white shadow-[0_0_8px_#FFFFFF]"
-                          : "bg-[#E31B23]"
+                      isLive
+                        ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
+                        : isUpcoming
+                          ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
+                          : isSelected
+                            ? "bg-white shadow-[0_0_8px_#FFFFFF]"
+                            : "bg-[#E31B23]"
                     }`}
                   />
                   <span className="tracking-[-0.01em]">{m.title}</span>
                   <span
                     className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
-                      isSelected
-                        ? "bg-black/40 text-white border border-white/25 shadow-inner"
-                        : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
+                      isLive
+                        ? "bg-[#FF2636]/25 text-[#FF6961] border border-[#FF2636]/40 font-bold animate-pulse"
+                        : isSelected
+                          ? "bg-black/40 text-white border border-white/25 shadow-inner"
+                          : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
                     }`}
                   >
                     {m.statusText}
@@ -157,26 +167,34 @@ export default function AnfieldInsightsDashboard() {
 
         {/* Tab 1: Boot Room Live (Tactical Visualisation + Momentum Split) */}
         {activeTab === "boot-room" && (
-          <div className="w-full flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto lg:overflow-hidden min-h-0">
-            {/* Left 2/3 Tactical Pitch Canvas */}
-            <div className="flex-1 lg:w-2/3 h-[460px] lg:h-full">
-              <PitchCanvas
-                activeMatch={activeMatch}
-                overlayMode={overlayMode}
-                selectedPlayer={selectedPlayer}
-                setSelectedPlayer={setSelectedPlayer}
-              />
-            </div>
+          <div className="w-full flex-1 flex flex-col gap-3.5 overflow-y-auto min-h-0">
+            {/* Live Match Scoreboard View — Only available during an active live match */}
+            {activeMatch?.type === "LIVE" && (
+              <LiveScoreboard activeMatch={activeMatch} />
+            )}
 
-            {/* Right 1/3 Metrics & Match Momentum Controller */}
-            <div className="lg:w-1/3 overflow-y-auto pr-0.5">
-              <MomentumChart
-                activeMatch={activeMatch}
-                overlayMode={overlayMode}
-                setOverlayMode={setOverlayMode}
-                selectedPlayer={selectedPlayer}
-                setSelectedPlayer={setSelectedPlayer}
-              />
+            {/* Tactical Pitch Canvas & Match Momentum */}
+            <div className="w-full flex-1 flex flex-col lg:flex-row gap-4 min-h-[460px] lg:min-h-[500px]">
+              {/* Left 2/3 Tactical Pitch Canvas */}
+              <div className="flex-1 lg:w-2/3 h-[460px] lg:h-full">
+                <PitchCanvas
+                  activeMatch={activeMatch}
+                  overlayMode={overlayMode}
+                  selectedPlayer={selectedPlayer}
+                  setSelectedPlayer={setSelectedPlayer}
+                />
+              </div>
+
+              {/* Right 1/3 Metrics & Match Momentum Controller */}
+              <div className="lg:w-1/3 overflow-y-auto pr-0.5">
+                <MomentumChart
+                  activeMatch={activeMatch}
+                  overlayMode={overlayMode}
+                  setOverlayMode={setOverlayMode}
+                  selectedPlayer={selectedPlayer}
+                  setSelectedPlayer={setSelectedPlayer}
+                />
+              </div>
             </div>
           </div>
         )}

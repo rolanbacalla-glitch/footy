@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Shield, Activity, Newspaper, Clock, UserSearch, Radio } from "lucide-react";
 
-export default function Header({ activeTab, setActiveTab }) {
+export default function Header({ activeTab, setActiveTab, activeMatch }) {
   const [matchData, setMatchData] = useState({
     nextMatch: null,
     lastMatch: null,
@@ -77,24 +77,49 @@ export default function Header({ activeTab, setActiveTab }) {
 
         {/* OKX Sports-Style Live Match Pill */}
         <div className="hidden xl:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#121212] border border-white/[0.08] shadow-[inset_0_0.5px_0_rgba(255,255,255,0.06)] text-xs">
-          <Radio
-            className="w-3.5 h-3.5 text-[#FF2636] animate-pulse shrink-0"
-            strokeWidth={2.2}
-          />
+          {activeMatch?.type === "LIVE" ? (
+            <>
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF2636]" />
+              </span>
 
-          {nextMatch ? (
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-[#F1B82D] tracking-[0.04em] uppercase text-[10px] bg-[#F1B82D]/12 px-2 py-0.5 rounded-full border border-[#F1B82D]/25">
-                Next
-              </span>
-              <span className="font-semibold text-white tracking-[-0.01em]">
-                {nextMatch.homeTeam} vs {nextMatch.awayTeam}
-              </span>
-              <span className="text-white/20">•</span>
-              <span className="text-[#FF4D5A] font-medium">{nextMatch.competition}</span>
-              <span className="text-white/20">•</span>
-              <span className="text-[#8E8E93] text-[11px]">{nextMatch.venue}</span>
-            </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#FF4D5A] tracking-[0.04em] uppercase text-[10px] bg-[#FF2636]/15 px-2 py-0.5 rounded-full border border-[#FF2636]/30 animate-pulse">
+                  LIVE {activeMatch.minute || 68}&apos;
+                </span>
+                <span className="font-semibold text-white tracking-[-0.01em]">
+                  {activeMatch.homeTeam || "Liverpool"}{" "}
+                  <span className="font-mono text-[#F1B82D] font-bold">
+                    {activeMatch.homeScore ?? 2} - {activeMatch.awayScore ?? 1}
+                  </span>{" "}
+                  {activeMatch.awayTeam || "Man United"}
+                </span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#FF4D5A] font-medium">{activeMatch.competition}</span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#8E8E93] text-[11px]">{activeMatch.venue || "Anfield"}</span>
+              </div>
+            </>
+          ) : nextMatch ? (
+            <>
+              <Radio
+                className="w-3.5 h-3.5 text-[#F1B82D] shrink-0"
+                strokeWidth={2.2}
+              />
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#F1B82D] tracking-[0.04em] uppercase text-[10px] bg-[#F1B82D]/12 px-2 py-0.5 rounded-full border border-[#F1B82D]/25">
+                  Next
+                </span>
+                <span className="font-semibold text-white tracking-[-0.01em]">
+                  {nextMatch.homeTeam} vs {nextMatch.awayTeam}
+                </span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#FF4D5A] font-medium">{nextMatch.competition}</span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#8E8E93] text-[11px]">{nextMatch.venue}</span>
+              </div>
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">Anfield • The Kop Stand</span>
