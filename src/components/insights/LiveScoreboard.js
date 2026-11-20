@@ -35,7 +35,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const [countdownSeconds, setCountdownSeconds] = useState(16155); // ~4 hours 29 mins 15 secs
   const [previewOffset, setPreviewOffset] = useState(null);
   const [realCountdown, setRealCountdown] = useState(null);
-  const [expandedStats, setExpandedStats] = useState(true);
+  const [expandedStats, setExpandedStats] = useState(false);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
 
   const isLive = activeMatch?.type === "LIVE" || activeMatch?.isLive;
@@ -219,11 +219,15 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
             <button
               type="button"
               onClick={() => setExpandedStats(!expandedStats)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white transition-colors cursor-pointer border border-white/[0.08]"
-              aria-label={expandedStats ? "Collapse match statistics" : "Expand match statistics"}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer border ${
+                expandedStats
+                  ? "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30 shadow-[0_0_10px_rgba(255,38,54,0.15)]"
+                  : "bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border-white/[0.08]"
+              }`}
+              aria-label={expandedStats ? "Collapse pre-match analysis" : "Expand pre-match analysis"}
             >
               <span className="text-[10px] font-semibold uppercase tracking-wider">
-                {expandedStats ? "Less" : "Details"}
+                {expandedStats ? "Hide Pre-Match Hub" : "Pre-Match Hub"}
               </span>
               {expandedStats ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
