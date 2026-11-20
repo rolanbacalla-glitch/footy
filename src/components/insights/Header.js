@@ -51,8 +51,8 @@ export default function Header({ activeTab, setActiveTab }) {
             className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2636] rounded-xl"
             aria-label="Football Insights — home"
           >
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#E31B23]/25 via-white/[0.05] to-black/80 border border-white/15 shrink-0 p-1 group-hover:border-[#FF2636]/60 transition-colors shadow-sm">
-              <FootballLogo className="w-8 h-8" isLive={true} />
+            <div className="flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FootballLogo className="w-8 h-8" />
             </div>
 
             <div>

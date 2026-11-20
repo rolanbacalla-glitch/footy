@@ -2,97 +2,61 @@
 
 import React from "react";
 
-export default function FootballLogo({ className = "w-6 h-6", isLive = true }) {
+export default function FootballLogo({ className = "w-7 h-7" }) {
   return (
-    <div className={`relative flex items-center justify-center shrink-0 ${className}`}>
-      <svg
-        viewBox="0 0 36 36"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full drop-shadow-[0_2px_8px_rgba(255,38,54,0.3)] select-none"
-        aria-hidden="true"
-      >
-        <defs>
-          <linearGradient id="fbShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E242D" />
-            <stop offset="50%" stopColor="#13171F" />
-            <stop offset="100%" stopColor="#0B0E14" />
-          </linearGradient>
+    <svg
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`shrink-0 select-none ${className}`}
+      aria-hidden="true"
+    >
+      {/* Outer Ball Body */}
+      <circle
+        cx="16"
+        cy="16"
+        r="14"
+        fill="#FFFFFF"
+        stroke="#11161B"
+        strokeWidth="1.6"
+      />
 
-          <linearGradient id="fbCrimsonCore" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF4D5A" />
-            <stop offset="100%" stopColor="#FF2636" />
-          </linearGradient>
+      {/* Central Black Pentagon */}
+      <polygon
+        points="16,11 20.76,14.45 18.94,20.05 13.06,20.05 11.24,14.45"
+        fill="#11161B"
+        stroke="#11161B"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
 
-          <linearGradient id="fbBorderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
-            <stop offset="60%" stopColor="#FFFFFF" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#FF2636" stopOpacity="0.5" />
-          </linearGradient>
-        </defs>
+      {/* Radiating Seams */}
+      <line x1="16" y1="11" x2="16" y2="2" stroke="#11161B" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="20.76" y1="14.45" x2="29.3" y2="11.7" stroke="#11161B" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="18.94" y1="20.05" x2="24.2" y2="28.9" stroke="#11161B" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="13.06" y1="20.05" x2="7.8" y2="28.9" stroke="#11161B" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="11.24" y1="14.45" x2="2.7" y2="11.7" stroke="#11161B" strokeWidth="1.5" strokeLinecap="round" />
 
-        {/* Tactical Shield Crest Background */}
-        <path
-          d="M18 2.5 L30.5 7 V17 C30.5 25.2 24.8 31.5 18 34.5 C11.2 31.5 5.5 25.2 5.5 17 V7 L18 2.5 Z"
-          fill="url(#fbShieldGrad)"
-          stroke="url(#fbBorderGrad)"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-        />
+      {/* Five Perimeter Black Patches */}
+      {/* Top */}
+      <path d="M11 2.9 C14 2.1 18 2.1 21 2.9 L19 5.8 H13 Z" fill="#11161B" />
+      {/* Top Right */}
+      <path d="M28.5 7.5 C30.2 10.2 30.5 13.5 29.8 16.5 L26.8 14.5 L27 10 Z" fill="#11161B" />
+      {/* Bottom Right */}
+      <path d="M27.3 22.8 C25.5 26.2 22.5 28.5 19 29.8 L20.5 26.5 L24.5 24 Z" fill="#11161B" />
+      {/* Bottom Left */}
+      <path d="M4.7 22.8 C6.5 26.2 9.5 28.5 13 29.8 L11.5 26.5 L7.5 24 Z" fill="#11161B" />
+      {/* Top Left */}
+      <path d="M3.5 7.5 C1.8 10.2 1.5 13.5 2.2 16.5 L5.2 14.5 L5 10 Z" fill="#11161B" />
 
-        {/* Subtle Pitch Coordinate Crosshair Tick Marks */}
-        <path
-          d="M18 5 V8 M18 29 V32 M8 18 H11 M25 18 H28"
-          stroke="#FFFFFF"
-          strokeOpacity="0.2"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
-
-        {/* Telstar Football Motif */}
-        {/* Outer Circular Seam */}
-        <circle
-          cx="18"
-          cy="18"
-          r="8"
-          fill="#0C1017"
-          stroke="#FFFFFF"
-          strokeOpacity="0.45"
-          strokeWidth="1"
-        />
-
-        {/* Center Pentagon Core */}
-        <polygon
-          points="18,15 20.85,17.07 19.76,20.43 16.24,20.43 15.15,17.07"
-          fill="url(#fbCrimsonCore)"
-        />
-
-        {/* Seam Lines Radiating to Perimeter */}
-        <path
-          d="
-            M18 15 L18 10
-            M20.85 17.07 L25.6 15.5
-            M19.76 20.43 L22.7 25.4
-            M16.24 20.43 L13.3 25.4
-            M15.15 17.07 L10.4 15.5
-          "
-          stroke="#FFFFFF"
-          strokeOpacity="0.75"
-          strokeWidth="0.9"
-          strokeLinecap="round"
-        />
-      </svg>
-
-      {/* Live In-Play / Signal Indicator Dot */}
-      {isLive && (
-        <span
-          aria-hidden="true"
-          className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5"
-        >
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF2636] border border-black/40" />
-        </span>
-      )}
-    </div>
+      {/* Outer Rim */}
+      <circle
+        cx="16"
+        cy="16"
+        r="14"
+        stroke="#11161B"
+        strokeWidth="1.5"
+      />
+    </svg>
   );
 }
