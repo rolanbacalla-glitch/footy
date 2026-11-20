@@ -157,93 +157,114 @@ export default function AnfieldInsightsDashboard() {
               aria-label="Match Centre fixtures"
               className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"
             >
-              {/* Primary Tactical Study Matches */}
-              {MATCH_LIBRARY.map((m) => {
-                const isSelected = m.id === selectedMatchId;
-                const isUpcoming = m.type === "UPCOMING";
-                const isLive = m.type === "LIVE" || m.isLive;
-                const isMatchday = m.type === "MATCHDAY" || m.isMatchday;
-
+              {/* 1. Immediate Last Result (Only 1 previous game for context) */}
+              {(() => {
+                const lastGame = MATCH_LIBRARY.find((m) => m.type === "RECENT");
+                if (!lastGame) return null;
+                const isSelected = lastGame.id === selectedMatchId;
                 return (
                   <button
-                    key={m.id}
+                    key={lastGame.id}
                     role="tab"
                     aria-selected={isSelected}
                     onClick={() => {
-                      setSelectedMatchId(m.id);
+                      setSelectedMatchId(lastGame.id);
                       setSelectedPlayer(null);
                     }}
                     className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
                       isSelected
                         ? "glass-crimson-pill text-white"
                         : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+                    <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider">
+                      Last:
+                    </span>
+                    <span className="tracking-[-0.01em]">
+                      {lastGame.title}
+                    </span>
+                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-black/40 text-white border border-white/10 font-bold">
+                      {lastGame.statusText}
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* 2. Primary Focus Match (Today's Live or Upcoming Derby) */}
+              {(() => {
+                const primaryMatch = MATCH_LIBRARY.find((m) => m.isMatchday || m.type === "MATCHDAY" || m.isLive);
+                if (!primaryMatch) return null;
+                const isSelected = primaryMatch.id === selectedMatchId;
+                const isLive = primaryMatch.type === "LIVE" || primaryMatch.isLive;
+
+                return (
+                  <button
+                    key={primaryMatch.id}
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      setSelectedMatchId(primaryMatch.id);
+                      setSelectedPlayer(null);
+                    }}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border ${
+                      isSelected
+                        ? "glass-crimson-pill text-white shadow-[0_0_12px_rgba(255,38,54,0.4)]"
+                        : "apple-tile border-[#FF2636]/40 text-white hover:border-[#FF2636]/80"
                     }`}
                   >
                     <span
                       className={`w-2 h-2 rounded-full shrink-0 ${
                         isLive
                           ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
-                          : isMatchday
-                            ? "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                            : isUpcoming
-                              ? "bg-white/70 shadow-[0_0_6px_rgba(255,255,255,0.4)]"
-                              : isSelected
-                                ? "bg-white shadow-[0_0_8px_#FFFFFF]"
-                                : "bg-[#E31B23]"
+                          : "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
                       }`}
                     />
-                    <span className="tracking-[-0.01em]">
-                      {m.title}
+                    <span className="tracking-tight text-white">
+                      {primaryMatch.title}
                     </span>
-                    <span
-                      className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
-                        isLive
-                          ? "bg-[#FF2636]/25 text-[#FF6961] border border-[#FF2636]/40 font-bold animate-pulse"
-                          : isMatchday
-                            ? "bg-white/10 text-white border border-white/25 font-bold"
-                            : isSelected
-                              ? "bg-black/40 text-white border border-white/25 shadow-inner"
-                              : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
+                    <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF2636]/25 text-[#FF6961] border border-[#FF2636]/40 font-bold">
+                      {primaryMatch.statusText}
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* 3. Real ESPN Upcoming Fixtures (Next 4 calendar ties) */}
+              {liveSchedule.upcoming
+                .filter((fx) => !fx.opponent?.toLowerCase().includes("manchester united"))
+                .slice(0, 4)
+                .map((fx) => {
+                  const isSelected = selectedMatchId === fx.id;
+                  const formattedDate = new Date(fx.date).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  });
+
+                  return (
+                    <button
+                      key={fx.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMatchId(fx.id);
+                        setSelectedPlayer(null);
+                      }}
+                      className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
+                        isSelected
+                          ? "glass-crimson-pill text-white"
+                          : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
                       }`}
                     >
-                      {m.statusText}
-                    </span>
-                  </button>
-                );
-              })}
-
-              {/* Real ESPN Upcoming Fixtures */}
-              {liveSchedule.upcoming.slice(0, 6).map((fx) => {
-                const isSelected = selectedMatchId === fx.id;
-                const formattedDate = new Date(fx.date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                });
-
-                return (
-                  <button
-                    key={fx.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedMatchId(fx.id);
-                      setSelectedPlayer(null);
-                    }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
-                      isSelected
-                        ? "glass-crimson-pill text-white"
-                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                    }`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                    <span className="tracking-[-0.01em]">
-                      {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
-                    </span>
-                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
-                      {formattedDate} • {fx.broadcast}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                      <span className="tracking-[-0.01em]">
+                        {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
+                      </span>
+                      <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
+                        {formattedDate} • {fx.broadcast}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         )}
