@@ -141,18 +141,11 @@ export default function FootballInsightsDashboard() {
         {activeTab === "boot-room" && (
           <div className="flex flex-col gap-1.5 shrink-0">
             <div className="flex items-center justify-between gap-2 px-1">
+              {/* Match Centre heading */}
               <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8E8E93] flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#E31B23]" strokeWidth={2} />
                 Match Centre • Real ESPN Fixtures
               </span>
-
-              {/* Live source attribution badge */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-white/50 flex items-center gap-1.5 bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-white/[0.06]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Live Official Feed ({liveSchedule.upcoming.length + liveSchedule.recent.length} Matches)
-                </span>
-              </div>
             </div>
 
             <div
