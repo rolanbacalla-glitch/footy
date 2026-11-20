@@ -198,11 +198,11 @@ export default function TimeMachineView() {
   const [selectedMatch, setSelectedMatch] = useState(HISTORIC_MATCHES[0]);
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-y-auto pr-0.5">
+    <div className="w-full min-h-0 flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto pr-0.5">
       {/* 2/3 Left Column: Match Timeline Explorer */}
-      <div className="flex-1 lg:w-2/3 flex flex-col gap-3.5">
+      <div className="flex-1 lg:w-2/3 space-y-3.5 min-w-0">
         {/* Archive Banner */}
-        <div className="apple-card rounded-[20px] p-4 flex items-center justify-between gap-3">
+        <div className="apple-card rounded-[20px] p-4 flex items-center justify-between gap-3 shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <History className="w-5 h-5 text-[#FFD60A]" strokeWidth={2} />
@@ -350,7 +350,7 @@ export default function TimeMachineView() {
       </div>
 
       {/* 1/3 Right Column: On-Ball Value (OBV) Leaderboard & Historical Metrics */}
-      <div className="lg:w-1/3 flex flex-col gap-3.5">
+      <div className="lg:w-1/3 space-y-3.5 min-w-0">
         {/* Match Key Index Box */}
         <div className="apple-card rounded-[20px] p-4">
           <div className="flex items-center gap-2 mb-3">

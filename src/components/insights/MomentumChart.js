@@ -76,7 +76,7 @@ export default function MomentumChart({
   ];
 
   return (
-    <div className="w-full flex flex-col gap-3.5">
+    <div className="w-full space-y-3.5 min-w-0">
       {/* 0. Selected Player Tactical Spotlight Card */}
       {selectedPlayer && (
         <div className="apple-card rounded-[20px] p-4 border-[#00DAC3]/40">

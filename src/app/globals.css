@@ -78,6 +78,7 @@
 .apple-card,
 .glass-card {
   position: relative;
+  min-height: fit-content;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(14, 16, 22, 0.72);
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
@@ -88,7 +89,7 @@
     inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4),
     0 16px 40px -8px rgba(0, 0, 0, 0.7);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
+  overflow: clip;
 }
 
 .apple-card:hover,

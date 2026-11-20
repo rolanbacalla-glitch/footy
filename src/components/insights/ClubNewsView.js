@@ -175,11 +175,11 @@ export default function ClubNewsView() {
   const remainingArticles = displayedArticles.slice(1);
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-y-auto pr-0.5">
+    <div className="w-full min-h-0 flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto pr-0.5">
       {/* 2/3 Left Column: Apple News Dark Mode Top 10 Feed */}
-      <div className="flex-1 lg:w-2/3 flex flex-col gap-3.5">
+      <div className="flex-1 lg:w-2/3 space-y-3.5 min-w-0">
         {/* Top Editorial Control Bar */}
-        <div className="apple-card rounded-[20px] p-4 flex flex-col gap-3">
+        <div className="apple-card rounded-[20px] p-4 flex flex-col gap-3 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -440,7 +440,7 @@ export default function ClubNewsView() {
       </div>
 
       {/* 1/3 Right Column: Free Sources Status & Topic Filter */}
-      <div className="lg:w-1/3 flex flex-col gap-3.5">
+      <div className="lg:w-1/3 space-y-3.5 min-w-0">
         {/* Topic Filter Chips */}
         <div className="apple-card rounded-[24px] p-4">
           <div className="flex items-center gap-2 mb-3">

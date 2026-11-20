@@ -35,7 +35,7 @@ export default function AnfieldInsightsDashboard() {
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* 2. Main Body Dashboard Viewport */}
-      <div className="relative z-10 flex-1 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto lg:overflow-hidden gap-3.5 max-w-[1680px] w-full mx-auto">
+      <div className="relative z-10 flex-1 min-h-0 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto gap-3.5 max-w-[1680px] w-full mx-auto">
         {/* Universal Match Centre Fixture Ribbon (Apple Sports inspired pill bar) */}
         {activeTab === "boot-room" && (
           <div
