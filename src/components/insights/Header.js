@@ -50,14 +50,9 @@ export default function Header({ activeTab, setActiveTab, activeMatch }) {
         <div className="flex items-center justify-between w-full sm:w-auto">
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center w-9 h-9 rounded-[12px] glass-crimson-card shrink-0 p-1">
-              <Image
-                src="/crests/liverpool.svg"
-                alt="Liverpool FC Official Crest"
-                width={28}
-                height={28}
-                unoptimized
-                priority
-                className="w-full h-full object-contain filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+              <Shield
+                className="w-5 h-5 text-white fill-white/10"
+                strokeWidth={2}
               />
               <span
                 aria-hidden="true"

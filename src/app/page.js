@@ -153,17 +153,7 @@ export default function AnfieldInsightsDashboard() {
                               : "bg-[#E31B23]"
                     }`}
                   />
-                  <span className="tracking-[-0.01em] flex items-center gap-1.5">
-                    {m.awayCrest && (
-                      <Image
-                        src={m.awayCrest}
-                        alt=""
-                        width={14}
-                        height={14}
-                        unoptimized
-                        className="w-3.5 h-3.5 object-contain inline-block opacity-85"
-                      />
-                    )}
+                  <span className="tracking-[-0.01em]">
                     {m.title}
                   </span>
                   <span

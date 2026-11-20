@@ -268,24 +268,12 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
               )}
             </div>
 
-            {/* Liverpool Official Club Badge */}
+            {/* Liverpool Tactical Club Identifier */}
             <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 p-2 sm:p-2.5 rounded-[22px] bg-gradient-to-br from-[#E31B23]/25 via-white/[0.05] to-black/70 border border-white/20 shadow-[0_8px_24px_rgba(227,27,35,0.4)] shrink-0 flex items-center justify-center backdrop-blur-xl group hover:border-[#E31B23]/60 transition-all">
-              {homeCrest ? (
-                <Image
-                  src={homeCrest}
-                  alt={`${homeTeam} Official Club Badge`}
-                  width={72}
-                  height={72}
-                  unoptimized
-                  priority
-                  className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] transform transition-transform group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full rounded-[16px] bg-[#140204]/70 flex flex-col items-center justify-center text-white">
-                  <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#E31B23]" strokeWidth={1.8} />
-                  <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">LFC</span>
-                </div>
-              )}
+              <div className="w-full h-full rounded-[16px] bg-[#140204]/70 flex flex-col items-center justify-center text-white">
+                <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#E31B23]" strokeWidth={1.8} />
+                <span className="text-[10px] font-black tracking-widest text-white mt-0.5">LFC</span>
+              </div>
             </div>
           </div>
 
@@ -316,24 +304,12 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
 
           {/* Away Team (Manchester United) */}
           <div className="md:col-span-3 flex items-center justify-start gap-3 sm:gap-4 order-3">
-            {/* Away Official Club Badge */}
+            {/* Away Tactical Club Identifier */}
             <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 p-2 sm:p-2.5 rounded-[22px] bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-black/70 border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] shrink-0 flex items-center justify-center backdrop-blur-xl group hover:border-white/40 transition-all">
-              {awayCrest ? (
-                <Image
-                  src={awayCrest}
-                  alt={`${awayTeam} Official Club Badge`}
-                  width={72}
-                  height={72}
-                  unoptimized
-                  priority
-                  className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] transform transition-transform group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full rounded-[16px] bg-[#121214]/80 flex flex-col items-center justify-center text-white">
-                  <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#C8102E]" strokeWidth={1.8} />
-                  <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">MUFC</span>
-                </div>
-              )}
+              <div className="w-full h-full rounded-[16px] bg-[#121214]/80 flex flex-col items-center justify-center text-white">
+                <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white/70 fill-white/10" strokeWidth={1.8} />
+                <span className="text-[10px] font-black tracking-widest text-white/80 mt-0.5">MUFC</span>
+              </div>
             </div>
 
             <div className="text-left">
