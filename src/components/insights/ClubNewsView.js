@@ -200,10 +200,10 @@ export default function ClubNewsView() {
               type="button"
               onClick={() => fetchNews(true)}
               disabled={refreshing}
-              className="min-h-[38px] self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1D1E2A] hover:bg-[#252838] border border-white/10 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
+              className="min-h-[38px] self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/[0.08] text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-[#00BFA5] ${
+                className={`w-3.5 h-3.5 text-[#FF2636] ${
                   refreshing ? "animate-spin" : ""
                 }`}
                 strokeWidth={2.2}
@@ -217,7 +217,7 @@ export default function ClubNewsView() {
             <div
               role="tablist"
               aria-label="Filter news by free source"
-              className="apple-segmented inline-flex items-center gap-1 p-1 rounded-full overflow-x-auto max-w-full"
+              className="apple-segmented inline-flex items-center gap-1.5 p-1 rounded-full overflow-x-auto max-w-full"
             >
               {FEED_TABS.map((tab) => {
                 const isActive = selectedFeed === tab.id;
@@ -228,10 +228,10 @@ export default function ClubNewsView() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setSelectedFeed(tab.id)}
-                    className={`min-h-[34px] px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       isActive
-                        ? "bg-[#1D1E2A] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_0.5px_0_rgba(255,255,255,0.18)]"
-                        : "text-[#EBEBF5]/68 hover:text-white hover:bg-white/[0.05]"
+                        ? "bg-[#E31B23] text-white shadow-[0_2px_10px_rgba(227,27,35,0.4)]"
+                        : "bg-[#181818] border border-white/[0.06] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                     }`}
                   >
                     {tab.label}
@@ -259,17 +259,17 @@ export default function ClubNewsView() {
         {loading && (
           <div className="space-y-3" aria-busy="true" aria-label="Loading latest club news">
             <div className="apple-card rounded-[20px] p-5 animate-pulse">
-              <div className="h-4 w-32 bg-[#1D1E2A] rounded-full mb-3" />
-              <div className="h-6 w-4/5 bg-[#1D1E2A] rounded-lg mb-2" />
-              <div className="h-4 w-full bg-[#1D1E2A] rounded-lg mb-1.5" />
-              <div className="h-4 w-2/3 bg-[#1D1E2A] rounded-lg" />
+              <div className="h-4 w-32 bg-[#1A1A1A] rounded-full mb-3" />
+              <div className="h-6 w-4/5 bg-[#1A1A1A] rounded-lg mb-2" />
+              <div className="h-4 w-full bg-[#1A1A1A] rounded-lg mb-1.5" />
+              <div className="h-4 w-2/3 bg-[#1A1A1A] rounded-lg" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[...Array(6)].map((_, idx) => (
                 <div key={idx} className="apple-card rounded-[20px] p-4 animate-pulse">
-                  <div className="h-3.5 w-24 bg-[#1D1E2A] rounded-full mb-3" />
-                  <div className="h-4 w-full bg-[#1D1E2A] rounded mb-2" />
-                  <div className="h-4 w-3/4 bg-[#1D1E2A] rounded" />
+                  <div className="h-3.5 w-24 bg-[#1A1A1A] rounded-full mb-3" />
+                  <div className="h-4 w-full bg-[#1A1A1A] rounded mb-2" />
+                  <div className="h-4 w-3/4 bg-[#1A1A1A] rounded" />
                 </div>
               ))}
             </div>
@@ -311,7 +311,7 @@ export default function ClubNewsView() {
                 setSelectedFeed("all");
                 setSelectedTopic("all");
               }}
-              className="mt-4 min-h-[38px] px-4 py-1.5 rounded-full bg-[#1D1E2A] hover:bg-[#252838] text-xs font-semibold text-white border border-white/10 cursor-pointer"
+              className="mt-4 min-h-[38px] px-4 py-1.5 rounded-full bg-[#181818] hover:bg-[#222222] text-xs font-semibold text-white border border-white/10 cursor-pointer"
             >
               Reset Filters
             </button>
@@ -324,11 +324,11 @@ export default function ClubNewsView() {
             href={leadArticle.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="apple-card group rounded-[22px] p-5 border-white/[0.08] hover:border-[#E03535]/50 hover:bg-[#1A1C26] transition-all duration-200 block"
+            className="apple-card group rounded-[24px] p-5 border-white/[0.08] hover:border-[#E31B23]/50 hover:bg-[#161616] transition-all duration-200 block"
           >
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded-full bg-[#C8102E] text-white tabular-nums shadow-[0_2px_8px_rgba(200,16,46,0.35)]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded-full bg-[#E31B23] text-white tabular-nums shadow-[0_2px_10px_rgba(227,27,35,0.4)]">
                   Top Story • #01
                 </span>
                 <span
@@ -340,13 +340,13 @@ export default function ClubNewsView() {
                 </span>
                 {leadArticle.publisher &&
                   leadArticle.publisher !== leadArticle.feedName && (
-                    <span className="text-[11px] font-medium text-[#EBEBF5]/72">
+                    <span className="text-[11px] font-medium text-[#8E8E93]">
                       via {leadArticle.publisher}
                     </span>
                   )}
               </div>
 
-              <span className="text-[11px] font-medium tabular-nums text-[#EBEBF5]/65">
+              <span className="text-[11px] font-medium tabular-nums text-[#8E8E93]">
                 {formatRelativeTime(leadArticle.publishedAt)}
                 {leadArticle.publishedAt
                   ? ` • ${formatUkDateTime(leadArticle.publishedAt)}`
@@ -354,21 +354,21 @@ export default function ClubNewsView() {
               </span>
             </div>
 
-            <h3 className="text-[18px] sm:text-[20px] font-semibold text-white tracking-[-0.02em] leading-snug group-hover:text-[#FF6961] transition-colors">
+            <h3 className="text-[18px] sm:text-[20px] font-bold text-white tracking-[-0.02em] leading-snug group-hover:text-[#FF4D5A] transition-colors">
               {leadArticle.title}
             </h3>
 
             {leadArticle.summary && (
-              <p className="text-[13px] text-[#EBEBF5]/72 leading-relaxed mt-2">
+              <p className="text-[13px] text-[#8E8E93] leading-relaxed mt-2">
                 {leadArticle.summary}
               </p>
             )}
 
             <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
-              <span className="text-[#EBEBF5]/65 font-medium">
+              <span className="text-[#8E8E93] font-medium">
                 {leadArticle.publisher}
               </span>
-              <span className="inline-flex items-center gap-1 font-semibold text-[#00BFA5] group-hover:translate-x-0.5 transition-transform">
+              <span className="inline-flex items-center gap-1 font-semibold text-[#FF2636] group-hover:translate-x-0.5 transition-transform">
                 Read full article
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </span>
@@ -390,12 +390,12 @@ export default function ClubNewsView() {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="apple-card group rounded-[20px] p-4 hover:bg-[#1A1C26] hover:border-white/20 transition-all duration-200 flex flex-col justify-between gap-3"
+                  className="apple-card group rounded-[22px] p-4 hover:bg-[#161616] hover:border-white/20 transition-all duration-200 flex flex-col justify-between gap-3"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-6 h-6 rounded-full bg-[#1D1E2A] border border-white/10 text-[10px] font-semibold tabular-nums text-[#EBEBF5]/85 flex items-center justify-center shrink-0">
+                        <span className="w-6 h-6 rounded-full bg-[#1A1A1A] border border-white/10 text-[10px] font-semibold tabular-nums text-white flex items-center justify-center shrink-0">
                           {rank}
                         </span>
                         <span
@@ -407,27 +407,27 @@ export default function ClubNewsView() {
                         </span>
                       </div>
 
-                      <span className="text-[11px] text-[#EBEBF5]/60 tabular-nums shrink-0">
+                      <span className="text-[11px] text-[#8E8E93] tabular-nums shrink-0">
                         {formatRelativeTime(article.publishedAt)}
                       </span>
                     </div>
 
-                    <h4 className="text-[14px] font-semibold text-white leading-snug tracking-[-0.015em] group-hover:text-[#FF6961] transition-colors line-clamp-3">
+                    <h4 className="text-[14px] font-semibold text-white leading-snug tracking-[-0.015em] group-hover:text-[#FF4D5A] transition-colors line-clamp-3">
                       {article.title}
                     </h4>
 
                     {article.summary && (
-                      <p className="text-xs text-[#EBEBF5]/65 leading-relaxed mt-1.5 line-clamp-2">
+                      <p className="text-xs text-[#8E8E93] leading-relaxed mt-1.5 line-clamp-2">
                         {article.summary}
                       </p>
                     )}
                   </div>
 
                   <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between gap-2 text-[11px]">
-                    <span className="text-[#EBEBF5]/65 font-medium truncate">
+                    <span className="text-[#8E8E93] font-medium truncate">
                       {article.publisher}
                     </span>
-                    <span className="inline-flex items-center gap-1 font-semibold text-[#00BFA5] shrink-0">
+                    <span className="inline-flex items-center gap-1 font-semibold text-[#FF2636] shrink-0">
                       Open
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </span>
@@ -442,9 +442,9 @@ export default function ClubNewsView() {
       {/* 1/3 Right Column: Free Sources Status & Topic Filter */}
       <div className="lg:w-1/3 flex flex-col gap-3.5">
         {/* Topic Filter Chips */}
-        <div className="apple-card rounded-[20px] p-4">
+        <div className="apple-card rounded-[24px] p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-[#E5B338]" strokeWidth={2} />
+            <Sparkles className="w-4 h-4 text-[#F1B82D]" strokeWidth={2} />
             <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
               Quick Topic Filter
             </h3>
@@ -458,10 +458,10 @@ export default function ClubNewsView() {
                   type="button"
                   onClick={() => setSelectedTopic(topic.id)}
                   aria-pressed={isActive}
-                  className={`min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+                  className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
                     isActive
-                      ? "bg-[#C8102E] border-[#E03535]/60 text-white shadow-[0_2px_10px_rgba(200,16,46,0.35)]"
-                      : "bg-[#1D1E2A] border-white/[0.08] text-[#EBEBF5]/72 hover:text-white hover:bg-[#252838]"
+                      ? "bg-[#E31B23] border-transparent text-white shadow-[0_2px_10px_rgba(227,27,35,0.4)]"
+                      : "bg-[#1A1A1A] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                   }`}
                 >
                   {topic.label}
@@ -472,15 +472,15 @@ export default function ClubNewsView() {
         </div>
 
         {/* Free Live RSS Sources Telemetry */}
-        <div className="apple-card rounded-[20px] p-4">
+        <div className="apple-card rounded-[24px] p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#00BFA5]" strokeWidth={2} />
+              <Globe className="w-4 h-4 text-[#FF2636]" strokeWidth={2} />
               <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
                 Free Live News Sources
               </h3>
             </div>
-            <span className="text-[10px] font-semibold text-[#30D158] bg-[#30D158]/14 px-2 py-0.5 rounded-full border border-[#30D158]/25">
+            <span className="text-[10px] font-semibold text-[#FF2636] bg-[#E31B23]/14 px-2 py-0.5 rounded-full border border-[#E31B23]/25">
               Zero API Key
             </span>
           </div>
@@ -498,7 +498,7 @@ export default function ClubNewsView() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     className={`w-4 h-4 shrink-0 ${
-                      src.ok ? "text-[#30D158]" : "text-[#E03535]"
+                      src.ok ? "text-[#FF2636]" : "text-[#8E8E93]"
                     }`}
                     strokeWidth={2}
                   />
@@ -506,19 +506,19 @@ export default function ClubNewsView() {
                     <span className="text-xs font-semibold text-white block">
                       {src.name}
                     </span>
-                    <span className="text-[10px] text-[#EBEBF5]/60">
+                    <span className="text-[10px] text-[#8E8E93]">
                       Public RSS • UK (en-GB)
                     </span>
                   </div>
                 </div>
-                <span className="text-[11px] font-mono tabular-nums font-semibold text-[#00BFA5]">
+                <span className="text-[11px] font-mono tabular-nums font-semibold text-[#FF2636]">
                   {loading ? "—" : `${src.count} items`}
                 </span>
               </div>
             ))}
           </div>
 
-          <p className="text-[11px] text-[#EBEBF5]/60 leading-relaxed mt-3 pt-3 border-t border-white/[0.08]">
+          <p className="text-[11px] text-[#8E8E93] leading-relaxed mt-3 pt-3 border-t border-white/[0.08]">
             Headlines are deduplicated across feeds, ordered strictly by publication timestamp, and capped to the <strong className="text-white">Top 10 most recent</strong> stories.
           </p>
         </div>

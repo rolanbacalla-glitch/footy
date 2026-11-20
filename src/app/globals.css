@@ -4,47 +4,48 @@
   :root {
     color-scheme: dark;
 
-    /* Refined Midnight Obsidian & Anfield Prestige Palette */
-    --apple-bg-base: #0B0E17;                  /* Deep Midnight Obsidian base canvas (nocturnal, eye-relaxing) */
-    --apple-bg-elevated: #131826;              /* Surface 1: Elevated card container (distinct tonal separation) */
-    --apple-bg-tertiary: #1C2337;              /* Surface 2: Secondary inner tile surface */
-    --apple-bg-quaternary: #263048;            /* Surface 3: Interactive hover fill */
+    /* OKX Dark Theme — Pitch Black Canvas & Matte Charcoal Surface Hierarchy */
+    --apple-bg-base: #000000;                  /* Pure pitch-black canvas (OKX foundation) */
+    --apple-bg-elevated: #121212;              /* Primary matte dark charcoal card (#121212) */
+    --apple-bg-tertiary: #1A1A1A;              /* Secondary inner tile surface (#1A1A1A) */
+    --apple-bg-quaternary: #222222;            /* Interactive hover fill */
 
-    /* Apple Liquid Glass Material (Overlays, Floating HUD & Navigation) */
-    --apple-glass-bg: rgba(19, 24, 38, 0.84);
-    --apple-glass-hud: rgba(15, 19, 31, 0.88);
-    --apple-glass-border: rgba(255, 255, 255, 0.12);
+    /* Glass & Overlay Materials */
+    --apple-glass-bg: rgba(14, 14, 14, 0.94);
+    --apple-glass-hud: rgba(18, 18, 18, 0.92);
+    --apple-glass-border: rgba(255, 255, 255, 0.08);
 
-    /* Separators, Hairlines & Specular Rim Borders */
-    --apple-separator: rgba(255, 255, 255, 0.10);
-    --apple-separator-opaque: #28324B;
-    --apple-hairline: rgba(255, 255, 255, 0.10);
+    /* Separators & Hairlines */
+    --apple-separator: rgba(255, 255, 255, 0.08);
+    --apple-separator-opaque: #222222;
+    --apple-hairline: rgba(255, 255, 255, 0.08);
 
-    /* Apple Label Hierarchy (WCAG 2.2 AAA calibrated) */
-    --apple-label-primary: #FFFFFF;
-    --apple-label-body: #F1F4F9;
-    --apple-label-secondary: #9BA8C0;
-    --apple-label-tertiary: #677590;
+    /* High-Contrast Typography Hierarchy (OKX Spec) */
+    --apple-label-primary: #FFFFFF;            /* Pure white primary headers & values */
+    --apple-label-body: #F4F4F4;               /* High-contrast body prose */
+    --apple-label-secondary: #8E8E93;          /* Muted metadata grey (#8E8E93) */
+    --apple-label-tertiary: #5A5A5E;           /* Subdued tertiary grey */
 
-    /* Authentic Anfield Identity & Vibrant Telemetry Accents */
-    --apple-red: #E63946;                      /* Iconic Anfield Crimson (vibrant, high legibility) */
-    --apple-red-fill: #C8102E;                 /* Official Liverpool FC Heritage Red */
-    --apple-gold: #F1B82D;                     /* LFC Heritage Crest Gold (prestige accent) */
-    --apple-mint: #00D2B4;                     /* Tactical Data Emerald (calm, clear telemetry) */
-    --apple-teal: #38BDF8;                     /* Tactical Data Cyan */
-    --apple-green: #22C55E;                    /* Live Match Signal Green */
-    --apple-yellow: #FBBF24;                   /* Match Telemetry Amber */
-    --apple-orange: #FB923C;                   /* Warning Amber */
-    --apple-blue: #3B82F6;                     /* System Focus Ring Blue */
+    /* Liverpool FC Red Highlights (Replacing OKX Green with Iconic Anfield Red) */
+    --apple-red: #FF2636;                      /* Electric Anfield Red (luminous metric highlights) */
+    --apple-red-fill: #E31B23;                 /* Iconic Liverpool FC Red (solid CTAs & feature blocks) */
+    --apple-red-deep: #C8102E;                 /* Official Heritage Crimson */
+    --apple-gold: #F1B82D;                     /* Heritage Crest Gold */
+    --apple-mint: #E31B23;                     /* Redirected to Anfield Red */
+    --apple-teal: #64D2FF;                     /* Tactical Data Cyan */
+    --apple-green: #E31B23;                    /* Replaced with Anfield Red */
+    --apple-yellow: #FFD60A;                   /* Amber Signal */
+    --apple-orange: #FF9F0A;                   /* Caution Orange */
+    --apple-blue: #E31B23;                     /* Focus Ring Red */
 
     /* Authentic Anfield Stadium Turf */
-    --apple-pitch-deep: #0C1E16;
-    --apple-pitch-mid: #132E22;
+    --apple-pitch-deep: #0D1612;
+    --apple-pitch-mid: #12211A;
     --apple-pitch-line: rgba(255, 255, 255, 0.22);
   }
 
   html {
-    background-color: var(--apple-bg-base);
+    background-color: #000000;
     color: var(--apple-label-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -52,12 +53,7 @@
   }
 
   body {
-    background-color: var(--apple-bg-base);
-    background-image: 
-      radial-gradient(ellipse 90% 50% at 50% -20%, rgba(200, 16, 46, 0.09), transparent 65%),
-      radial-gradient(circle 600px at 95% 5%, rgba(241, 184, 45, 0.045), transparent 55%),
-      radial-gradient(circle 700px at 5% 90%, rgba(0, 210, 180, 0.035), transparent 55%);
-    background-attachment: fixed;
+    background-color: #000000;
     color: var(--apple-label-body);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-apple-sans), system-ui, "Segoe UI", Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -68,72 +64,74 @@
   select:focus-visible,
   input:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--apple-blue);
+    outline: 2px solid var(--apple-red);
     outline-offset: 2px;
   }
 }
 
-/* ─── Apple Liquid Glass Material (Navigation & Floating Overlays Only) ─── */
-.apple-glass {
-  background-color: var(--apple-glass-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-color: var(--apple-glass-border);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-}
-
-.apple-glass-hud {
-  background-color: var(--apple-glass-hud);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.45),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.14);
-}
-
-/* ─── Apple Elevated Surface Cards (Content Layer — Solid Tonal Elevation) ─── */
+/* ─── OKX-Style Matte Card Material (Content Layer — #121212 with Hairline Border) ─── */
 .apple-card {
-  background-color: var(--apple-bg-elevated);
-  border: 1px solid var(--apple-hairline);
-  box-shadow:
-    0 10px 30px -5px rgba(0, 0, 0, 0.52),
-    0 4px 12px -2px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  background-color: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .apple-card:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 16px 40px -5px rgba(0, 0, 0, 0.62),
-    0 0 24px -2px rgba(200, 16, 46, 0.14),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .apple-tile {
-  background-color: var(--apple-bg-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #1A1A1A;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
 }
 
 .apple-segmented {
-  background-color: rgba(24, 30, 48, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── OKX Signature Highlight Banner (Electric Red Split Card) ─── */
+.okx-highlight-card {
+  background-color: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.okx-highlight-solid {
+  background-color: #E31B23;
+  color: #FFFFFF;
+}
+
+/* ─── Navigation Header & Floating Chrome ─── */
+.apple-glass {
+  background-color: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.apple-glass-hud {
+  background-color: rgba(18, 18, 18, 0.90);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── Accessibility: Reduce Transparency & Reduce Motion (Apple HIG) ─── */
+/* ─── Accessibility: Reduce Transparency & Reduce Motion ─── */
 @media (prefers-reduced-transparency: reduce) {
   .apple-glass,
   .apple-glass-hud {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background-color: #1c1c1e;
-    border-color: #38383a;
+    background-color: #121212;
+    border-color: #222222;
   }
 }
 
@@ -147,7 +145,7 @@
   }
 }
 
-/* ─── Apple macOS Dark Mode Minimal Scrollbars ─── */
+/* ─── Dark Minimal Scrollbars ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -158,19 +156,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(235, 235, 245, 0.22);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(235, 235, 245, 0.38);
+  background: rgba(255, 255, 255, 0.28);
 }
 
-/* ─── Apple iOS / macOS Precision Range Sliders ─── */
+/* ─── Precision Range Sliders ─── */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: #3a3a3c;
+  background: #222222;
   height: 5px;
   border-radius: 9999px;
   accent-color: var(--apple-red);
@@ -184,13 +182,8 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 9999px;
   background: #ffffff;
   border: 0.5px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.08);
 }
 
 input[type="range"]::-moz-range-thumb {

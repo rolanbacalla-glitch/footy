@@ -439,7 +439,7 @@ export default function TransferScoutView() {
                 cy={p.y}
                 r="3.1"
                 fill="#FF453A"
-                stroke="#1C1C1E"
+                stroke="#121212"
                 strokeWidth="1"
               />
             ))}
@@ -459,7 +459,7 @@ export default function TransferScoutView() {
                 cy={p.y}
                 r="3.4"
                 fill="#00DAC3"
-                stroke="#1C1C1E"
+                stroke="#121212"
                 strokeWidth="1"
               />
             ))}

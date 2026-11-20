@@ -33,7 +33,7 @@ export default function PitchCanvas({
       {/* Recessed Stadium Pitch Backdrop Glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(14,34,24,0.65)_0%,rgba(11,25,18,0.92)_62%,rgba(19,20,27,1)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(14,34,24,0.65)_0%,rgba(11,25,18,0.92)_62%,rgba(18,18,18,1)_100%)]"
       />
 
       {/* Top Floating Liquid Glass HUD Bar */}

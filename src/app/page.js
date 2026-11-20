@@ -20,7 +20,7 @@ export default function AnfieldInsightsDashboard() {
     MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
 
   return (
-    <main className="min-h-screen lg:h-screen w-full flex flex-col bg-transparent text-[#F4F4F8] overflow-x-hidden lg:overflow-hidden select-none">
+    <main className="min-h-screen lg:h-screen w-full flex flex-col bg-[#000000] text-white overflow-x-hidden lg:overflow-hidden select-none">
       {/* 1. Persistent Apple Liquid Glass Navigation Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -33,8 +33,8 @@ export default function AnfieldInsightsDashboard() {
             aria-label="Match Centre fixtures"
             className="flex items-center gap-2 overflow-x-auto pb-1 shrink-0"
           >
-            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#EBEBF5]/65 shrink-0 flex items-center gap-1.5 pl-1 pr-1">
-              <Calendar className="w-3.5 h-3.5 text-[#00BFA5]" strokeWidth={2} />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8E8E93] shrink-0 flex items-center gap-1.5 pl-1 pr-1">
+              <Calendar className="w-3.5 h-3.5 text-[#E31B23]" strokeWidth={2} />
               Match Centre
             </span>
 
@@ -53,23 +53,23 @@ export default function AnfieldInsightsDashboard() {
                   }}
                   className={`min-h-[38px] flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer border ${
                     isSelected
-                      ? "bg-[var(--apple-bg-tertiary)] border-[#F1B82D]/40 text-white shadow-[0_4px_16px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)]"
-                      : "bg-[var(--apple-bg-elevated)] border-white/[0.08] text-[#9BA8C0] hover:text-white hover:bg-[var(--apple-bg-tertiary)]/80 hover:border-white/15"
+                      ? "bg-[#E31B23] border-transparent text-white shadow-[0_2px_12px_rgba(227,27,35,0.45)]"
+                      : "bg-[#181818] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                   }`}
                 >
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 ${
                       isUpcoming
-                        ? "bg-[#F0C419] shadow-[0_0_8px_rgba(240,196,25,0.65)]"
-                        : "bg-[#00BFA5]"
+                        ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
+                        : "bg-[#E31B23]"
                     }`}
                   />
                   <span className="tracking-[-0.01em]">{m.title}</span>
                   <span
                     className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
                       isSelected
-                        ? "bg-[#C8102E]/22 text-[#FF6961] border border-[#C8102E]/35"
-                        : "bg-black/35 text-[#EBEBF5]/65 border border-white/[0.06]"
+                        ? "bg-black/35 text-white border border-white/20"
+                        : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
                     }`}
                   >
                     {m.statusText}

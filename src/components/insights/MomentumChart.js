@@ -114,15 +114,15 @@ export default function MomentumChart({
 
           <div className="grid grid-cols-3 gap-2 text-xs mb-3">
             <div className="apple-tile p-2.5 rounded-[14px]">
-              <span className="text-[10px] text-[#EBEBF5]/65 font-medium block">
+              <span className="text-[10px] text-[#8E8E93] font-medium block">
                 On-Ball Value
               </span>
-              <span className="text-[15px] font-semibold text-[#00DAC3] tabular-nums mt-0.5 block">
+              <span className="text-[15px] font-semibold text-[#FF2636] tabular-nums mt-0.5 block">
                 +{selectedPlayer.obv.toFixed(2)}
               </span>
             </div>
             <div className="apple-tile p-2.5 rounded-[14px]">
-              <span className="text-[10px] text-[#EBEBF5]/65 font-medium block">
+              <span className="text-[10px] text-[#8E8E93] font-medium block">
                 Touches / Pass
               </span>
               <span className="text-[15px] font-semibold text-white tabular-nums mt-0.5 block">
@@ -130,10 +130,10 @@ export default function MomentumChart({
               </span>
             </div>
             <div className="apple-tile p-2.5 rounded-[14px]">
-              <span className="text-[10px] text-[#EBEBF5]/65 font-medium block">
+              <span className="text-[10px] text-[#8E8E93] font-medium block">
                 Accuracy
               </span>
-              <span className="text-[15px] font-semibold text-[#FFD60A] tabular-nums mt-0.5 block">
+              <span className="text-[15px] font-semibold text-[#F1B82D] tabular-nums mt-0.5 block">
                 {selectedPlayer.comp}%
               </span>
             </div>
@@ -141,8 +141,8 @@ export default function MomentumChart({
 
           {playerConnections.length > 0 && (
             <div className="pt-2.5 border-t border-white/[0.08]">
-              <span className="text-[11px] font-semibold text-[#EBEBF5]/65 flex items-center gap-1.5 mb-2">
-                <ArrowRightLeft className="w-3.5 h-3.5 text-[#00DAC3]" />
+              <span className="text-[11px] font-semibold text-[#8E8E93] flex items-center gap-1.5 mb-2">
+                <ArrowRightLeft className="w-3.5 h-3.5 text-[#E31B23]" />
                 Primary Passing Combinations
               </span>
               <div className="space-y-1.5">
@@ -193,13 +193,13 @@ export default function MomentumChart({
                 aria-pressed={isActive}
                 className={`min-h-[54px] flex flex-col items-center justify-center py-2 px-1.5 rounded-[12px] text-center transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? "bg-[#3A3A3C] text-white shadow-[0_2px_10px_rgba(0,0,0,0.4),inset_0_0.5px_0_rgba(255,255,255,0.18)]"
-                    : "text-[#EBEBF5]/68 hover:text-white hover:bg-white/[0.05]"
+                    ? "bg-[#E31B23] text-white shadow-[0_2px_12px_rgba(227,27,35,0.4)]"
+                    : "text-[#8E8E93] hover:text-white hover:bg-white/[0.05]"
                 }`}
               >
                 <Icon
                   className={`w-4 h-4 mb-1 ${
-                    isActive ? "text-[#FF453A]" : "text-[#EBEBF5]/65"
+                    isActive ? "text-white" : "text-[#8E8E93]"
                   }`}
                   strokeWidth={2}
                 />
@@ -212,16 +212,16 @@ export default function MomentumChart({
         </div>
       </div>
 
-      {/* 2. Match Momentum Wave (Apple Stocks Dark Chart Aesthetic) */}
-      <div className="apple-card rounded-[20px] p-4">
+      {/* 2. Match Momentum Wave */}
+      <div className="apple-card rounded-[24px] p-4">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#00DAC3]" strokeWidth={2} />
+            <TrendingUp className="w-4 h-4 text-[#FF2636]" strokeWidth={2} />
             <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
               Match Momentum Wave
             </h3>
           </div>
-          <span className="text-[10px] text-[#00DAC3] font-semibold tabular-nums bg-[#00DAC3]/12 px-2.5 py-0.5 rounded-full border border-[#00DAC3]/25">
+          <span className="text-[10px] text-[#FF2636] font-semibold tabular-nums bg-[#E31B23]/12 px-2.5 py-0.5 rounded-full border border-[#E31B23]/25">
             {activeMatch?.statusText}
           </span>
         </div>
@@ -306,74 +306,78 @@ export default function MomentumChart({
         </div>
       </div>
 
-      {/* 3. Key Match Science Indicators */}
-      <div className="apple-card rounded-[20px] p-4">
+      {/* 3. Key Match Science Indicators (OKX High-Contrast Metric Grid) */}
+      <div className="apple-card rounded-[24px] p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4 text-[#FFD60A]" strokeWidth={2} />
+          <Zap className="w-4 h-4 text-[#F1B82D]" strokeWidth={2} />
           <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
             Key Match Science Indicators
           </h3>
         </div>
 
         <div className="grid grid-cols-2 gap-2.5 text-xs">
-          <div className="apple-tile p-3 rounded-[14px]">
-            <span className="text-[#EBEBF5]/68 text-[11px] font-medium block">
+          {/* Card 1: Total Team xG */}
+          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+            <span className="text-[#8E8E93] text-[11px] font-medium block">
               Total Team xG
             </span>
             <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-[20px] font-semibold tracking-tight text-white tabular-nums">
+              <span className="text-[22px] font-bold tracking-tight text-white tabular-nums">
                 {metrics.teamXg.toFixed(2)}
               </span>
-              <span className="text-[11px] text-[#EBEBF5]/60 tabular-nums">
+              <span className="text-[11px] text-[#8E8E93] tabular-nums">
                 vs {metrics.opponentXg.toFixed(2)}
               </span>
             </div>
-            <span className="text-[10px] text-[#00DAC3] font-medium tabular-nums mt-0.5 block">
-              +{(metrics.teamXg - metrics.opponentXg).toFixed(2)} xG Diff
+            <span className="text-[10px] text-[#FF2636] font-medium tabular-nums mt-0.5 block">
+              +{(metrics.teamXg - metrics.opponentXg).toFixed(2)} xG Supremacy
             </span>
           </div>
 
-          <div className="apple-tile p-3 rounded-[14px]">
-            <span className="text-[#EBEBF5]/68 text-[11px] font-medium block">
+          {/* Card 2: Signature OKX Solid Red Highlight Card for Field Tilt */}
+          <div className="bg-[#E31B23] p-3 rounded-[16px] text-white flex flex-col justify-between shadow-[0_4px_16px_rgba(227,27,35,0.35)]">
+            <span className="text-white/80 text-[11px] font-semibold uppercase tracking-[0.04em] block">
               Field Tilt
             </span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-[20px] font-semibold tracking-tight text-[#FF453A] tabular-nums">
+            <div className="flex items-baseline gap-1 my-0.5">
+              <span className="text-[26px] font-extrabold tracking-tight text-white tabular-nums">
                 {metrics.fieldTilt}%
               </span>
             </div>
-            <span className="text-[10px] text-[#EBEBF5]/60 mt-0.5 block">
-              Territory dominance
+            <span className="text-[10px] text-white/90 font-medium block">
+              Anfield Territorial Domination
             </span>
           </div>
 
-          <div className="apple-tile p-3 rounded-[14px]">
-            <span className="text-[#EBEBF5]/68 text-[11px] font-medium block">
+          {/* Card 3: Defensive PPDA */}
+          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+            <span className="text-[#8E8E93] text-[11px] font-medium block">
               Defensive PPDA
             </span>
             <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-[20px] font-semibold tracking-tight text-[#00DAC3] tabular-nums">
+              <span className="text-[22px] font-bold tracking-tight text-[#FF2636] tabular-nums">
                 {metrics.ppda}
               </span>
-              <span className="text-[10px] text-[#EBEBF5]/60">passes/act</span>
+              <span className="text-[10px] text-[#8E8E93]">passes/act</span>
             </div>
-            <span className="text-[10px] text-[#00DAC3] mt-0.5 block">
-              High Press Index
+            <span className="text-[10px] text-[#8E8E93] mt-0.5 block">
+              Iraola High Press Index
             </span>
           </div>
 
-          <div className="apple-tile p-3 rounded-[14px]">
-            <span className="text-[#EBEBF5]/68 text-[11px] font-medium block">
+          {/* Card 4: Counter-Press Regains */}
+          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+            <span className="text-[#8E8E93] text-[11px] font-medium block">
               Counter-Press
             </span>
             <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="text-[20px] font-semibold tracking-tight text-white tabular-nums">
+              <span className="text-[22px] font-bold tracking-tight text-white tabular-nums">
                 {metrics.counterPressRegains}
               </span>
-              <span className="text-[10px] text-[#FFD60A] font-medium">regains</span>
+              <span className="text-[10px] text-[#F1B82D] font-medium">regains</span>
             </div>
-            <span className="text-[10px] text-[#FFD60A]/90 mt-0.5 block">
-              Gegenpress turnovers
+            <span className="text-[10px] text-[#8E8E93] mt-0.5 block">
+              Gegenpress Turnovers
             </span>
           </div>
         </div>
