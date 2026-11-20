@@ -11,6 +11,7 @@ import TimeMachineView from "../components/insights/TimeMachineView";
 import TransferScoutView from "../components/insights/TransferScoutView";
 import ClubNewsView from "../components/insights/ClubNewsView";
 import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
+import StandingsTable from "../components/insights/StandingsTable";
 import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
@@ -277,7 +278,7 @@ export default function AnfieldInsightsDashboard() {
               </div>
 
               {/* Right 1/3 Metrics & Match Momentum Controller */}
-              <div className="lg:w-1/3">
+              <div className="lg:w-1/3 flex flex-col gap-4">
                 <MomentumChart
                   activeMatch={activeMatch}
                   overlayMode={overlayMode}
@@ -292,6 +293,9 @@ export default function AnfieldInsightsDashboard() {
                       : null
                   }
                 />
+
+                {/* Real Live Premier League Standings */}
+                <StandingsTable />
               </div>
             </div>
           </div>
