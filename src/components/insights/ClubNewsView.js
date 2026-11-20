@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Newspaper,
   RefreshCw,
@@ -83,6 +83,11 @@ export default function ClubNewsView() {
   const [selectedFeed, setSelectedFeed] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
 
+  const payloadRef = useRef(null);
+  useEffect(() => {
+    payloadRef.current = payload;
+  }, [payload]);
+
   const fetchNews = useCallback(async (forceRefresh = false) => {
     try {
       if (forceRefresh) {
@@ -100,7 +105,9 @@ export default function ClubNewsView() {
       const data = await res.json();
       setPayload(data);
     } catch (err) {
-      setError(err?.message || "Unable to load latest Liverpool FC news.");
+      if (!payloadRef.current?.articles?.length) {
+        setError(err?.message || "Unable to load latest Liverpool FC news.");
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -128,7 +135,9 @@ export default function ClubNewsView() {
         }
       } catch (err) {
         if (active) {
-          setError(err?.message || "Unable to load latest Liverpool FC news.");
+          if (!payloadRef.current?.articles?.length) {
+            setError(err?.message || "Unable to load latest Liverpool FC news.");
+          }
         }
       } finally {
         if (active) {

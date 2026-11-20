@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/insights/Header";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import MomentumChart from "../components/insights/MomentumChart";
@@ -10,11 +10,74 @@ import ClubNewsView from "../components/insights/ClubNewsView";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
 
+const VALID_TABS = ["boot-room", "club-news", "match-archives", "transfer-scout"];
+
+function resolveTabName(raw) {
+  if (!raw) return null;
+  const clean = String(raw).replace(/^#/, "").toLowerCase().trim();
+  if (VALID_TABS.includes(clean)) return clean;
+  if (clean === "time-machine" || clean === "archives") return "match-archives";
+  if (clean === "news" || clean === "clubnews") return "club-news";
+  if (clean === "scout" || clean === "transfers") return "transfer-scout";
+  return null;
+}
+
 export default function AnfieldInsightsDashboard() {
-  const [activeTab, setActiveTab] = useState("boot-room");
+  const [activeTab, setActiveTabState] = useState(() => {
+    if (typeof window === "undefined") return "boot-room";
+    const fromHash = resolveTabName(window.location.hash);
+    let fromQuery = null;
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      fromQuery = resolveTabName(urlParams.get("tab"));
+    } catch {
+      // Ignore
+    }
+    let fromStorage = null;
+    try {
+      fromStorage = resolveTabName(localStorage.getItem("anfield_active_tab"));
+    } catch {
+      // Storage unavailable
+    }
+    return fromHash || fromQuery || fromStorage || "boot-room";
+  });
+
   const [selectedMatchId, setSelectedMatchId] = useState(MATCH_LIBRARY[0].id);
   const [overlayMode, setOverlayMode] = useState("pass"); // 'pass' | 'heat' | 'shots'
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  // Restore & persist active tab across reloads, browser hibernation, and navigation
+  useEffect(() => {
+    // Keep URL hash in sync with active tab on mount without scrolling
+    if (window.location.hash !== `#${activeTab}`) {
+      window.history.replaceState(null, "", `#${activeTab}`);
+    }
+
+    // Listen to browser navigation / hashchange (Back and Forward buttons)
+    const handleHashChange = () => {
+      const newTab = resolveTabName(window.location.hash);
+      if (newTab) {
+        setActiveTabState(newTab);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [activeTab]);
+
+  // Public setter that persists state to localStorage and keeps URL hash updated
+  const setActiveTab = (tabId) => {
+    const valid = resolveTabName(tabId) || tabId;
+    setActiveTabState(valid);
+    try {
+      localStorage.setItem("anfield_active_tab", valid);
+      if (window.location.hash !== `#${valid}`) {
+        window.history.replaceState(null, "", `#${valid}`);
+      }
+    } catch {
+      // Storage error ignored
+    }
+  };
 
   const activeMatch =
     MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
