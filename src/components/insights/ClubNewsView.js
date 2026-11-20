@@ -228,10 +228,10 @@ export default function ClubNewsView() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setSelectedFeed(tab.id)}
-                    className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`min-h-[34px] pressable px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ${
                       isActive
                         ? "glass-crimson-pill text-white"
-                        : "bg-[#181818] border border-white/[0.06] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
+                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
                     }`}
                   >
                     {tab.label}
@@ -324,7 +324,7 @@ export default function ClubNewsView() {
             href={leadArticle.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="apple-card group rounded-[24px] p-5 border-white/[0.08] hover:border-[#E31B23]/50 hover:bg-[#161616] transition-all duration-200 block"
+            className="apple-card group glass-shimmer rounded-[24px] p-5 pressable block"
           >
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2 flex-wrap">
@@ -390,7 +390,7 @@ export default function ClubNewsView() {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="apple-card group rounded-[22px] p-4 hover:bg-[#161616] hover:border-white/20 transition-all duration-200 flex flex-col justify-between gap-3"
+                  className="apple-card group rounded-[22px] p-4.5 pressable flex flex-col justify-between gap-3"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2.5">

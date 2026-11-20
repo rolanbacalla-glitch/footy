@@ -650,10 +650,10 @@ export default function TransferScoutView() {
                     key={candidate.id}
                     onClick={() => setTargetId(candidate.id)}
                     aria-pressed={isSelected}
-                    className={`w-full text-left p-3 rounded-[14px] border transition-all duration-150 cursor-pointer ${
+                    className={`w-full text-left p-3 rounded-[14px] pressable border cursor-pointer ${
                       isSelected
-                        ? "bg-[var(--apple-bg-quaternary)] border-[#00D2B4]/80 shadow-[inset_0_0.5px_0_rgba(255,255,255,0.16)]"
-                        : "bg-[var(--apple-bg-tertiary)] border-white/[0.08] hover:bg-[var(--apple-bg-quaternary)]/70 hover:border-white/15"
+                        ? "apple-tile border-[#00D2B4]/80 shadow-[inset_0_1px_1px_rgba(0,210,180,0.3),0_4px_16px_rgba(0,210,180,0.15)]"
+                        : "apple-tile border-white/[0.08] hover:border-white/20"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-1">

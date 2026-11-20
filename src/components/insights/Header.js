@@ -43,7 +43,7 @@ export default function Header({ activeTab, setActiveTab }) {
   const lastMatch = matchData.lastMatch;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#000000]/95 backdrop-blur-md border-b border-white/[0.08] px-3 sm:px-5 md:px-6 py-2.5">
+    <header className="sticky top-0 z-50 bg-[#08090D]/80 backdrop-blur-2xl border-b border-white/[0.09] shadow-[0_4px_30px_rgba(0,0,0,0.5)] px-3 sm:px-5 md:px-6 py-2.5">
       <div className="max-w-[1680px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Brand Emblem & SF Pro Wordmark */}
         <div className="flex items-center justify-between w-full sm:w-auto">
@@ -116,10 +116,10 @@ export default function Header({ activeTab, setActiveTab }) {
           )}
         </div>
 
-        {/* OKX-Style Segmented Navigation Control */}
+        {/* Frosted Liquid Glass Segmented Navigation */}
         <nav
           aria-label="Primary workspaces"
-          className="bg-[#121212] border border-white/[0.08] flex items-center gap-1 p-1 rounded-full w-full sm:w-auto justify-between sm:justify-start overflow-x-auto"
+          className="apple-segmented flex items-center gap-1 p-1 rounded-full w-full sm:w-auto justify-between sm:justify-start overflow-x-auto"
         >
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -129,10 +129,10 @@ export default function Header({ activeTab, setActiveTab }) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`min-h-[36px] flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold tracking-[-0.01em] transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                className={`min-h-[36px] pressable flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold tracking-[-0.01em] cursor-pointer whitespace-nowrap ${
                   isActive
                     ? "glass-crimson-pill text-white"
-                    : "text-[#8E8E93] hover:text-white hover:bg-white/[0.06]"
+                    : "text-[#8E8E93] hover:text-white hover:bg-white/[0.08]"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2.1} />

@@ -20,12 +20,22 @@ export default function AnfieldInsightsDashboard() {
     MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
 
   return (
-    <main className="min-h-screen lg:h-screen w-full flex flex-col bg-[#000000] text-white overflow-x-hidden lg:overflow-hidden select-none">
+    <main className="relative min-h-screen lg:h-screen w-full flex flex-col bg-[#050608] text-white overflow-x-hidden lg:overflow-hidden select-none">
+      {/* Dynamic Ambient Glassmorphism Light Pools (Subtle LFC Crimson & Deep Emerald Atmosphere) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 overflow-hidden z-0"
+      >
+        <div className="absolute -top-[140px] left-[8%] w-[540px] h-[540px] rounded-full bg-gradient-to-br from-[#E31B23]/14 via-[#C8102E]/8 to-transparent blur-[130px] animate-ambient-pulse" />
+        <div className="absolute top-[32%] -right-[100px] w-[500px] h-[500px] rounded-full bg-gradient-to-bl from-[#FF2636]/12 via-[#8A0713]/6 to-transparent blur-[140px] animate-ambient-pulse" style={{ animationDelay: '-4s' }} />
+        <div className="absolute -bottom-[120px] left-[25%] w-[620px] h-[620px] rounded-full bg-gradient-to-tr from-[#0E281A]/18 via-[#103020]/8 to-transparent blur-[150px]" />
+      </div>
+
       {/* 1. Persistent Apple Liquid Glass Navigation Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* 2. Main Body Dashboard Viewport */}
-      <div className="flex-1 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto lg:overflow-hidden gap-3.5 max-w-[1680px] w-full mx-auto">
+      <div className="relative z-10 flex-1 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto lg:overflow-hidden gap-3.5 max-w-[1680px] w-full mx-auto">
         {/* Universal Match Centre Fixture Ribbon (Apple Sports inspired pill bar) */}
         {activeTab === "boot-room" && (
           <div
@@ -51,10 +61,10 @@ export default function AnfieldInsightsDashboard() {
                     setSelectedMatchId(m.id);
                     setSelectedPlayer(null);
                   }}
-                  className={`min-h-[38px] flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer border ${
+                  className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
                     isSelected
                       ? "glass-crimson-pill text-white"
-                      : "bg-[#181818] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
+                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
                   }`}
                 >
                   <span

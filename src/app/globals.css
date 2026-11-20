@@ -4,48 +4,49 @@
   :root {
     color-scheme: dark;
 
-    /* OKX Dark Theme — Pitch Black Canvas & Matte Charcoal Surface Hierarchy */
-    --apple-bg-base: #000000;                  /* Pure pitch-black canvas (OKX foundation) */
-    --apple-bg-elevated: #121212;              /* Primary matte dark charcoal card (#121212) */
-    --apple-bg-tertiary: #1A1A1A;              /* Secondary inner tile surface (#1A1A1A) */
-    --apple-bg-quaternary: #222222;            /* Interactive hover fill */
+    /* Liquid Glass & Dark Atmosphere Hierarchy */
+    --apple-bg-base: #050608;                  /* Deep obsidian canvas */
+    --apple-bg-elevated: rgba(16, 18, 24, 0.72); /* Translucent primary glass card */
+    --apple-bg-tertiary: rgba(24, 26, 36, 0.58); /* Nested glass tile */
+    --apple-bg-quaternary: rgba(34, 38, 50, 0.65); /* Interactive hover glass */
 
-    /* Glass & Overlay Materials */
-    --apple-glass-bg: rgba(14, 14, 14, 0.94);
-    --apple-glass-hud: rgba(18, 18, 18, 0.92);
-    --apple-glass-border: rgba(255, 255, 255, 0.08);
+    /* Glass Materials & Translucent Optics */
+    --apple-glass-bg: rgba(8, 9, 13, 0.82);
+    --apple-glass-hud: rgba(18, 20, 28, 0.78);
+    --apple-glass-border: rgba(255, 255, 255, 0.12);
+    --apple-glass-highlight: rgba(255, 255, 255, 0.18);
 
-    /* Separators & Hairlines */
-    --apple-separator: rgba(255, 255, 255, 0.08);
-    --apple-separator-opaque: #222222;
-    --apple-hairline: rgba(255, 255, 255, 0.08);
+    /* Separators & Bevel Rims */
+    --apple-separator: rgba(255, 255, 255, 0.10);
+    --apple-separator-opaque: #222226;
+    --apple-hairline: rgba(255, 255, 255, 0.12);
 
-    /* High-Contrast Typography Hierarchy (OKX Spec) */
+    /* High-Contrast Typography Hierarchy */
     --apple-label-primary: #FFFFFF;            /* Pure white primary headers & values */
-    --apple-label-body: #F4F4F4;               /* High-contrast body prose */
-    --apple-label-secondary: #8E8E93;          /* Muted metadata grey (#8E8E93) */
-    --apple-label-tertiary: #5A5A5E;           /* Subdued tertiary grey */
+    --apple-label-body: #F4F4F6;               /* High-contrast body prose */
+    --apple-label-secondary: #9A9AA2;          /* Clean secondary grey */
+    --apple-label-tertiary: #686872;           /* Subdued tertiary grey */
 
-    /* Liverpool FC Red Highlights (Replacing OKX Green with Iconic Anfield Red) */
-    --apple-red: #FF2636;                      /* Electric Anfield Red (luminous metric highlights) */
-    --apple-red-fill: #E31B23;                 /* Iconic Liverpool FC Red (solid CTAs & feature blocks) */
-    --apple-red-deep: #C8102E;                 /* Official Heritage Crimson */
+    /* Liverpool FC Iconic Red Palette */
+    --apple-red: #FF2636;                      /* Electric Anfield Red (luminous highlights) */
+    --apple-red-fill: #E31B23;                 /* Official Liverpool FC Red */
+    --apple-red-deep: #C8102E;                 /* Heritage Crimson */
     --apple-gold: #F1B82D;                     /* Heritage Crest Gold */
-    --apple-mint: #E31B23;                     /* Redirected to Anfield Red */
-    --apple-teal: #64D2FF;                     /* Tactical Data Cyan */
-    --apple-green: #E31B23;                    /* Replaced with Anfield Red */
-    --apple-yellow: #FFD60A;                   /* Amber Signal */
-    --apple-orange: #FF9F0A;                   /* Caution Orange */
-    --apple-blue: #E31B23;                     /* Focus Ring Red */
+    --apple-mint: #00DAC3;                     /* Tactical Data Cyan */
+    --apple-teal: #64D2FF;                     /* Secondary Metric Cyan */
+    --apple-green: #30D158;                    /* Status Pulse Green */
+    --apple-yellow: #FFD60A;                   /* Caution / Goal Indicator */
+    --apple-orange: #FF9F0A;                   /* Transition Orange */
+    --apple-blue: #0A84FF;                     /* RSS Accent Blue */
 
-    /* Authentic Anfield Stadium Turf */
-    --apple-pitch-deep: #0D1612;
-    --apple-pitch-mid: #12211A;
-    --apple-pitch-line: rgba(255, 255, 255, 0.22);
+    /* Pitch Turf Shading */
+    --apple-pitch-deep: #07100B;
+    --apple-pitch-mid: #0B1C13;
+    --apple-pitch-line: rgba(255, 255, 255, 0.26);
   }
 
   html {
-    background-color: #000000;
+    background-color: var(--apple-bg-base);
     color: var(--apple-label-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -53,13 +54,13 @@
   }
 
   body {
-    background-color: #000000;
+    background-color: var(--apple-bg-base);
     color: var(--apple-label-body);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-apple-sans), system-ui, "Segoe UI", Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Crisp Apple-native keyboard focus indicator */
+  /* Crisp keyboard focus indicator with electric crimson glow */
   button:focus-visible,
   select:focus-visible,
   input:focus-visible,
@@ -69,146 +70,245 @@
   }
 }
 
-/* ─── OKX-Style Matte Card Material (Content Layer — #121212 with Hairline Border) ─── */
-.apple-card {
-  background-color: #121212;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   LIQUID GLASS DESIGN SYSTEM (Universal Glassmorphism Hierarchy)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-.apple-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-.apple-tile {
-  background-color: #1A1A1A;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-}
-
-.apple-segmented {
-  background-color: #181818;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* ─── Crimson Glassmorphism Design System (Boxes & Pills) ─── */
-
-/* 1. Crimson Glassmorphic Boxes / Cards */
-.glass-crimson-card {
+/* ─── 1. Primary Frosted Glass Cards (Content Containers) ─── */
+.apple-card,
+.glass-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(227, 27, 35, 0.72) 0%, rgba(160, 10, 20, 0.58) 48%, rgba(255, 38, 54, 0.68) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(14, 16, 22, 0.72);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
   box-shadow:
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35),
-    0 12px 36px 0 rgba(227, 27, 35, 0.38),
-    inset 0 0 28px 0 rgba(255, 45, 70, 0.22);
-  color: #FFFFFF;
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4),
+    0 16px 40px -8px rgba(0, 0, 0, 0.7);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+}
+
+.apple-card:hover,
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4),
+    0 24px 52px -6px rgba(0, 0, 0, 0.8),
+    0 0 24px 0 rgba(227, 27, 35, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ─── 2. Inner Nested Glass Tiles (Metric Blocks, List Rows) ─── */
+.apple-tile,
+.glass-tile {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(22, 25, 34, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.3);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-crimson-card:hover {
-  border-color: rgba(255, 255, 255, 0.45);
+.apple-tile:hover,
+.glass-tile:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(28, 32, 44, 0.72);
+  border-color: rgba(255, 255, 255, 0.18);
   box-shadow:
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35),
-    0 16px 44px 0 rgba(255, 38, 54, 0.48),
-    inset 0 0 32px 0 rgba(255, 60, 85, 0.3);
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* 2. Crimson Glassmorphic Pills (Tabs, Active Buttons, Badges) */
+/* ─── 3. Frosted Segmented Glass Controls ─── */
+.apple-segmented {
+  background: rgba(18, 20, 28, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ─── 4. Floating HUD Glass Capsules ─── */
+.apple-glass-hud {
+  background: rgba(16, 18, 26, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.apple-glass-hud:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CRIMSON GLASSMORPHISM SYSTEM (Feature Boxes & Interactive Pills)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Crimson Glassmorphic Feature Cards / Boxes ─── */
+.glass-crimson-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(227, 27, 35, 0.75) 0%, rgba(150, 10, 20, 0.6) 46%, rgba(255, 38, 54, 0.7) 100%);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.35),
+    0 16px 40px 0 rgba(227, 27, 35, 0.42),
+    inset 0 0 28px 0 rgba(255, 45, 70, 0.24);
+  color: #FFFFFF;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-crimson-card:hover {
+  border-color: rgba(255, 255, 255, 0.52);
+  box-shadow:
+    inset 0 1.8px 1.8px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, 0.35),
+    0 22px 50px 0 rgba(255, 38, 54, 0.52),
+    inset 0 0 34px 0 rgba(255, 60, 85, 0.32);
+  transform: translateY(-2px);
+}
+
+/* ─── 2. Crimson Glassmorphic Interactive Pills & Buttons ─── */
 .glass-crimson-pill {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 42, 60, 0.88) 0%, rgba(195, 12, 24, 0.82) 50%, rgba(255, 52, 75, 0.92) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: linear-gradient(135deg, rgba(255, 42, 60, 0.9) 0%, rgba(195, 12, 24, 0.84) 50%, rgba(255, 52, 75, 0.94) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 9999px;
   box-shadow:
-    inset 0 1.2px 1.2px 0 rgba(255, 255, 255, 0.65),
+    inset 0 1.2px 1.2px 0 rgba(255, 255, 255, 0.7),
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.25),
-    0 4px 18px 0 rgba(227, 27, 35, 0.42),
+    0 6px 20px 0 rgba(227, 27, 35, 0.45),
     inset 0 0 14px 0 rgba(255, 75, 95, 0.25);
   color: #FFFFFF;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-crimson-pill:hover {
-  background: linear-gradient(135deg, rgba(255, 55, 75, 0.94) 0%, rgba(210, 16, 30, 0.88) 50%, rgba(255, 68, 90, 0.96) 100%);
-  border-color: rgba(255, 255, 255, 0.55);
+  background: linear-gradient(135deg, rgba(255, 60, 80, 0.96) 0%, rgba(215, 16, 30, 0.9) 50%, rgba(255, 75, 95, 0.98) 100%);
+  border-color: rgba(255, 255, 255, 0.6);
   box-shadow:
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.8),
-    0 6px 24px 0 rgba(255, 38, 54, 0.55),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.85),
+    0 8px 26px 0 rgba(255, 38, 54, 0.58),
     inset 0 0 18px 0 rgba(255, 90, 110, 0.35);
+  transform: translateY(-1px);
 }
 
-/* 3. Subtle Frosted Glass Badge for Key Stat Pills */
+.glass-crimson-pill:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+/* ─── 3. Subtle Frosted Glass Badge for Stat Chips ─── */
 .glass-crimson-badge {
   background: linear-gradient(135deg, rgba(227, 27, 35, 0.35) 0%, rgba(160, 10, 20, 0.28) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 50, 70, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 50, 70, 0.38);
   border-radius: 9999px;
   box-shadow:
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.32),
     0 2px 10px 0 rgba(227, 27, 35, 0.25);
   color: #FFFFFF;
 }
 
-/* ─── OKX Signature Highlight Banner (Electric Red Split Card) ─── */
-.okx-highlight-card {
-  background-color: #121212;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTION KEYFRAMES & MICRO-INTERACTIONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Shimmer Sweep Animation across Glass Surfaces */
+@keyframes glassShimmerSweep {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+
+.glass-shimmer {
+  position: relative;
   overflow: hidden;
 }
 
-.okx-highlight-solid {
-  position: relative;
-  background: linear-gradient(135deg, rgba(227, 27, 35, 0.72) 0%, rgba(160, 10, 20, 0.58) 48%, rgba(255, 38, 54, 0.68) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow:
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35),
-    0 12px 36px 0 rgba(227, 27, 35, 0.38),
-    inset 0 0 28px 0 rgba(255, 45, 70, 0.22);
-  color: #FFFFFF;
+.glass-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.14) 50%, transparent 100%);
+  transform: translateX(-160%) skewX(-20deg);
+  animation: glassShimmerSweep 8s infinite ease-in-out;
+  pointer-events: none;
 }
 
-/* ─── Navigation Header & Floating Chrome ─── */
-.apple-glass {
-  background-color: rgba(0, 0, 0, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-color: rgba(255, 255, 255, 0.08);
+/* Ambient Pulse for Glow Pools */
+@keyframes ambientGlowPulse {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.05);
+  }
 }
 
-.apple-glass-hud {
-  background-color: rgba(18, 18, 18, 0.90);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.animate-ambient-pulse {
+  animation: ambientGlowPulse 9s infinite ease-in-out;
 }
 
+/* Tactile Pressable Feedback */
+.pressable {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pressable:hover {
+  transform: translateY(-1.5px);
+}
+
+.pressable:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+/* Tabular Numbers */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
 /* ─── Accessibility: Reduce Transparency & Reduce Motion ─── */
 @media (prefers-reduced-transparency: reduce) {
-  .apple-glass,
-  .apple-glass-hud {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background-color: #121212;
-    border-color: #222222;
+  .apple-card,
+  .glass-card,
+  .apple-tile,
+  .glass-tile,
+  .apple-segmented,
+  .apple-glass-hud,
+  .glass-crimson-card,
+  .glass-crimson-pill {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #14151C !important;
+    border-color: #282A36 !important;
   }
 }
 
@@ -235,6 +335,7 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -245,7 +346,7 @@
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: #222222;
+  background: rgba(35, 38, 50, 0.8);
   height: 5px;
   border-radius: 9999px;
   accent-color: var(--apple-red);
@@ -259,8 +360,13 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 9999px;
   background: #ffffff;
   border: 0.5px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -269,6 +375,11 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 9999px;
   background: #ffffff;
   border: 0.5px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
 }

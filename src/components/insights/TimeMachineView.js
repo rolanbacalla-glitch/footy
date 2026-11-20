@@ -229,10 +229,10 @@ export default function TimeMachineView() {
                 key={match.id}
                 onClick={() => setSelectedMatch(match)}
                 aria-pressed={isSelected}
-                className={`text-left p-4 rounded-[20px] transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                className={`text-left p-4 rounded-[20px] pressable cursor-pointer flex flex-col justify-between ${
                   isSelected
                     ? "glass-crimson-card border border-white/35"
-                    : "apple-card hover:border-white/15"
+                    : "apple-card hover:border-white/20"
                 }`}
               >
                 <div>

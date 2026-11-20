@@ -191,10 +191,10 @@ export default function MomentumChart({
                 key={mode.id}
                 onClick={() => setOverlayMode(mode.id)}
                 aria-pressed={isActive}
-                className={`min-h-[54px] flex flex-col items-center justify-center py-2 px-1.5 rounded-[12px] text-center transition-all duration-200 cursor-pointer ${
+                className={`min-h-[54px] pressable flex flex-col items-center justify-center py-2 px-1.5 rounded-[12px] text-center cursor-pointer ${
                   isActive
                     ? "glass-crimson-pill text-white"
-                    : "text-[#8E8E93] hover:text-white hover:bg-white/[0.05]"
+                    : "text-[#8E8E93] hover:text-white hover:bg-white/[0.08]"
                 }`}
               >
                 <Icon
@@ -335,7 +335,7 @@ export default function MomentumChart({
           </div>
 
           {/* Card 2: Signature Crimson Glassmorphic Highlight Card for Field Tilt */}
-          <div className="glass-crimson-card p-3 rounded-[16px] text-white flex flex-col justify-between">
+          <div className="glass-crimson-card glass-shimmer p-3 rounded-[16px] text-white flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-white/85 text-[11px] font-semibold uppercase tracking-[0.05em] block drop-shadow-sm">
                 Field Tilt
