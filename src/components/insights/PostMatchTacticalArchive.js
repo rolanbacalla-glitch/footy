@@ -154,16 +154,16 @@ export default function PostMatchTacticalArchive({ match }) {
                     strokeDasharray={shot.outcome === "goal" ? undefined : "1,1"}
                   />
 
-                  {/* Outer Pulsing Ring for Selected Shot */}
+                  {/* Static Accent Ring for Selected Shot */}
                   {isSelected && (
                     <circle
                       cx={shot.x}
                       cy={shot.y}
-                      r={radius + 1.2}
+                      r={radius + 0.9}
                       fill="none"
                       stroke="#FF2636"
                       strokeWidth="0.4"
-                      className="animate-ping"
+                      strokeOpacity="0.8"
                     />
                   )}
 
