@@ -101,6 +101,26 @@ export default function Header({ activeTab, setActiveTab, activeMatch }) {
                 <span className="text-[#8E8E93] text-[11px]">{activeMatch.venue || "Anfield"}</span>
               </div>
             </>
+          ) : (activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday) ? (
+            <>
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F1B82D] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#F1B82D]" />
+              </span>
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#F1B82D] tracking-[0.04em] uppercase text-[10px] bg-[#F1B82D]/15 px-2 py-0.5 rounded-full border border-[#F1B82D]/30">
+                  MATCHDAY • {activeMatch.statusText || "TODAY 16:30"}
+                </span>
+                <span className="font-semibold text-white tracking-[-0.01em]">
+                  {activeMatch.homeTeam || "Liverpool"} vs {activeMatch.awayTeam || "Man United"}
+                </span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#F1B82D] font-medium">{activeMatch.competition}</span>
+                <span className="text-white/20">•</span>
+                <span className="text-[#8E8E93] text-[11px]">{activeMatch.venue || "Anfield"}</span>
+              </div>
+            </>
           ) : nextMatch ? (
             <>
               <Radio

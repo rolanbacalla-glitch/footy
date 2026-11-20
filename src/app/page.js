@@ -120,6 +120,7 @@ export default function AnfieldInsightsDashboard() {
               const isSelected = m.id === selectedMatchId;
               const isUpcoming = m.type === "UPCOMING";
               const isLive = m.type === "LIVE" || m.isLive;
+              const isMatchday = m.type === "MATCHDAY" || m.isMatchday;
 
               return (
                 <button
@@ -140,11 +141,13 @@ export default function AnfieldInsightsDashboard() {
                     className={`w-2 h-2 rounded-full shrink-0 ${
                       isLive
                         ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
-                        : isUpcoming
-                          ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
-                          : isSelected
-                            ? "bg-white shadow-[0_0_8px_#FFFFFF]"
-                            : "bg-[#E31B23]"
+                        : isMatchday
+                          ? "bg-[#F1B82D] animate-pulse shadow-[0_0_8px_rgba(241,184,45,0.7)]"
+                          : isUpcoming
+                            ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
+                            : isSelected
+                              ? "bg-white shadow-[0_0_8px_#FFFFFF]"
+                              : "bg-[#E31B23]"
                     }`}
                   />
                   <span className="tracking-[-0.01em]">{m.title}</span>
@@ -152,9 +155,11 @@ export default function AnfieldInsightsDashboard() {
                     className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
                       isLive
                         ? "bg-[#FF2636]/25 text-[#FF6961] border border-[#FF2636]/40 font-bold animate-pulse"
-                        : isSelected
-                          ? "bg-black/40 text-white border border-white/25 shadow-inner"
-                          : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
+                        : isMatchday
+                          ? "bg-[#F1B82D]/20 text-[#F1B82D] border border-[#F1B82D]/35 font-bold"
+                          : isSelected
+                            ? "bg-black/40 text-white border border-white/25 shadow-inner"
+                            : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
                     }`}
                   >
                     {m.statusText}
@@ -168,8 +173,8 @@ export default function AnfieldInsightsDashboard() {
         {/* Tab 1: Boot Room Live (Tactical Visualisation + Momentum Split) */}
         {activeTab === "boot-room" && (
           <div className="w-full flex flex-col gap-3.5 min-h-0">
-            {/* Live Match Scoreboard View — Only available during an active live match */}
-            {activeMatch?.type === "LIVE" && (
+            {/* Live Match Scoreboard View — Available during matchday and live in-play */}
+            {(activeMatch?.type === "LIVE" || activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday) && (
               <LiveScoreboard activeMatch={activeMatch} />
             )}
 
