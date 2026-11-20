@@ -13,6 +13,7 @@ import ClubNewsView from "../components/insights/ClubNewsView";
 import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
 import StandingsTable from "../components/insights/StandingsTable";
 import PostMatchTacticalArchive from "../components/insights/PostMatchTacticalArchive";
+import AudioCommentaryBar from "../components/insights/AudioCommentaryBar";
 import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
@@ -323,6 +324,9 @@ export default function AnfieldInsightsDashboard() {
         isOpen={Boolean(selectedPlayer)}
         onClose={() => setSelectedPlayer(null)}
       />
+
+      {/* Ambient Live Matchday Commentary Audio Player */}
+      <AudioCommentaryBar />
 
       {/* Global Apple & travel-kin Styled Footer */}
       <Footer setActiveTab={setActiveTab} />

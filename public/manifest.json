@@ -1,0 +1,17 @@
+{
+  "name": "Anfield Insights",
+  "short_name": "Anfield",
+  "description": "Premium Matchday Intelligence & Tactical Telemetry for Liverpool FC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070A0E",
+  "theme_color": "#FF2636",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/crests/liverpool.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
