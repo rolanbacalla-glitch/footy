@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import TacticalRadarCard from "./TacticalRadarCard";
+import SetPieceModal from "./SetPieceModal";
 import {
   Activity,
   ChevronDown,
   ChevronUp,
   CloudRain,
+  CornerDownRight,
   Flag,
   HeartPulse,
   History,
@@ -160,6 +163,7 @@ function Card({ icon: Icon, title, children, className = "" }) {
 export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, onPreviewPhase, isPreviewing, onResetPreview }) {
   const [showDetails, setShowDetails] = useState(false);
   const [h2hAnfieldOnly, setH2hAnfieldOnly] = useState(false);
+  const [isSetPieceOpen, setIsSetPieceOpen] = useState(false);
 
   const pm = activeMatch?.preMatch || {};
   const homeTeam = activeMatch?.homeTeam || "Liverpool";
@@ -220,6 +224,9 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
           {awayTeam} {wp.away}% • {pm.winProbabilitySource || "Elo rating blended with market odds; adjusted for team news"}
         </p>
       </div>
+
+      {/* Tactical Counter-Press Radar Comparison (Phase 1 Market Recommendation) */}
+      <TacticalRadarCard activeMatch={activeMatch} />
 
       {/* Tier 1: form, team news, key duel */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -341,6 +348,17 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
           </Card>
 
           <Card icon={Flag} title="Set pieces (xG per game)">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">TacticAI Dynamics</span>
+              <button
+                type="button"
+                onClick={() => setIsSetPieceOpen(true)}
+                className="text-[10px] px-2 py-0.5 rounded-full border border-[#00DAC3]/40 bg-[#00DAC3]/15 text-[#00DAC3] font-semibold cursor-pointer hover:bg-[#00DAC3]/25 flex items-center gap-1 transition-colors"
+              >
+                <CornerDownRight className="w-3 h-3" />
+                Inspect Routines
+              </button>
+            </div>
             {[
               { team: homeTeam, d: pm.setPieces?.home },
               { team: awayTeam, d: pm.setPieces?.away },
@@ -454,6 +472,13 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
           })}
         </ol>
       </div>
+
+      {/* DeepMind TacticAI Set-Piece Modal */}
+      <SetPieceModal
+        isOpen={isSetPieceOpen}
+        onClose={() => setIsSetPieceOpen(false)}
+        activeMatch={activeMatch}
+      />
     </div>
   );
 }

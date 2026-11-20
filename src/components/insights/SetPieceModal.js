@@ -1,0 +1,271 @@
+"use client";
+
+import React, { useState } from "react";
+import { X, CornerDownRight, ShieldAlert, Target } from "lucide-react";
+
+export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
+  const [activeSide, setActiveSide] = useState("left"); // 'left' | 'right' corner
+  const [deliveryType, setDeliveryType] = useState("inswinger"); // 'inswinger' | 'outswinger'
+
+  if (!isOpen) return null;
+
+  const homeTeam = activeMatch?.homeTeam || "Liverpool";
+  const awayTeam = activeMatch?.awayTeam || "Man United";
+
+  // TacticAI-inspired tactical models for LFC 2026/27 corner setups
+  const receiverProbabilities = [
+    {
+      player: "Virgil van Dijk (#4)",
+      targetZone: "Near Post Flick / 6-Yard Box",
+      probability: 38,
+      shotQualityXg: 0.28,
+      role: "Primary Aerial Target",
+      colour: "#FF2636",
+    },
+    {
+      player: "Jérémy Jacquet (#5)",
+      targetZone: "Central Penalty Spot",
+      probability: 29,
+      shotQualityXg: 0.22,
+      role: "Second-Ball Attacker",
+      colour: "#00DAC3",
+    },
+    {
+      player: "Alexander Isak (#9)",
+      targetZone: "Back Post / Blindside Run",
+      probability: 21,
+      shotQualityXg: 0.35,
+      role: "Far-Post Poacher",
+      colour: "#F1B82D",
+    },
+    {
+      player: "Florian Wirtz (#7)",
+      targetZone: "Edge of Box (D-Arc)",
+      probability: 12,
+      shotQualityXg: 0.14,
+      role: "Cutback Volley & Recirculation",
+      colour: "#EBEBF5",
+    },
+  ];
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tacticai-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md animate-fade-in"
+    >
+      <div className="relative w-full max-w-2xl apple-card rounded-[24px] border border-white/15 p-5 sm:p-6 bg-[#0E0F12]/95 shadow-2xl max-h-[92vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/[0.08] pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/15 border border-[#E31B23]/30 flex items-center justify-center text-[#FF2636]">
+              <CornerDownRight className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 id="tacticai-title" className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  Set-Piece Dynamics
+                </h2>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#00DAC3]/15 text-[#00DAC3] border border-[#00DAC3]/30 uppercase tracking-wider">
+                  DeepMind TacticAI Engine
+                </span>
+              </div>
+              <p className="text-xs text-[#8E8E93] mt-0.5">
+                Predictive Corner Trajectory & Receiver Distribution • {homeTeam} vs {awayTeam}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close modal"
+            className="w-8 h-8 rounded-full bg-white/10 border border-white/10 text-white/70 hover:text-white hover:bg-white/20 flex items-center justify-center cursor-pointer transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Corner Selection Controls */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="apple-tile p-1.5 rounded-xl flex items-center justify-between">
+            <span className="text-[11px] text-[#8E8E93] font-medium pl-2">Delivery Side</span>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setActiveSide("left")}
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  activeSide === "left"
+                    ? "bg-[#FF2636] text-white shadow-sm"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Left Corner
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSide("right")}
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  activeSide === "right"
+                    ? "bg-[#FF2636] text-white shadow-sm"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Right Corner
+              </button>
+            </div>
+          </div>
+
+          <div className="apple-tile p-1.5 rounded-xl flex items-center justify-between">
+            <span className="text-[11px] text-[#8E8E93] font-medium pl-2">Trajectory</span>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setDeliveryType("inswinger")}
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  deliveryType === "inswinger"
+                    ? "bg-[#00DAC3] text-black shadow-sm font-bold"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Inswinger
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeliveryType("outswinger")}
+                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                  deliveryType === "outswinger"
+                    ? "bg-[#00DAC3] text-black shadow-sm font-bold"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Outswinger
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tactical Pitch Box Visualization (SVG Top-Down 18-Yard Box View) */}
+        <div className="relative w-full h-44 sm:h-52 bg-[#09150E] rounded-2xl border border-emerald-500/25 p-3 overflow-hidden mb-4 shadow-inner">
+          <svg viewBox="0 0 320 160" className="w-full h-full" aria-hidden="true">
+            {/* Pitch Grass Grid Lines */}
+            <rect x="0" y="0" width="320" height="160" fill="#0B1A12" />
+            {/* Goal Line & Goal Box */}
+            <line x1="0" y1="150" x2="320" y2="150" stroke="#34D399" strokeWidth="1.5" strokeOpacity="0.5" />
+            <rect x="110" y="146" width="100" height="4" fill="#FFFFFF" fillOpacity="0.8" />
+            <rect x="70" y="80" width="180" height="70" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.45" />
+            {/* 6-Yard Box */}
+            <rect x="115" y="125" width="90" height="25" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.4" />
+            {/* Penalty Spot & Arc */}
+            <circle cx="160" cy="105" r="2" fill="#FFFFFF" />
+            <path d="M 130 80 A 30 30 0 0 1 190 80" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.35" />
+
+            {/* Corner Arc Origin */}
+            {activeSide === "left" ? (
+              <path d="M 0 135 A 15 15 0 0 1 15 150" fill="none" stroke="#F1B82D" strokeWidth="2" />
+            ) : (
+              <path d="M 320 135 A 15 15 0 0 0 305 150" fill="none" stroke="#F1B82D" strokeWidth="2" />
+            )}
+
+            {/* Corner Flight Path Curved Arc */}
+            {activeSide === "left" ? (
+              <path
+                d={
+                  deliveryType === "inswinger"
+                    ? "M 5 145 Q 80 50 140 128"
+                    : "M 5 145 Q 90 70 160 105"
+                }
+                fill="none"
+                stroke="#F1B82D"
+                strokeWidth="2.5"
+                strokeDasharray="4 2"
+                strokeLinecap="round"
+              />
+            ) : (
+              <path
+                d={
+                  deliveryType === "inswinger"
+                    ? "M 315 145 Q 240 50 180 128"
+                    : "M 315 145 Q 230 70 160 105"
+                }
+                fill="none"
+                stroke="#F1B82D"
+                strokeWidth="2.5"
+                strokeDasharray="4 2"
+                strokeLinecap="round"
+              />
+            )}
+
+            {/* Player Target Hotspots */}
+            <g className="animate-pulse">
+              {/* Van Dijk: Near post */}
+              <circle cx="138" cy="128" r="9" fill="#FF2636" fillOpacity="0.4" />
+              <circle cx="138" cy="128" r="4.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="1" />
+              <text x="138" y="120" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Van Dijk</text>
+
+              {/* Jacquet: Central spot */}
+              <circle cx="160" cy="105" r="8" fill="#00DAC3" fillOpacity="0.35" />
+              <circle cx="160" cy="105" r="4" fill="#00DAC3" stroke="#FFFFFF" strokeWidth="1" />
+              <text x="160" y="98" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Jacquet</text>
+
+              {/* Isak: Far post */}
+              <circle cx="184" cy="130" r="7.5" fill="#F1B82D" fillOpacity="0.35" />
+              <circle cx="184" cy="130" r="4" fill="#F1B82D" stroke="#FFFFFF" strokeWidth="1" />
+              <text x="184" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Isak</text>
+            </g>
+          </svg>
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] text-white/80 border border-white/10 font-mono">
+            {activeSide === "left" ? "Left Corner Delivery" : "Right Corner Delivery"} • {deliveryType.toUpperCase()}
+          </div>
+        </div>
+
+        {/* TacticAI Receiver Probabilities Leaderboard */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between text-xs font-semibold text-white/80">
+            <span className="flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-[#FF2636]" />
+              Receiver First-Contact Probability Model
+            </span>
+            <span className="text-[10px] text-[#8E8E93]">TacticAI Geometric GNN</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {receiverProbabilities.map((r, i) => (
+              <div key={i} className="apple-tile p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-white">{r.player}</span>
+                  <span className="text-xs font-bold font-mono" style={{ color: r.colour }}>
+                    {r.probability}%
+                  </span>
+                </div>
+                <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-1.5">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${r.probability}%`, backgroundColor: r.colour }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-[#8E8E93]">
+                  <span>{r.targetZone}</span>
+                  <span className="text-white/70 font-mono">xG: {r.shotQualityXg.toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Defensive Marking Scheme Breakdown */}
+        <div className="apple-tile p-3 rounded-xl border border-white/[0.06] text-xs">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="font-semibold text-white flex items-center gap-1.5">
+              <ShieldAlert className="w-3.5 h-3.5 text-[#F1B82D]" />
+              Opposition Marking Vulnerability
+            </span>
+            <span className="text-[10px] font-mono text-[#F1B82D]">Hybrid 60/40 Scheme</span>
+          </div>
+          <p className="text-[11px] text-[#8E8E93] leading-relaxed">
+            <strong className="text-white">{awayTeam}</strong> deploys a 5-man zonal spine with man-to-man coverage on Van Dijk. Our inswinging near-post delivery creates natural separation for <strong>Jérémy Jacquet (#5)</strong> and far-post back-runners.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
