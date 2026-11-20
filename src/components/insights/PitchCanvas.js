@@ -83,85 +83,57 @@ export default function PitchCanvas({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(16,36,26,0.55)_0%,rgba(9,18,13,0.92)_70%,rgba(6,10,8,0.98)_100%)]"
       />
 
-      {/* Top Floating Glass HUD Bar */}
-      <div className="relative flex flex-col gap-2 z-10 mb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          {/* Match & Overlay Title Pill */}
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-full self-start sm:self-auto bg-[#121212]/90 border border-white/[0.08]">
-            <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-pulse shrink-0 shadow-[0_0_8px_#FF2636]" />
-            <span className="text-[11px] sm:text-xs font-semibold text-white tracking-[-0.01em]">
-              {activeMatch?.title}
-              <span className="text-[#8E8E93] mx-1.5">•</span>
-              <span className="text-[#FF2636] font-medium">{modeLabel}</span>
-            </span>
-          </div>
-
-          {/* Right Action Tools */}
-          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-            {overlayMode === "pass" && (
-              <button
-                type="button"
-                onClick={() => setShowChannels(!showChannels)}
-                className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${showChannels
-                  ? "bg-[#1A1A1A] text-white border-white/20"
-                  : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                  }`}
-                title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
-              >
-                <Layers className="w-3 h-3 text-[#FF2636]" />
-                <span className="hidden sm:inline">5 Tactical Corridors</span>
-                <span className="sm:hidden">Corridors</span>
-              </button>
-            )}
-
-            {activeMatch?.expectedShape && (
-              <div className="hidden lg:flex items-center text-[11px] font-medium tabular-nums text-white/90 px-3 py-1 rounded-full bg-[#181818] border border-white/[0.08]">
-                Shape: <span className="text-[#FF2636] ml-1 font-semibold">{activeMatch.expectedShape}</span>
-              </div>
-            )}
-
-            {/* The Kop Direction Indicator */}
-            <div className="apple-glass-hud text-[11px] font-medium text-white/85 px-3 py-1 rounded-full flex items-center gap-1.5 bg-[#121212]/90 border border-white/[0.08]">
-              <Compass className="w-3 h-3 text-[#FF2636]" />
-              The Kop: <span className="text-[#FF2636] font-bold">Right ➔</span>
-            </div>
-
-            {/* Matchday line-up status */}
-            {lineupStatus && (
-              <div
-                className={`text-[11px] font-semibold px-3 py-1 rounded-full border ${
-                  isPredicted
-                    ? "bg-white/10 text-white/80 border-white/20 border-dashed"
-                    : "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30"
-                }`}
-              >
-                {isPredicted ? "Predicted XI" : "Confirmed XI"}
-              </div>
-            )}
-
-            {selectedPlayer && (
-              <button
-                type="button"
-                onClick={() => setSelectedPlayer(null)}
-                className="min-h-[28px] flex items-center gap-1.5 text-[11px] font-semibold text-white glass-crimson-pill px-3 py-1 cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Reset Focus
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Tactical Battle Brief */}
-        {activeMatch?.keyTacticalBattle && (
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-2xl text-[11px] text-[#8E8E93] bg-[#121212]/80 border border-white/[0.06]">
-            <Sparkles className="w-3.5 h-3.5 text-white/80 shrink-0" strokeWidth={2} />
-            <span className="font-semibold text-white shrink-0">Tactical Focus:</span>
-            <span className="truncate text-white/80 font-medium">
+      {/* Top Floating Glass HUD Bar — Streamlined Single Row */}
+      <div className="relative flex items-center justify-between gap-3 z-10 mb-2 px-1">
+        {/* Left: Clean Mode Indicator */}
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-pulse shrink-0 shadow-[0_0_8px_#FF2636]" />
+          <span className="text-xs font-semibold text-white tracking-[-0.01em]">
+            {modeLabel}
+          </span>
+          {activeMatch?.keyTacticalBattle && (
+            <span className="hidden xl:inline text-[11px] text-[#8E8E93] pl-2 border-l border-white/10 font-normal truncate max-w-[340px]">
               {activeMatch.keyTacticalBattle}
             </span>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Right: Essential Tactical Tools */}
+        <div className="flex items-center gap-2">
+          {overlayMode === "pass" && (
+            <button
+              type="button"
+              onClick={() => setShowChannels(!showChannels)}
+              className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                showChannels
+                  ? "bg-[#1A1A1A] text-white border-white/20"
+                  : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+              }`}
+              title="Toggle 5 tactical vertical channels"
+            >
+              <Layers className="w-3 h-3 text-[#FF2636]" />
+              <span className="hidden sm:inline">5 Corridors</span>
+            </button>
+          )}
+
+          {activeMatch?.expectedShape && (
+            <div className="flex items-center text-[11px] font-medium tabular-nums text-white/90 px-3 py-1 rounded-full bg-[#141414] border border-white/[0.08]">
+              <span className="text-[#8E8E93] mr-1.5 hidden sm:inline">Shape</span>
+              <span className="text-[#FF2636] font-semibold">{activeMatch.expectedShape}</span>
+            </div>
+          )}
+
+          {selectedPlayer && (
+            <button
+              type="button"
+              onClick={() => setSelectedPlayer(null)}
+              className="min-h-[28px] flex items-center gap-1.5 text-[11px] font-semibold text-white glass-crimson-pill px-3 py-1 cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset Focus
+            </button>
+          )}
+        </div>
       </div>
 
       {/* SVG Pitch Canvas Area */}
