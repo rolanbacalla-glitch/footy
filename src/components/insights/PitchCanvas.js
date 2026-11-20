@@ -13,6 +13,7 @@ export default function PitchCanvas({
   const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
   const [showChannels, setShowChannels] = useState(true);
+  const [pillMode, setPillMode] = useState("pills"); // "pills" | "minimal"
 
   const activePlayerId = selectedPlayer?.id || hoveredPlayer?.id || null;
 
@@ -22,6 +23,44 @@ export default function PitchCanvas({
   const activeShot = selectedShot || shots[0] || null;
 
   const getPlayer = (id) => startingXI.find((p) => p.id === id);
+
+  // Helper to extract proper full surname/display name without chopping compound names
+  const getPlayerDisplayName = (fullName = "") => {
+    if (!fullName) return "";
+    if (fullName.startsWith("Van ") || fullName.startsWith("van ")) return fullName;
+    if (fullName.startsWith("Mac ") || fullName.startsWith("Mc ")) return fullName;
+    const parts = fullName.split(" ");
+    if (parts.length > 2) {
+      const secondToLast = parts[parts.length - 2].toLowerCase();
+      if (secondToLast === "van" || secondToLast === "mac" || secondToLast === "mc") {
+        return `${parts[parts.length - 2]} ${parts[parts.length - 1]}`;
+      }
+    }
+    return parts[parts.length - 1];
+  };
+
+  // Helper to produce clean concise tactical position label
+  const getShortPos = (pos = "") => {
+    if (!pos) return "";
+    return pos.split("/")[0].replace(/\(.*\)/, "").trim();
+  };
+
+  // Smart placement to ensure player info pills never overlap pass lines or pass volume badges
+  const getPlayerLabelPlacement = (player, radius) => {
+    // Mac Allister (#10) and Endo (#3) have heavy pass links directly below them (badge 34) -> place label ABOVE
+    // Players near the bottom touchline (y > 61) -> place label ABOVE
+    const placeAbove =
+      player.id === "macallister" ||
+      player.id === "endo" ||
+      player.y > 61;
+
+    const capsuleHeight = 3.2;
+    const capsuleY = placeAbove
+      ? player.y - radius - capsuleHeight - 0.9
+      : player.y + radius + 1.2;
+
+    return { x: player.x, y: capsuleY, placeAbove };
+  };
 
   const modeLabel =
     overlayMode === "pass"
@@ -59,20 +98,36 @@ export default function PitchCanvas({
           {/* Right Action Tools */}
           <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             {overlayMode === "pass" && (
-              <button
-                type="button"
-                onClick={() => setShowChannels(!showChannels)}
-                className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
-                  showChannels
-                    ? "bg-[#1A1A1A] text-white border-white/20"
-                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                }`}
-                title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
-              >
-                <Layers className="w-3 h-3 text-[#FF2636]" />
-                <span className="hidden sm:inline">5 Tactical Corridors</span>
-                <span className="sm:hidden">Corridors</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowChannels(!showChannels)}
+                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                    showChannels
+                      ? "bg-[#1A1A1A] text-white border-white/20"
+                      : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                  }`}
+                  title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
+                >
+                  <Layers className="w-3 h-3 text-[#FF2636]" />
+                  <span className="hidden sm:inline">5 Tactical Corridors</span>
+                  <span className="sm:hidden">Corridors</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPillMode(pillMode === "pills" ? "minimal" : "pills")}
+                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                    pillMode === "pills"
+                      ? "bg-[#1A1A1A] text-white border-white/20"
+                      : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                  }`}
+                  title="Toggle between sleek glass pills and minimal labels"
+                >
+                  <Sparkles className="w-3 h-3 text-[#FF2636]" />
+                  <span>{pillMode === "pills" ? "Glass Pills" : "Minimal Labels"}</span>
+                </button>
+              </>
             )}
 
             {activeMatch?.expectedShape && (
@@ -228,12 +283,12 @@ export default function PitchCanvas({
               {/* Right Half-Space / Right Wing boundary */}
               <line x1="2" y1="53.2" x2="103" y2="53.2" />
 
-              {/* Channel Watermark Labels */}
-              <text x="3.5" y="13.6" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">LEFT FLANK</text>
-              <text x="3.5" y="26.4" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">LEFT HALF-SPACE</text>
-              <text x="3.5" y="39.2" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">CENTRAL CORRIDOR</text>
-              <text x="3.5" y="52.0" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">RIGHT HALF-SPACE</text>
-              <text x="3.5" y="64.8" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">RIGHT FLANK</text>
+              {/* Channel Watermark Labels - Centered Vertically in Corridors */}
+              <text x="3.5" y="8.4" fill="#8E8E93" fillOpacity="0.25" fontSize="1.3" fontWeight="600" letterSpacing="0.08">LEFT FLANK</text>
+              <text x="3.5" y="21.2" fill="#8E8E93" fillOpacity="0.25" fontSize="1.3" fontWeight="600" letterSpacing="0.08">LEFT HALF-SPACE</text>
+              <text x="3.5" y="29.0" fill="#8E8E93" fillOpacity="0.25" fontSize="1.3" fontWeight="600" letterSpacing="0.08">CENTRAL CORRIDOR</text>
+              <text x="3.5" y="47.0" fill="#8E8E93" fillOpacity="0.25" fontSize="1.3" fontWeight="600" letterSpacing="0.08">RIGHT HALF-SPACE</text>
+              <text x="3.5" y="60.0" fill="#8E8E93" fillOpacity="0.25" fontSize="1.3" fontWeight="600" letterSpacing="0.08">RIGHT FLANK</text>
             </g>
           )}
 
@@ -406,51 +461,20 @@ export default function PitchCanvas({
                         strokeLinejoin="round"
                       />
                     )}
-
-                    {/* Midpoint Pass Volume Badge (for high-volume or hovered/connected combinations) */}
-                    {(link.count >= 25 || isConnected || isHovered) && !isDimmed && (
-                      <g className="pointer-events-none select-none">
-                        <rect
-                          x={mx - 3.2}
-                          y={my - 1.8}
-                          width="6.4"
-                          height="3.6"
-                          rx="1.8"
-                          fill="#0D0E12"
-                          fillOpacity="0.94"
-                          stroke={isConnected || isHovered ? "#FF2636" : "rgba(255,255,255,0.18)"}
-                          strokeWidth="0.3"
-                        />
-                        <text
-                          x={mx}
-                          y={my + 0.75}
-                          textAnchor="middle"
-                          fill={isConnected || isHovered ? "#FF2636" : "#FFFFFF"}
-                          fontSize="1.6"
-                          fontWeight="700"
-                          className="tabular-nums font-mono"
-                        >
-                          {link.count}
-                        </text>
-                      </g>
-                    )}
                   </g>
                 );
               })}
 
-              {/* Player Node Crest Badges & Tactical Name Capsules */}
+              {/* ═══════ LAYER 2 & 3: PLAYER NODES & TACTICAL LABELS ═══════ */}
               {startingXI.map((player) => {
                 const isActive = activePlayerId === player.id;
                 const radius = getNodeRadius(player.touches);
 
-                // Smart capsule placement: above node if player is positioned near bottom boundary
-                const isNearBottom = player.y > 51;
-                const capsuleY = isNearBottom
-                  ? player.y - radius - 4.4
-                  : player.y + radius + 1.4;
-
-                const lastName = player.name.split(" ").pop();
-                const capsuleWidth = Math.max(lastName.length * 1.35 + 4.8, 14);
+                const placement = getPlayerLabelPlacement(player, radius);
+                const displayName = getPlayerDisplayName(player.name);
+                const shortPos = getShortPos(player.pos);
+                const fullLabel = `${displayName} • ${shortPos}`;
+                const capsuleWidth = Math.max(fullLabel.length * 0.96 + 3.2, 11);
 
                 return (
                   <g
@@ -524,36 +548,121 @@ export default function PitchCanvas({
                       {player.number}
                     </text>
 
-                    {/* Frosted Glass Name & Position Capsule */}
-                    <g className="pointer-events-none select-none">
-                      <rect
-                        x={player.x - capsuleWidth / 2}
-                        y={capsuleY}
-                        width={capsuleWidth}
-                        height="4.0"
-                        rx="2.0"
-                        fill="#0D0E12"
-                        fillOpacity="0.92"
-                        stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.12)"}
-                        strokeWidth="0.25"
-                      />
-                      <text
-                        x={player.x}
-                        y={capsuleY + 2.55}
-                        textAnchor="middle"
-                        fontSize="1.45"
-                        fontWeight="600"
-                        fill="#FFFFFF"
-                      >
-                        {lastName}{" "}
-                        <tspan fill="#8E8E93" fontSize="1.15" fontWeight="500">
-                          • {player.pos}
-                        </tspan>
-                      </text>
-                    </g>
+                    {/* Tactical Info Pill or Clean Text Label */}
+                    {pillMode === "pills" ? (
+                      /* Refined Sleek Glass Capsule (Semi-translucent, non-occluding) */
+                      <g className="pointer-events-none select-none" filter="url(#nodeDropShadow)">
+                        <rect
+                          x={player.x - capsuleWidth / 2}
+                          y={placement.y}
+                          width={capsuleWidth}
+                          height={3.2}
+                          rx={1.6}
+                          fill={isActive ? "rgba(45, 10, 14, 0.88)" : "rgba(10, 14, 18, 0.76)"}
+                          stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.18)"}
+                          strokeWidth="0.25"
+                        />
+                        <text
+                          x={player.x}
+                          y={placement.y + 2.15}
+                          textAnchor="middle"
+                          fontSize="1.3"
+                          fontWeight="600"
+                          fill="#FFFFFF"
+                          className="tracking-[-0.01em]"
+                        >
+                          {displayName}{" "}
+                          <tspan fill="#8E8E93" fontSize="1.0" fontWeight="500">
+                            • {shortPos}
+                          </tspan>
+                        </text>
+                      </g>
+                    ) : (
+                      /* Clean Minimal Pitch Text (Direct names on pitch) */
+                      <g className="pointer-events-none select-none">
+                        <text
+                          x={player.x}
+                          y={placement.y + 2.15}
+                          textAnchor="middle"
+                          fontSize="1.45"
+                          fontWeight="700"
+                          fill="#FFFFFF"
+                          filter="drop-shadow(0 1px 2px rgba(0,0,0,0.95))"
+                          className="tracking-[-0.01em]"
+                        >
+                          {displayName}
+                        </text>
+                      </g>
+                    )}
                   </g>
                 );
               })}
+
+              {/* ═══════ LAYER 4: DEDICATED FOREGROUND PASS VOLUME BADGES (NEVER OCCLUDED) ═══════ */}
+              <g id="pass-volume-badges-layer">
+                {passLinks.map((link, idx) => {
+                  const p1 = getPlayer(link.from);
+                  const p2 = getPlayer(link.to);
+                  if (!p1 || !p2) return null;
+
+                  const isConnected =
+                    activePlayerId &&
+                    (link.from === activePlayerId || link.to === activePlayerId);
+                  const isDimmed = activePlayerId && !isConnected;
+                  const isHovered = hoveredLink === `${link.from}-${link.to}`;
+
+                  // Show badge for high volume (count >= 25) or when focused/hovered
+                  if (!((link.count >= 25 || isConnected || isHovered) && !isDimmed)) {
+                    return null;
+                  }
+
+                  // Smart positioning along link vector to guarantee clearance from player capsules
+                  let t = 0.5;
+                  if (
+                    (link.from === "gravenberch" && link.to === "macallister") ||
+                    (link.from === "macallister" && link.to === "gravenberch") ||
+                    (link.from === "endo" && link.to === "gravenberch") ||
+                    (link.from === "gravenberch" && link.to === "endo")
+                  ) {
+                    t = 0.44;
+                  }
+
+                  const bx = p1.x + (p2.x - p1.x) * t;
+                  const by = p1.y + (p2.y - p1.y) * t;
+                  const badgeW = link.count >= 100 ? 7.2 : 6.4;
+
+                  return (
+                    <g
+                      key={`top-badge-${idx}`}
+                      className="pointer-events-none select-none transition-all duration-200"
+                      filter="url(#nodeDropShadow)"
+                    >
+                      <rect
+                        x={bx - badgeW / 2}
+                        y={by - 1.8}
+                        width={badgeW}
+                        height="3.6"
+                        rx="1.8"
+                        fill={isConnected || isHovered ? "#240406" : "#0D0E12"}
+                        fillOpacity="0.96"
+                        stroke={isConnected || isHovered ? "#FF2636" : "rgba(255,255,255,0.24)"}
+                        strokeWidth={isConnected || isHovered ? "0.45" : "0.3"}
+                      />
+                      <text
+                        x={bx}
+                        y={by + 0.72}
+                        textAnchor="middle"
+                        fill={isConnected || isHovered ? "#FF2636" : "#FFFFFF"}
+                        fontSize="1.6"
+                        fontWeight="700"
+                        className="tabular-nums font-mono"
+                      >
+                        {link.count}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
             </g>
           )}
 
