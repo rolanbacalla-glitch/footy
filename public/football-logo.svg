@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <!-- Dark Glass Shield Linear Gradient -->
+    <linearGradient id="shieldBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#1E232B" stopOpacity="0.95" />
+      <stop offset="50%" stopColor="#12161D" stopOpacity="0.98" />
+      <stop offset="100%" stopColor="#0B0E14" stopOpacity="1" />
+    </linearGradient>
+
+    <!-- Crimson Pulse Glow -->
+    <linearGradient id="crimsonAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FF4D5A" />
+      <stop offset="100%" stopColor="#FF2636" />
+    </linearGradient>
+
+    <!-- Subtle Bevel Border -->
+    <linearGradient id="shieldBorder" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.35" />
+      <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.1" />
+      <stop offset="100%" stopColor="#FF2636" stopOpacity="0.4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Protective Tactical Shield Crest -->
+  <path
+    d="M24 3.5 L40 9.5 V22 C40 32.5 33 40.5 24 44.5 C15 40.5 8 32.5 8 22 V9.5 L24 3.5 Z"
+    fill="url(#shieldBgGrad)"
+    stroke="url(#shieldBorder)"
+    strokeWidth="1.5"
+    strokeLinejoin="round"
+  />
+
+  <!-- Subtle Tactical Crosshairs & Radar Grid -->
+  <path
+    d="M24 7 V12 M24 36 V41 M11 24 H16 M32 24 H37"
+    stroke="#FFFFFF"
+    strokeOpacity="0.18"
+    strokeWidth="1"
+    strokeLinecap="round"
+  />
+
+  <!-- Modern Geometric Telstar Football Icon at Center -->
+  <!-- Outer Ball Seam Circle -->
+  <circle
+    cx="24"
+    cy="24"
+    r="10"
+    fill="#0F141C"
+    stroke="#FFFFFF"
+    strokeOpacity="0.4"
+    strokeWidth="1.2"
+  />
+
+  <!-- Center Pentagon (Tactical Crimson Core) -->
+  <!-- Calculated regular pentagon centered at (24, 24) with radius 3.8 -->
+  <polygon
+    points="24,20.2 27.6,22.8 26.2,27.1 21.8,27.1 20.4,22.8"
+    fill="url(#crimsonAccent)"
+  />
+
+  <!-- Radiating Ball Seams connecting Center Pentagon to Perimeter -->
+  <path
+    d="
+      M24 20.2 L24 14
+      M27.6 22.8 L33.5 20.9
+      M26.2 27.1 L30.1 33.2
+      M21.8 27.1 L17.9 33.2
+      M20.4 22.8 L14.5 20.9
+    "
+    stroke="#FFFFFF"
+    strokeOpacity="0.75"
+    strokeWidth="1.1"
+    strokeLinecap="round"
+  />
+
+  <!-- Tactical Data Spark Dot (Top Right) -->
+  <circle cx="35" cy="11" r="1.5" fill="#FF2636" />
+</svg>
