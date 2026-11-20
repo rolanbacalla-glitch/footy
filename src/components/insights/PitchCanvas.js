@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, RotateCcw } from "lucide-react";
+import { Sparkles, RotateCcw, Compass, Layers } from "lucide-react";
 
 export default function PitchCanvas({
   activeMatch,
@@ -10,7 +10,9 @@ export default function PitchCanvas({
   setSelectedPlayer,
 }) {
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
+  const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
+  const [showChannels, setShowChannels] = useState(true);
 
   const activePlayerId = selectedPlayer?.id || hoveredPlayer?.id || null;
 
@@ -23,58 +25,87 @@ export default function PitchCanvas({
 
   const modeLabel =
     overlayMode === "pass"
-      ? "Pass Network"
+      ? "Tactical Pass Network"
       : overlayMode === "heat"
         ? "Attacking Heatmap"
         : "Shots & xG Map";
 
+  // Helper to compute node radius based on touch involvement
+  const getNodeRadius = (touches = 50) => {
+    return 2.3 + Math.min(Math.max((touches - 40) / 55, 0), 1) * 1.25;
+  };
+
   return (
-    <div className="apple-card relative w-full h-full min-h-[380px] sm:min-h-[440px] flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none">
-      {/* Recessed Stadium Pitch Backdrop Glow */}
+    <div className="apple-card relative w-full h-full min-h-[400px] sm:min-h-[460px] flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none bg-[#0D120F] border border-white/[0.08]">
+      {/* Stadium Pitch Atmospheric Vignette */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(14,34,24,0.65)_0%,rgba(11,25,18,0.92)_62%,rgba(18,18,18,1)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(16,36,26,0.55)_0%,rgba(9,18,13,0.92)_70%,rgba(6,10,8,0.98)_100%)]"
       />
 
-      {/* Top Floating Liquid Glass HUD Bar */}
+      {/* Top Floating Glass HUD Bar */}
       <div className="relative flex flex-col gap-2 z-10 mb-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-full self-start sm:self-auto">
-            <span className="w-2 h-2 rounded-full bg-[#30D158] animate-pulse shrink-0" />
+          {/* Match & Overlay Title Pill */}
+          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-full self-start sm:self-auto bg-[#121212]/90 border border-white/[0.08]">
+            <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-pulse shrink-0 shadow-[0_0_8px_#FF2636]" />
             <span className="text-[11px] sm:text-xs font-semibold text-white tracking-[-0.01em]">
               {activeMatch?.title}
-              <span className="text-[#EBEBF5]/40 mx-1.5">•</span>
-              <span className="text-[#00DAC3]">{modeLabel}</span>
+              <span className="text-[#8E8E93] mx-1.5">•</span>
+              <span className="text-[#FF2636] font-medium">{modeLabel}</span>
             </span>
           </div>
 
+          {/* Right Action Tools */}
           <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+            {overlayMode === "pass" && (
+              <button
+                type="button"
+                onClick={() => setShowChannels(!showChannels)}
+                className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                  showChannels
+                    ? "bg-[#1A1A1A] text-white border-white/20"
+                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                }`}
+                title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
+              >
+                <Layers className="w-3 h-3 text-[#FF2636]" />
+                <span className="hidden sm:inline">5 Tactical Corridors</span>
+                <span className="sm:hidden">Corridors</span>
+              </button>
+            )}
+
             {activeMatch?.expectedShape && (
-              <div className="hidden md:flex items-center text-[11px] font-medium tabular-nums text-[#00DAC3] px-3 py-1 rounded-full bg-[#00DAC3]/12 border border-[#00DAC3]/25">
-                Shape: {activeMatch.expectedShape}
+              <div className="hidden lg:flex items-center text-[11px] font-medium tabular-nums text-white/90 px-3 py-1 rounded-full bg-[#181818] border border-white/[0.08]">
+                Shape: <span className="text-[#FF2636] ml-1 font-semibold">{activeMatch.expectedShape}</span>
               </div>
             )}
-            <div className="apple-glass-hud text-[11px] font-medium text-[#EBEBF5]/75 px-3 py-1 rounded-full">
-              The Kop: <span className="text-[#FF453A] font-semibold">Right ➔</span>
+
+            {/* The Kop Direction Indicator */}
+            <div className="apple-glass-hud text-[11px] font-medium text-white/85 px-3 py-1 rounded-full flex items-center gap-1.5 bg-[#121212]/90 border border-white/[0.08]">
+              <Compass className="w-3 h-3 text-[#FF2636]" />
+              The Kop: <span className="text-[#FF2636] font-bold">Right ➔</span>
             </div>
+
             {selectedPlayer && (
               <button
+                type="button"
                 onClick={() => setSelectedPlayer(null)}
-                className="min-h-[30px] flex items-center gap-1 text-[11px] font-semibold text-[#00DAC3] hover:text-white cursor-pointer bg-[#00DAC3]/14 hover:bg-[#00DAC3]/25 px-2.5 py-1 rounded-full border border-[#00DAC3]/30 transition-colors"
+                className="min-h-[28px] flex items-center gap-1 text-[11px] font-semibold text-white bg-[#E31B23] hover:bg-[#FF2636] px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(227,27,35,0.4)] transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
-                Reset
+                Reset Focus
               </button>
             )}
           </div>
         </div>
 
-        {/* Tactical Battle Brief Pill */}
+        {/* Tactical Battle Brief */}
         {activeMatch?.keyTacticalBattle && (
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-2xl text-[11px] text-[#EBEBF5]/72">
-            <Sparkles className="w-3.5 h-3.5 text-[#FFD60A] shrink-0" strokeWidth={2} />
-            <span className="font-semibold text-white shrink-0">Key Tactical Battle:</span>
-            <span className="truncate text-[#00DAC3] font-medium">
+          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-2xl text-[11px] text-[#8E8E93] bg-[#121212]/80 border border-white/[0.06]">
+            <Sparkles className="w-3.5 h-3.5 text-[#F1B82D] shrink-0" strokeWidth={2} />
+            <span className="font-semibold text-white shrink-0">Tactical Focus:</span>
+            <span className="truncate text-white/80 font-medium">
               {activeMatch.keyTacticalBattle}
             </span>
           </div>
@@ -82,124 +113,201 @@ export default function PitchCanvas({
       </div>
 
       {/* SVG Pitch Canvas Area */}
-      <div className="relative z-10 flex-1 w-full flex items-center justify-center overflow-x-auto">
+      <div className="relative z-10 flex-1 w-full flex items-center justify-center overflow-x-auto py-1">
         <svg
           role="img"
           aria-label={`Anfield tactical pitch showing ${modeLabel} for ${activeMatch?.title || "Liverpool FC"}`}
           viewBox="0 0 105 68"
-          className="w-full h-auto min-w-[320px] max-h-[480px] object-contain"
+          className="w-full h-auto min-w-[320px] max-h-[500px] object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.65)]"
         >
           <defs>
-            <linearGradient id="appleTurfGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0B1912" />
-              <stop offset="50%" stopColor="#10251B" />
-              <stop offset="100%" stopColor="#0B1912" />
+            {/* Authentic Pitch Turf Gradient */}
+            <linearGradient id="anfieldTurfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#08140E" />
+              <stop offset="50%" stopColor="#0B1C13" />
+              <stop offset="100%" stopColor="#07120C" />
             </linearGradient>
 
+            {/* Glowing Chalk Filter */}
+            <filter id="chalkGlow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="0" stdDeviation="0.25" floodColor="#FFFFFF" floodOpacity="0.35" />
+            </filter>
+
+            {/* Active Player Halo */}
+            <filter id="activePlayerHalo" x="-40%" y="-40%" width="180%" height="180%">
+              <feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="#FF2636" floodOpacity="0.9" />
+            </filter>
+
+            {/* Standard Node Drop Shadow */}
+            <filter id="nodeDropShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0.8" stdDeviation="0.9" floodColor="#000000" floodOpacity="0.8" />
+            </filter>
+
+            {/* Pass Beam Electric Glow */}
+            <filter id="passBeamGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="0.8" floodColor="#FF2636" floodOpacity="0.85" />
+            </filter>
+
+            {/* Player Crest Radial Gradient (Anfield Red) */}
+            <radialGradient id="playerBadgeRed" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#FF3848" />
+              <stop offset="50%" stopColor="#E31B23" />
+              <stop offset="100%" stopColor="#8A0713" />
+            </radialGradient>
+
+            {/* Active Highlight Player Gradient */}
+            <radialGradient id="playerBadgeActive" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="#FF6B78" />
+              <stop offset="50%" stopColor="#FF2636" />
+              <stop offset="100%" stopColor="#A80916" />
+            </radialGradient>
+
+            {/* Heatmap Gradients */}
             <radialGradient id="heatKopRight" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E03535" stopOpacity="0.82" />
+              <stop offset="0%" stopColor="#E31B23" stopOpacity="0.85" />
               <stop offset="42%" stopColor="#FF9F0A" stopOpacity="0.48" />
-              <stop offset="78%" stopColor="#00BFA5" stopOpacity="0.16" />
+              <stop offset="80%" stopColor="#FF2636" stopOpacity="0.12" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />
             </radialGradient>
 
             <radialGradient id="heatKopLeft" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E03535" stopOpacity="0.68" />
+              <stop offset="0%" stopColor="#E31B23" stopOpacity="0.75" />
               <stop offset="52%" stopColor="#FF9F0A" stopOpacity="0.32" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />
             </radialGradient>
 
             <radialGradient id="heatBoxCentre" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#E5B338" stopOpacity="0.78" />
-              <stop offset="38%" stopColor="#E03535" stopOpacity="0.56" />
-              <stop offset="80%" stopColor="#E03535" stopOpacity="0.12" />
+              <stop offset="0%" stopColor="#F1B82D" stopOpacity="0.85" />
+              <stop offset="38%" stopColor="#E31B23" stopOpacity="0.62" />
+              <stop offset="80%" stopColor="#E31B23" stopOpacity="0.14" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />
             </radialGradient>
-
-            <filter id="nodeShadow" x="-40%" y="-40%" width="180%" height="180%">
-              <feDropShadow dx="0" dy="0.8" stdDeviation="1.1" floodColor="#07080B" floodOpacity="0.6" />
-            </filter>
-            <filter id="activeNodeHalo" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="0" stdDeviation="1.8" floodColor="#00BFA5" floodOpacity="0.75" />
-            </filter>
           </defs>
 
-          {/* Turf Base */}
+          {/* 1. Base Pitch Turf */}
           <rect
             x="0"
             y="0"
             width="105"
             height="68"
-            fill="url(#appleTurfGrad)"
-            rx="2.5"
+            fill="url(#anfieldTurfGrad)"
+            rx="3"
             stroke="rgba(255,255,255,0.08)"
-            strokeWidth="0.35"
+            strokeWidth="0.4"
           />
 
-          {/* Subtle Stadium Mow Stripes */}
-          {[...Array(9)].map((_, i) => (
+          {/* 2. Alternating Premier League Mowing Bands */}
+          {[...Array(10)].map((_, i) => (
             <rect
-              key={i}
-              x={i * 11.66}
+              key={`mow-${i}`}
+              x={i * 10.5}
               y="0"
-              width="5.83"
+              width="5.25"
               height="68"
               fill="#FFFFFF"
-              fillOpacity="0.018"
+              fillOpacity={i % 2 === 0 ? "0.022" : "0.008"}
             />
           ))}
 
-          {/* Authentic Stadium Chalk Pitch Lines */}
-          <g stroke="#FFFFFF" strokeOpacity="0.22" strokeWidth="0.45" fill="none">
-            <rect x="2" y="2" width="101" height="64" rx="1" />
-            <line x1="52.5" y1="2" x2="52.5" y2="66" />
-            <circle cx="52.5" cy="34" r="9.15" />
-            <circle cx="52.5" cy="34" r="0.6" fill="#00DAC3" fillOpacity="0.75" stroke="none" />
+          {/* 3. Five Tactical Vertical Corridors (UEFA / Premier League Standard) */}
+          {showChannels && (
+            <g id="tactical-channels" stroke="#FFFFFF" strokeOpacity="0.08" strokeWidth="0.25" strokeDasharray="1.2, 2.2" fill="none">
+              {/* Left Wing / Left Half-Space boundary */}
+              <line x1="2" y1="14.8" x2="103" y2="14.8" />
+              {/* Left Half-Space / Central Channel boundary */}
+              <line x1="2" y1="27.6" x2="103" y2="27.6" />
+              {/* Central Channel / Right Half-Space boundary */}
+              <line x1="2" y1="40.4" x2="103" y2="40.4" />
+              {/* Right Half-Space / Right Wing boundary */}
+              <line x1="2" y1="53.2" x2="103" y2="53.2" />
 
-            {/* Left penalty box */}
+              {/* Channel Watermark Labels */}
+              <text x="3.5" y="13.6" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">LEFT FLANK</text>
+              <text x="3.5" y="26.4" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">LEFT HALF-SPACE</text>
+              <text x="3.5" y="39.2" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">CENTRAL CORRIDOR</text>
+              <text x="3.5" y="52.0" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">RIGHT HALF-SPACE</text>
+              <text x="3.5" y="64.8" fill="#8E8E93" fillOpacity="0.32" fontSize="1.4" fontWeight="600" letterSpacing="0.08">RIGHT FLANK</text>
+            </g>
+          )}
+
+          {/* 4. Authentic Stadium Chalk Markings */}
+          <g stroke="#FFFFFF" strokeOpacity="0.26" strokeWidth="0.4" fill="none" filter="url(#chalkGlow)">
+            {/* Outer Pitch Boundary */}
+            <rect x="2" y="2" width="101" height="64" rx="0.8" />
+
+            {/* Halfway Line */}
+            <line x1="52.5" y1="2" x2="52.5" y2="66" />
+
+            {/* Centre Circle & Spot */}
+            <circle cx="52.5" cy="34" r="9.15" />
+            <circle cx="52.5" cy="34" r="0.55" fill="#FFFFFF" fillOpacity="0.8" stroke="none" />
+
+            {/* Left Penalty Box (Anfield Road End) */}
             <rect x="2" y="13.84" width="16.5" height="40.32" />
             <rect x="2" y="24.84" width="5.5" height="18.32" />
             <path d="M 18.5 28.5 A 9.15 9.15 0 0 1 18.5 39.5" />
-            <circle cx="11" cy="34" r="0.55" fill="#FFFFFF" fillOpacity="0.45" stroke="none" />
+            <circle cx="11" cy="34" r="0.5" fill="#FFFFFF" fillOpacity="0.7" stroke="none" />
 
-            {/* The Kop penalty box */}
+            {/* Right Penalty Box (The Kop End) */}
             <rect x="86.5" y="13.84" width="16.5" height="40.32" />
             <rect x="97.5" y="24.84" width="5.5" height="18.32" />
             <path d="M 86.5 28.5 A 9.15 9.15 0 0 0 86.5 39.5" />
-            <circle cx="94" cy="34" r="0.55" fill="#FFFFFF" fillOpacity="0.45" stroke="none" />
+            <circle cx="94" cy="34" r="0.5" fill="#FFFFFF" fillOpacity="0.7" stroke="none" />
 
-            {/* Goals */}
-            <rect x="0.5" y="30.34" width="1.5" height="7.32" strokeOpacity="0.35" />
-            <rect x="103" y="30.34" width="1.5" height="7.32" strokeOpacity="0.35" />
+            {/* 4 Corner Arcs */}
+            <path d="M 2 3.5 A 1.5 1.5 0 0 1 3.5 2" />
+            <path d="M 2 64.5 A 1.5 1.5 0 0 0 3.5 66" />
+            <path d="M 101.5 2 A 1.5 1.5 0 0 1 103 3.5" />
+            <path d="M 101.5 66 A 1.5 1.5 0 0 0 103 64.5" />
+
+            {/* Goal Net Outlines */}
+            <rect x="0.5" y="30.34" width="1.5" height="7.32" strokeOpacity="0.4" />
+            <rect x="103" y="30.34" width="1.5" height="7.32" strokeOpacity="0.4" />
           </g>
 
-          {/* Subtle Stand Labels */}
+          {/* 5. Stand Identity & Tactical Direction */}
           <text
             x="6.5"
-            y="7.5"
-            fill="#EBEBF5"
-            fillOpacity="0.28"
-            fontSize="2.4"
-            fontWeight="600"
-            letterSpacing="0.18"
+            y="6.2"
+            fill="#8E8E93"
+            fillOpacity="0.55"
+            fontSize="2.1"
+            fontWeight="700"
+            letterSpacing="0.14"
           >
             ANFIELD ROAD STAND
           </text>
-          <text
-            x="76.5"
-            y="7.5"
-            fill="#FF453A"
-            fillOpacity="0.55"
-            fontSize="2.4"
-            fontWeight="600"
-            letterSpacing="0.18"
-          >
-            THE KOP STAND ➔
-          </text>
 
-          {/* ═══════ OVERLAY 1: PASS NETWORK ═══════ */}
+          {/* Attacking Direction HUD Pill */}
+          <g>
+            <rect
+              x="69"
+              y="3.2"
+              width="32"
+              height="4.2"
+              rx="2.1"
+              fill="#121212"
+              fillOpacity="0.88"
+              stroke="rgba(227,27,35,0.4)"
+              strokeWidth="0.25"
+            />
+            <text
+              x="85"
+              y="6.0"
+              textAnchor="middle"
+              fill="#FF2636"
+              fontSize="1.8"
+              fontWeight="700"
+              letterSpacing="0.06"
+            >
+              THE KOP • ATTACKING ➔
+            </text>
+          </g>
+
+          {/* ═══════ OVERLAY 1: TACTICAL PASS NETWORK ═══════ */}
           {overlayMode === "pass" && (
             <g id="pass-network-layer">
+              {/* Pass Connections (Vectors) */}
               {passLinks.map((link, idx) => {
                 const p1 = getPlayer(link.from);
                 const p2 = getPlayer(link.to);
@@ -208,27 +316,125 @@ export default function PitchCanvas({
                 const isConnected =
                   activePlayerId === link.from || activePlayerId === link.to;
                 const isDimmed = activePlayerId && !isConnected;
-                const baseStroke = Math.min(Math.max(link.count / 8, 0.55), 3.0);
+
+                // Vector geometry: offset endpoints to meet node edges cleanly
+                const r1 = getNodeRadius(p1.touches);
+                const r2 = getNodeRadius(p2.touches);
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const ux = dx / dist;
+                const uy = dy / dist;
+
+                const x1 = p1.x + ux * (r1 + 0.35);
+                const y1 = p1.y + uy * (r1 + 0.35);
+                const x2 = p2.x - ux * (r2 + 0.35);
+                const y2 = p2.y - uy * (r2 + 0.35);
+
+                const mx = (x1 + x2) / 2;
+                const my = (y1 + y2) / 2;
+
+                // Scaled stroke width based on pass count
+                const baseStroke = Math.min(Math.max((link.count - 10) / 12 * 0.9 + 0.65, 0.7), 2.5);
+                const strokeWidth = isConnected ? baseStroke * 1.35 : baseStroke;
+
+                // Opacity based on pass frequency
+                const defaultOpacity = Math.min(0.42 + link.count / 65, 0.82);
+                const opacity = isDimmed ? 0.06 : isConnected ? 0.98 : defaultOpacity;
+
+                const isHovered = hoveredLink === `${link.from}-${link.to}`;
 
                 return (
-                  <line
-                    key={idx}
-                    x1={p1.x}
-                    y1={p1.y}
-                    x2={p2.x}
-                    y2={p2.y}
-                    stroke={isConnected ? "#00DAC3" : "#FF453A"}
-                    strokeOpacity={isDimmed ? 0.08 : isConnected ? 0.92 : 0.44}
-                    strokeWidth={isConnected ? baseStroke * 1.45 : baseStroke}
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
+                  <g
+                    key={`link-${idx}`}
+                    className="cursor-pointer transition-all duration-200"
+                    onMouseEnter={() => setHoveredLink(`${link.from}-${link.to}`)}
+                    onMouseLeave={() => setHoveredLink(null)}
+                  >
+                    {/* Underlying Glow Line when Connected */}
+                    {isConnected && (
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke="#FF2636"
+                        strokeOpacity="0.45"
+                        strokeWidth={strokeWidth + 1.8}
+                        strokeLinecap="round"
+                        filter="url(#passBeamGlow)"
+                      />
+                    )}
+
+                    {/* Main Dynamic Pass Vector */}
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={isConnected ? "#FF2636" : "#E31B23"}
+                      strokeOpacity={opacity}
+                      strokeWidth={strokeWidth}
+                      strokeLinecap="round"
+                    />
+
+                    {/* Directional Chevron at 62% along the vector */}
+                    {dist > 15 && !isDimmed && (
+                      <path
+                        d={`M ${x1 + ux * (dist * 0.62) - uy * 1.0} ${y1 + uy * (dist * 0.62) + ux * 1.0} L ${x1 + ux * (dist * 0.62) + ux * 1.2} ${y1 + uy * (dist * 0.62) + uy * 1.2} L ${x1 + ux * (dist * 0.62) + uy * 1.0} ${y1 + uy * (dist * 0.62) - ux * 1.0}`}
+                        fill="none"
+                        stroke={isConnected ? "#FFFFFF" : "#FF3848"}
+                        strokeOpacity={isConnected ? 0.95 : 0.65}
+                        strokeWidth="0.45"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* Midpoint Pass Volume Badge (for high-volume or hovered/connected combinations) */}
+                    {(link.count >= 25 || isConnected || isHovered) && !isDimmed && (
+                      <g className="pointer-events-none select-none">
+                        <rect
+                          x={mx - 3.2}
+                          y={my - 1.8}
+                          width="6.4"
+                          height="3.6"
+                          rx="1.8"
+                          fill="#0D0E12"
+                          fillOpacity="0.94"
+                          stroke={isConnected || isHovered ? "#FF2636" : "rgba(255,255,255,0.18)"}
+                          strokeWidth="0.3"
+                        />
+                        <text
+                          x={mx}
+                          y={my + 0.75}
+                          textAnchor="middle"
+                          fill={isConnected || isHovered ? "#FF2636" : "#FFFFFF"}
+                          fontSize="1.6"
+                          fontWeight="700"
+                          className="tabular-nums font-mono"
+                        >
+                          {link.count}
+                        </text>
+                      </g>
+                    )}
+                  </g>
                 );
               })}
 
+              {/* Player Node Crest Badges & Tactical Name Capsules */}
               {startingXI.map((player) => {
                 const isActive = activePlayerId === player.id;
-                const radius = 2.2 + (player.touches / 100) * 1.35;
+                const radius = getNodeRadius(player.touches);
+
+                // Smart capsule placement: above node if player is positioned near bottom boundary
+                const isNearBottom = player.y > 51;
+                const capsuleY = isNearBottom
+                  ? player.y - radius - 4.4
+                  : player.y + radius + 1.4;
+
+                const lastName = player.name.split(" ").pop();
+                const capsuleWidth = Math.max(lastName.length * 1.35 + 4.8, 14);
 
                 return (
                   <g
@@ -240,57 +446,95 @@ export default function PitchCanvas({
                     onMouseEnter={() => setHoveredPlayer(player)}
                     onMouseLeave={() => setHoveredPlayer(null)}
                   >
+                    {/* Outer Concentric Touch Halo (Touch Volume Metric) */}
+                    <circle
+                      cx={player.x}
+                      cy={player.y}
+                      r={radius + 1.1}
+                      fill="none"
+                      stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.24)"}
+                      strokeWidth="0.32"
+                      strokeDasharray="1.2, 1.2"
+                      className={isActive ? "animate-spin" : ""}
+                      style={{
+                        transformOrigin: `${player.x}px ${player.y}px`,
+                        animationDuration: "10s",
+                      }}
+                    />
+
+                    {/* Active Spotlight Animated Halo */}
                     {isActive && (
                       <circle
                         cx={player.x}
                         cy={player.y}
-                        r={radius + 2.3}
+                        r={radius + 2.4}
                         fill="none"
-                        stroke="#00DAC3"
-                        strokeWidth="0.55"
-                        strokeDasharray="1.5, 1.1"
-                        className="animate-spin"
-                        style={{
-                          transformOrigin: `${player.x}px ${player.y}px`,
-                          animationDuration: "8s",
-                        }}
+                        stroke="#FF2636"
+                        strokeWidth="0.45"
+                        strokeDasharray="1.5, 1.2"
+                        className="animate-pulse"
                       />
                     )}
 
+                    {/* Core Anfield Crest Circle Badge */}
                     <circle
                       cx={player.x}
                       cy={player.y}
                       r={radius}
-                      fill={isActive ? "#00DAC3" : "#D70015"}
+                      fill={isActive ? "url(#playerBadgeActive)" : "url(#playerBadgeRed)"}
                       stroke="#FFFFFF"
-                      strokeOpacity={isActive ? 1 : 0.9}
-                      strokeWidth={isActive ? "0.75" : "0.45"}
-                      filter={isActive ? "url(#activeNodeHalo)" : "url(#nodeShadow)"}
+                      strokeOpacity="0.95"
+                      strokeWidth={isActive ? "0.65" : "0.45"}
+                      filter={isActive ? "url(#activePlayerHalo)" : "url(#nodeDropShadow)"}
                     />
 
+                    {/* Subtle Glass Specular Crescent */}
+                    <path
+                      d={`M ${player.x - radius * 0.75} ${player.y - radius * 0.2} A ${radius * 0.8} ${radius * 0.8} 0 0 1 ${player.x + radius * 0.75} ${player.y - radius * 0.2} A ${radius} ${radius * 0.5} 0 0 0 ${player.x - radius * 0.75} ${player.y - radius * 0.2}`}
+                      fill="#FFFFFF"
+                      fillOpacity="0.22"
+                    />
+
+                    {/* Bold Jersey Number */}
                     <text
                       x={player.x}
                       y={player.y + 0.72}
                       textAnchor="middle"
-                      fill={isActive ? "#000000" : "#FFFFFF"}
-                      fontSize="1.8"
-                      fontWeight="700"
-                      className="pointer-events-none select-none"
+                      fill="#FFFFFF"
+                      fontSize="1.85"
+                      fontWeight="800"
+                      className="pointer-events-none select-none font-mono tabular-nums"
                     >
                       {player.number}
                     </text>
 
-                    <text
-                      x={player.x}
-                      y={player.y + radius + 2.8}
-                      textAnchor="middle"
-                      fill={isActive ? "#00DAC3" : "#F5F5F7"}
-                      fontSize="1.85"
-                      fontWeight="600"
-                      className="pointer-events-none select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]"
-                    >
-                      {player.name}
-                    </text>
+                    {/* Frosted Glass Name & Position Capsule */}
+                    <g className="pointer-events-none select-none">
+                      <rect
+                        x={player.x - capsuleWidth / 2}
+                        y={capsuleY}
+                        width={capsuleWidth}
+                        height="4.0"
+                        rx="2.0"
+                        fill="#0D0E12"
+                        fillOpacity="0.92"
+                        stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.12)"}
+                        strokeWidth="0.25"
+                      />
+                      <text
+                        x={player.x}
+                        y={capsuleY + 2.55}
+                        textAnchor="middle"
+                        fontSize="1.45"
+                        fontWeight="600"
+                        fill="#FFFFFF"
+                      >
+                        {lastName}{" "}
+                        <tspan fill="#8E8E93" fontSize="1.15" fontWeight="500">
+                          • {player.pos}
+                        </tspan>
+                      </text>
+                    </g>
                   </g>
                 );
               })}
@@ -303,7 +547,7 @@ export default function PitchCanvas({
               <ellipse cx="80" cy="54" rx="16" ry="10" fill="url(#heatKopRight)" />
               <ellipse cx="76" cy="16" rx="14" ry="9" fill="url(#heatKopLeft)" />
               <circle cx="89" cy="34" r="11" fill="url(#heatBoxCentre)" />
-              <ellipse cx="48" cy="34" rx="12" ry="14" fill="#00DAC3" fillOpacity="0.12" />
+              <ellipse cx="48" cy="34" rx="12" ry="14" fill="#FF2636" fillOpacity="0.12" />
 
               <text
                 x="80"
@@ -311,9 +555,9 @@ export default function PitchCanvas({
                 textAnchor="middle"
                 fill="#FFFFFF"
                 fontSize="2.1"
-                fontWeight="600"
+                fontWeight="700"
               >
-                Half-Space Penetration
+                Half-Space Overload (Frimpong &amp; Barcola)
               </text>
               <text
                 x="76"
@@ -321,9 +565,9 @@ export default function PitchCanvas({
                 textAnchor="middle"
                 fill="#FFFFFF"
                 fontSize="2.1"
-                fontWeight="600"
+                fontWeight="700"
               >
-                Cutback Channel
+                Cutback Channel (Wirtz &amp; Kerkez)
               </text>
             </g>
           )}
@@ -348,8 +592,8 @@ export default function PitchCanvas({
                         cy={shot.y}
                         r={radius + 1.4}
                         fill="none"
-                        stroke="#00DAC3"
-                        strokeWidth="0.5"
+                        stroke="#FF2636"
+                        strokeWidth="0.55"
                         strokeDasharray="1.1, 1"
                       />
                     )}
@@ -357,13 +601,13 @@ export default function PitchCanvas({
                       cx={shot.x}
                       cy={shot.y}
                       r={radius}
-                      fill={isGoal ? "#FF453A" : "#8E8E93"}
-                      fillOpacity={isGoal ? 0.92 : 0.65}
+                      fill={isGoal ? "#FF2636" : "#8E8E93"}
+                      fillOpacity={isGoal ? 0.95 : 0.65}
                       stroke={
                         isSelectedShot
-                          ? "#00DAC3"
+                          ? "#FFFFFF"
                           : isGoal
-                            ? "#FFD60A"
+                            ? "#F1B82D"
                             : "rgba(255,255,255,0.85)"
                       }
                       strokeWidth={isSelectedShot ? "0.85" : isGoal ? "0.7" : "0.4"}
@@ -372,7 +616,7 @@ export default function PitchCanvas({
                       x={shot.x}
                       y={shot.y + radius + 2.3}
                       textAnchor="middle"
-                      fill={isSelectedShot ? "#00DAC3" : "#F5F5F7"}
+                      fill={isSelectedShot ? "#FF2636" : "#F5F5F7"}
                       fontSize="1.6"
                       fontWeight="600"
                     >
@@ -386,50 +630,55 @@ export default function PitchCanvas({
         </svg>
       </div>
 
-      {/* Bottom Legend & Active Telemetry Pill */}
-      <div className="relative z-10 mt-2.5 pt-2.5 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-[#EBEBF5]/68 gap-2">
+      {/* Bottom Professional Tactical Legend Bar */}
+      <div className="relative z-10 mt-2.5 pt-2.5 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-[#8E8E93] gap-2">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FF453A]" />
-            <span>LFC Player / Goal</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#E31B23] border border-white/60 shadow-[0_0_6px_rgba(227,27,35,0.5)]" />
+            <span className="text-white/80">Node Size = Touch Volume</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3.5 h-0.5 rounded-full bg-[#FF453A]" />
-            <span>Passing Dyad</span>
+            <span className="w-4 h-0.5 rounded-full bg-[#FF2636]" />
+            <span className="text-white/80">Vector Thickness = Pass Frequency</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00DAC3]" />
-            <span>Active Spotlight</span>
+            <span className="w-2 h-2 rounded-full border border-dashed border-[#FF2636]" />
+            <span className="text-white/80">Pill Badge = Total Dyad Passes</span>
           </div>
         </div>
 
+        {/* Dynamic Focus Telemetry Pill */}
         {overlayMode === "shots" && activeShot ? (
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap">
-            <span className="text-[#FFD60A] font-semibold">{activeShot.player}</span>
-            <span className="text-[#EBEBF5]/35">•</span>
-            <span className="text-[#00DAC3] font-mono tabular-nums font-semibold">
+          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap bg-[#141414] border border-white/[0.08]">
+            <span className="text-[#F1B82D] font-semibold">{activeShot.player}</span>
+            <span className="text-white/30">•</span>
+            <span className="text-[#FF2636] font-mono tabular-nums font-semibold">
               {activeShot.xG.toFixed(2)} xG
             </span>
-            <span className="text-[#EBEBF5]/35">•</span>
-            <span className="uppercase text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#FF453A]/18 text-[#FF6961] border border-[#FF453A]/30">
+            <span className="text-white/30">•</span>
+            <span className="uppercase text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#E31B23]/20 text-[#FF6B78] border border-[#E31B23]/40">
               {activeShot.outcome}
             </span>
             {activeShot.desc && (
-              <span className="text-[#EBEBF5]/68 text-[11px]">{activeShot.desc}</span>
+              <span className="text-[#8E8E93] text-[11px]">{activeShot.desc}</span>
             )}
           </div>
         ) : (
           selectedPlayer && (
-            <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap">
-              <span className="text-[#FF453A] font-semibold">
+            <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap bg-[#141414] border border-white/[0.08]">
+              <span className="text-[#FF2636] font-bold">
                 #{selectedPlayer.number} {selectedPlayer.name}
               </span>
-              <span className="text-[#EBEBF5]/35">•</span>
-              <span className="text-[#00DAC3] font-mono tabular-nums">
+              <span className="text-white/30">•</span>
+              <span className="text-white font-mono tabular-nums">
                 OBV +{selectedPlayer.obv.toFixed(2)}
               </span>
-              <span className="text-[#EBEBF5]/35">•</span>
-              <span className="tabular-nums">Acc {selectedPlayer.comp}%</span>
+              <span className="text-white/30">•</span>
+              <span className="text-[#F1B82D] font-mono tabular-nums">
+                {selectedPlayer.touches} Touches
+              </span>
+              <span className="text-white/30">•</span>
+              <span className="tabular-nums text-white/85">Pass Acc {selectedPlayer.comp}%</span>
             </div>
           )
         )}
