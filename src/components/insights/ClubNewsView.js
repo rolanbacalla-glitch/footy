@@ -174,11 +174,11 @@ export default function ClubNewsView() {
     activeTopic.keywords.length === 0
       ? rawList.slice(0, 10)
       : rawList
-          .filter((article) => {
-            const haystack = `${article.title} ${article.summary}`.toLowerCase();
-            return activeTopic.keywords.some((kw) => haystack.includes(kw));
-          })
-          .slice(0, 10);
+        .filter((article) => {
+          const haystack = `${article.title} ${article.summary}`.toLowerCase();
+          return activeTopic.keywords.some((kw) => haystack.includes(kw));
+        })
+        .slice(0, 10);
 
   const leadArticle = displayedArticles[0] || null;
   const remainingArticles = displayedArticles.slice(1);
@@ -212,9 +212,8 @@ export default function ClubNewsView() {
               className="min-h-[38px] self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/[0.08] text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-[#FF2636] ${
-                  refreshing ? "animate-spin" : ""
-                }`}
+                className={`w-3.5 h-3.5 text-[#FF2636] ${refreshing ? "animate-spin" : ""
+                  }`}
                 strokeWidth={2.2}
               />
               <span>{refreshing ? "Refreshing…" : "Refresh Feed"}</span>
@@ -237,11 +236,10 @@ export default function ClubNewsView() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setSelectedFeed(tab.id)}
-                    className={`min-h-[34px] pressable px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ${
-                      isActive
-                        ? "glass-crimson-pill text-white"
-                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                    }`}
+                    className={`min-h-[34px] pressable px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ${isActive
+                      ? "glass-crimson-pill text-white"
+                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -467,11 +465,10 @@ export default function ClubNewsView() {
                   type="button"
                   onClick={() => setSelectedTopic(topic.id)}
                   aria-pressed={isActive}
-                  className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                    isActive
-                      ? "glass-crimson-pill text-white border-transparent"
-                      : "bg-[#1A1A1A] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
-                  }`}
+                  className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${isActive
+                    ? "glass-crimson-pill text-white border-transparent"
+                    : "bg-[#1A1A1A] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
+                    }`}
                 >
                   {topic.label}
                 </button>
@@ -503,9 +500,8 @@ export default function ClubNewsView() {
               >
                 <div className="flex items-center gap-2">
                   <CheckCircle2
-                    className={`w-4 h-4 shrink-0 ${
-                      src.ok ? "text-[#FF2636]" : "text-[#8E8E93]"
-                    }`}
+                    className={`w-4 h-4 shrink-0 ${src.ok ? "text-[#FF2636]" : "text-[#8E8E93]"
+                      }`}
                     strokeWidth={2}
                   />
                   <div>
