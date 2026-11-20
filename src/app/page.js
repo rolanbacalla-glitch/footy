@@ -109,8 +109,10 @@ export default function AnfieldInsightsDashboard() {
         {/* Tab 2: Latest Club News (Top 10 Most Recent Free Sources) */}
         {activeTab === "club-news" && <ClubNewsView />}
 
-        {/* Tab 3: Anfield Time Machine */}
-        {activeTab === "time-machine" && <TimeMachineView />}
+        {/* Tab 3: Anfield Match Archives */}
+        {(activeTab === "match-archives" || activeTab === "time-machine") && (
+          <TimeMachineView />
+        )}
 
         {/* Tab 4: Transfer Scout Simulator */}
         {activeTab === "transfer-scout" && <TransferScoutView />}

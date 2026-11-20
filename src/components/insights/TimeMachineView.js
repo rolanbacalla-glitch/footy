@@ -207,7 +207,7 @@ export default function TimeMachineView() {
             <div className="flex items-center gap-2">
               <History className="w-5 h-5 text-[#FFD60A]" strokeWidth={2} />
               <h2 className="text-[16px] font-semibold text-white tracking-[-0.02em]">
-                Historical StatsBomb Open Data Archive
+                Anfield Match Archives — StatsBomb Historical Data
               </h2>
             </div>
             <p className="text-xs text-[#EBEBF5]/68 mt-0.5">

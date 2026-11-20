@@ -35,7 +35,7 @@ export default function Header({ activeTab, setActiveTab }) {
   const tabs = [
     { id: "boot-room", label: "Boot Room", icon: Activity },
     { id: "club-news", label: "Club News", icon: Newspaper },
-    { id: "time-machine", label: "Time Machine", icon: Clock },
+    { id: "match-archives", label: "Match Archives", icon: Clock },
     { id: "transfer-scout", label: "Transfer Scout", icon: UserSearch },
   ];
 

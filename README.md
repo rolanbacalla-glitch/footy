@@ -18,7 +18,7 @@ A high-performance Single Page Application (SPA) tactical intelligence and playe
 - **Match Momentum Area Wave**: Inline SVG cubic Bézier momentum chart ($-100$ to $+100$ territory dominance) with pinned match milestones.
 - **Key LFC Metrics**: Field Tilt ($71.4\%$), Defensive PPDA ($7.2$), Team xG differential, and Gegenpress turnovers.
 
-### 2. ⏳ [ Anfield Time Machine ] — Historic StatsBomb Engine
+### 2. ⏳ [ Anfield Match Archives ] — Historic StatsBomb Engine
 Replay iconic Liverpool campaigns with xG comparisons, PPDA pressure metrics, and **On-Ball Value (OBV)** contributor leaderboards:
 - **2005 Istanbul UCL Final** vs AC Milan (3-3, 3-2 pens)
 - **2019 UCL Semi-Final** vs FC Barcelona (4-0)
