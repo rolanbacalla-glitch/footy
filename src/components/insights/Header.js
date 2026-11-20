@@ -27,13 +27,19 @@ export default function Header({ activeTab, setActiveTab }) {
     <>
       <header
         aria-label="Main navigation"
-        className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow,backdrop-filter,padding,margin] duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow,backdrop-filter,padding,margin] duration-300 flex justify-center ${
           isScrolled
-            ? "mx-3 sm:mx-6 mt-3 rounded-2xl bg-[#08090D]/85 backdrop-blur-xl shadow-2xl px-4 sm:px-6 py-2.5 border border-white/10 max-w-[1640px] left-1/2 -translate-x-1/2"
-            : "px-4 sm:px-8 py-4 bg-transparent max-w-[1680px] mx-auto"
+            ? "px-4 pt-3"
+            : "px-4 sm:px-8 py-3.5 bg-[#050608]/90 backdrop-blur-xl border-b border-white/[0.08]"
         }`}
       >
-        <div className="w-full flex items-center justify-between">
+        <div
+          className={`w-full max-w-[1680px] flex items-center justify-between transition-all duration-300 ${
+            isScrolled
+              ? "rounded-2xl bg-[#0B0C10]/90 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.7)] px-4 sm:px-6 py-2.5 border border-white/15"
+              : ""
+          }`}
+        >
           {/* Logo Brand / Emblem (travel-kin layout pattern) */}
           <Link
             href="#boot-room"
