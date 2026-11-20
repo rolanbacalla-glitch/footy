@@ -159,18 +159,24 @@ export default function AnfieldInsightsDashboard() {
               aria-label="Match Centre fixtures"
               className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"
             >
-              {/* 1. Immediate Last Result (Only 1 previous game for context) */}
+              {/* 1. Next Single Upcoming Fixture (Left of Upcoming) */}
               {(() => {
-                const lastGame = MATCH_LIBRARY.find((m) => m.type === "RECENT");
-                if (!lastGame) return null;
-                const isSelected = lastGame.id === selectedMatchId;
+                const nextFx = liveSchedule.upcoming.find(
+                  (fx) => !fx.opponent?.toLowerCase().includes("manchester united")
+                );
+                if (!nextFx) return null;
+                const isSelected = selectedMatchId === nextFx.id;
+                const formattedDate = new Date(nextFx.date).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                });
+
                 return (
                   <button
-                    key={lastGame.id}
-                    role="tab"
-                    aria-selected={isSelected}
+                    key={nextFx.id}
+                    type="button"
                     onClick={() => {
-                      setSelectedMatchId(lastGame.id);
+                      setSelectedMatchId(nextFx.id);
                       setSelectedPlayer(null);
                     }}
                     className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
@@ -179,15 +185,15 @@ export default function AnfieldInsightsDashboard() {
                         : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
                     }`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
-                    <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider">
-                      Last:
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                    <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
+                      Next:
                     </span>
                     <span className="tracking-[-0.01em]">
-                      {lastGame.title}
+                      {nextFx.isHome ? `vs ${nextFx.opponent}` : `@ ${nextFx.opponent}`}
                     </span>
-                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-black/40 text-white border border-white/10 font-bold">
-                      {lastGame.statusText}
+                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
+                      {formattedDate} • {nextFx.broadcast}
                     </span>
                   </button>
                 );
@@ -232,24 +238,18 @@ export default function AnfieldInsightsDashboard() {
                 );
               })()}
 
-              {/* 3. Next Single Upcoming Fixture */}
+              {/* 3. Immediate Last Result (Right of Upcoming/Focus Match) */}
               {(() => {
-                const nextFx = liveSchedule.upcoming.find(
-                  (fx) => !fx.opponent?.toLowerCase().includes("manchester united")
-                );
-                if (!nextFx) return null;
-                const isSelected = selectedMatchId === nextFx.id;
-                const formattedDate = new Date(nextFx.date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                });
-
+                const lastGame = MATCH_LIBRARY.find((m) => m.type === "RECENT");
+                if (!lastGame) return null;
+                const isSelected = lastGame.id === selectedMatchId;
                 return (
                   <button
-                    key={nextFx.id}
-                    type="button"
+                    key={lastGame.id}
+                    role="tab"
+                    aria-selected={isSelected}
                     onClick={() => {
-                      setSelectedMatchId(nextFx.id);
+                      setSelectedMatchId(lastGame.id);
                       setSelectedPlayer(null);
                     }}
                     className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
@@ -258,15 +258,15 @@ export default function AnfieldInsightsDashboard() {
                         : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
                     }`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                    <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
-                      Next:
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+                    <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider">
+                      Last:
                     </span>
                     <span className="tracking-[-0.01em]">
-                      {nextFx.isHome ? `vs ${nextFx.opponent}` : `@ ${nextFx.opponent}`}
+                      {lastGame.title}
                     </span>
-                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
-                      {formattedDate} • {nextFx.broadcast}
+                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-black/40 text-white border border-white/10 font-bold">
+                      {lastGame.statusText}
                     </span>
                   </button>
                 );
