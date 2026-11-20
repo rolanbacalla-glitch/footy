@@ -145,9 +145,9 @@ export default function AnfieldInsightsDashboard() {
                       isLive
                         ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
                         : isMatchday
-                          ? "bg-[#F1B82D] animate-pulse shadow-[0_0_8px_rgba(241,184,45,0.7)]"
+                          ? "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
                           : isUpcoming
-                            ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
+                            ? "bg-white/70 shadow-[0_0_6px_rgba(255,255,255,0.4)]"
                             : isSelected
                               ? "bg-white shadow-[0_0_8px_#FFFFFF]"
                               : "bg-[#E31B23]"
@@ -171,7 +171,7 @@ export default function AnfieldInsightsDashboard() {
                       isLive
                         ? "bg-[#FF2636]/25 text-[#FF6961] border border-[#FF2636]/40 font-bold animate-pulse"
                         : isMatchday
-                          ? "bg-[#F1B82D]/20 text-[#F1B82D] border border-[#F1B82D]/35 font-bold"
+                          ? "bg-white/10 text-white border border-white/25 font-bold"
                           : isSelected
                             ? "bg-black/40 text-white border border-white/25 shadow-inner"
                             : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"

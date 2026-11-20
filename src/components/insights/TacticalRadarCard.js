@@ -66,7 +66,7 @@ export default function TacticalRadarCard({ activeMatch }) {
             LFC
           </span>
           <span className="flex items-center gap-1 text-white/70">
-            <span className="w-2 h-2 rounded-full bg-[#00DAC3] shadow-[0_0_6px_#00DAC3]" />
+            <span className="w-2 h-2 rounded-full bg-white/70 shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
             Opp
           </span>
         </div>
@@ -113,16 +113,17 @@ export default function TacticalRadarCard({ activeMatch }) {
               );
             })}
 
-            {/* Opposition Polygon */}
+            {/* Opposition Polygon (Subdued Precision Steel / Silver Glass) */}
             <path
               d={oppPath}
-              fill="rgba(0, 218, 195, 0.20)"
-              stroke="#00DAC3"
-              strokeWidth="1.5"
+              fill="rgba(255, 255, 255, 0.10)"
+              stroke="rgba(255, 255, 255, 0.45)"
+              strokeWidth="1.2"
+              strokeDasharray="3 2"
               strokeLinejoin="round"
             />
 
-            {/* LFC Polygon */}
+            {/* LFC Polygon (Electric Anfield Crimson) */}
             <path
               d={lfcPath}
               fill="rgba(255, 38, 54, 0.28)"
@@ -136,7 +137,7 @@ export default function TacticalRadarCard({ activeMatch }) {
               <circle key={`lfc-${i}`} cx={p.x} cy={p.y} r="2.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="0.6" />
             ))}
             {oppPoints.map((p, i) => (
-              <circle key={`opp-${i}`} cx={p.x} cy={p.y} r="2" fill="#00DAC3" stroke="#FFFFFF" strokeWidth="0.5" />
+              <circle key={`opp-${i}`} cx={p.x} cy={p.y} r="2" fill="#FFFFFF" fillOpacity="0.6" stroke="#8E8E93" strokeWidth="0.5" />
             ))}
           </svg>
         </div>
@@ -150,7 +151,7 @@ export default function TacticalRadarCard({ activeMatch }) {
                 <span className="font-mono text-[10px]">
                   <strong className="text-[#FF2636]">{dim.lfcVal}</strong>
                   <span className="text-white/30"> vs </span>
-                  <span className="text-[#00DAC3]">{dim.oppVal}</span>
+                  <span className="text-white/60">{dim.oppVal}</span>
                 </span>
               </div>
               <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden flex gap-0.5">
@@ -159,7 +160,7 @@ export default function TacticalRadarCard({ activeMatch }) {
                   style={{ width: `${(dim.lfc / (dim.lfc + dim.opp)) * 100}%` }}
                 />
                 <div
-                  className="bg-[#00DAC3] h-full rounded-full transition-all duration-500"
+                  className="bg-white/35 h-full rounded-full transition-all duration-500"
                   style={{ width: `${(dim.opp / (dim.lfc + dim.opp)) * 100}%` }}
                 />
               </div>

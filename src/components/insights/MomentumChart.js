@@ -79,10 +79,10 @@ export default function MomentumChart({
     <div className="w-full space-y-3.5 min-w-0">
       {/* 0. Selected Player Tactical Spotlight Card */}
       {selectedPlayer && (
-        <div className="apple-card rounded-[20px] p-4 border-[#00DAC3]/40">
+        <div className="apple-card rounded-[20px] p-4 border-white/20">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#00DAC3]/15 border border-[#00DAC3]/35 flex items-center justify-center text-xs font-bold tabular-nums text-[#00DAC3]">
+              <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold tabular-nums text-white">
                 #{selectedPlayer.number}
               </div>
               <div>
@@ -95,7 +95,7 @@ export default function MomentumChart({
                   </span>
                 </div>
                 <p className="text-[11px] text-[#EBEBF5]/65 flex items-center gap-1 mt-0.5">
-                  <UserCheck className="w-3 h-3 text-[#00DAC3]" />
+                  <UserCheck className="w-3 h-3 text-white/80" />
                   Active Pitch Node Telemetry
                 </p>
               </div>
@@ -133,7 +133,7 @@ export default function MomentumChart({
               <span className="text-[10px] text-[#8E8E93] font-medium block">
                 Accuracy
               </span>
-              <span className="text-[15px] font-semibold text-[#F1B82D] tabular-nums mt-0.5 block">
+              <span className="text-[15px] font-semibold text-white/90 tabular-nums mt-0.5 block">
                 {selectedPlayer.comp}%
               </span>
             </div>
@@ -157,7 +157,7 @@ export default function MomentumChart({
                         ({conn.partnerPos})
                       </span>
                     </span>
-                    <span className="font-mono tabular-nums font-semibold text-[#00DAC3]">
+                    <span className="font-mono tabular-nums font-semibold text-white/90">
                       {conn.count} passes
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export default function MomentumChart({
               Tactical Canvas Mode
             </h3>
           </div>
-          <span className="text-[11px] text-[#00DAC3] font-medium">
+          <span className="text-[11px] text-white/70 font-medium">
             {activeMatch?.competition}
           </span>
         </div>
@@ -269,7 +269,7 @@ export default function MomentumChart({
                     cx={p.x}
                     cy={p.y}
                     r={p.isGoal ? "3.8" : "2.6"}
-                    fill={p.isGoal ? "#FFD60A" : "#00DAC3"}
+                    fill={p.isGoal ? "#FF2636" : "#FFFFFF"}
                     stroke="#000000"
                     strokeWidth="0.9"
                   />
@@ -286,7 +286,7 @@ export default function MomentumChart({
                     x={p.x}
                     y={p.isGoal ? p.y - 7 : p.y - 5.5}
                     textAnchor="middle"
-                    fill={p.isGoal ? "#FFD60A" : "#F5F5F7"}
+                    fill={p.isGoal ? "#FF2636" : "#F5F5F7"}
                     fontSize="7"
                     fontWeight="600"
                     className="select-none"
@@ -309,7 +309,7 @@ export default function MomentumChart({
       {/* 3. Key Match Science Indicators (OKX High-Contrast Metric Grid) */}
       <div className="apple-card rounded-[24px] p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-4 h-4 text-[#F1B82D]" strokeWidth={2} />
+          <Zap className="w-4 h-4 text-[#FF2636]" strokeWidth={2} />
           <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
             Key Match Science Indicators
           </h3>
@@ -379,7 +379,7 @@ export default function MomentumChart({
               <span className="text-[22px] font-bold tracking-tight text-white tabular-nums">
                 {metrics.counterPressRegains}
               </span>
-              <span className="text-[10px] text-[#F1B82D] font-medium">regains</span>
+              <span className="text-[10px] text-white/70 font-medium">regains</span>
             </div>
             <span className="text-[10px] text-[#8E8E93] mt-0.5 block">
               Gegenpress Turnovers

@@ -147,8 +147,8 @@ export default function PitchCanvas({
               <div
                 className={`text-[11px] font-semibold px-3 py-1 rounded-full border ${
                   isPredicted
-                    ? "bg-[#F1B82D]/12 text-[#F1B82D] border-[#F1B82D]/35 border-dashed"
-                    : "bg-[#00DAC3]/12 text-[#00DAC3] border-[#00DAC3]/35"
+                    ? "bg-white/10 text-white/80 border-white/20 border-dashed"
+                    : "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30"
                 }`}
               >
                 {isPredicted ? "Predicted XI" : "Confirmed XI"}
@@ -171,7 +171,7 @@ export default function PitchCanvas({
         {/* Tactical Battle Brief */}
         {activeMatch?.keyTacticalBattle && (
           <div className="apple-glass-hud flex items-center gap-2 px-3 py-1.5 rounded-2xl text-[11px] text-[#8E8E93] bg-[#121212]/80 border border-white/[0.06]">
-            <Sparkles className="w-3.5 h-3.5 text-[#F1B82D] shrink-0" strokeWidth={2} />
+            <Sparkles className="w-3.5 h-3.5 text-white/80 shrink-0" strokeWidth={2} />
             <span className="font-semibold text-white shrink-0">Tactical Focus:</span>
             <span className="truncate text-white/80 font-medium">
               {activeMatch.keyTacticalBattle}
@@ -237,22 +237,22 @@ export default function PitchCanvas({
               <stop offset="100%" stopColor="#9E0A16" stopOpacity="0.94" />
             </linearGradient>
 
-            {/* Heatmap Gradients */}
+            {/* Heatmap Gradients (Monochromatic White / Charcoal / LFC Red Glow) */}
             <radialGradient id="heatKopRight" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#E31B23" stopOpacity="0.85" />
-              <stop offset="42%" stopColor="#FF9F0A" stopOpacity="0.48" />
+              <stop offset="42%" stopColor="#FF3848" stopOpacity="0.45" />
               <stop offset="80%" stopColor="#FF2636" stopOpacity="0.12" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />
             </radialGradient>
 
             <radialGradient id="heatKopLeft" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#E31B23" stopOpacity="0.75" />
-              <stop offset="52%" stopColor="#FF9F0A" stopOpacity="0.32" />
+              <stop offset="52%" stopColor="#FF3848" stopOpacity="0.30" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />
             </radialGradient>
 
             <radialGradient id="heatBoxCentre" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#F1B82D" stopOpacity="0.85" />
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.75" />
               <stop offset="38%" stopColor="#E31B23" stopOpacity="0.62" />
               <stop offset="80%" stopColor="#E31B23" stopOpacity="0.14" />
               <stop offset="100%" stopColor="#0B1912" stopOpacity="0" />

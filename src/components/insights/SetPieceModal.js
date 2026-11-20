@@ -12,7 +12,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
   const homeTeam = activeMatch?.homeTeam || "Liverpool";
   const awayTeam = activeMatch?.awayTeam || "Man United";
 
-  // TacticAI-inspired tactical models for LFC 2026/27 corner setups
+  // TacticAI-inspired tactical models for LFC 2026/27 corner setups (Monochrome + LFC Red)
   const receiverProbabilities = [
     {
       player: "Virgil van Dijk (#4)",
@@ -28,7 +28,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       probability: 29,
       shotQualityXg: 0.22,
       role: "Second-Ball Attacker",
-      colour: "#00DAC3",
+      colour: "#E5E5EA",
     },
     {
       player: "Alexander Isak (#9)",
@@ -36,7 +36,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       probability: 21,
       shotQualityXg: 0.35,
       role: "Far-Post Poacher",
-      colour: "#F1B82D",
+      colour: "#C7C7CC",
     },
     {
       player: "Florian Wirtz (#7)",
@@ -44,7 +44,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       probability: 12,
       shotQualityXg: 0.14,
       role: "Cutback Volley & Recirculation",
-      colour: "#EBEBF5",
+      colour: "#8E8E93",
     },
   ];
 
@@ -67,7 +67,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
                 <h2 id="tacticai-title" className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Set-Piece Dynamics
                 </h2>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#00DAC3]/15 text-[#00DAC3] border border-[#00DAC3]/30 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/20 uppercase tracking-wider">
                   DeepMind TacticAI Engine
                 </span>
               </div>
@@ -123,7 +123,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
                 onClick={() => setDeliveryType("inswinger")}
                 className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                   deliveryType === "inswinger"
-                    ? "bg-[#00DAC3] text-black shadow-sm font-bold"
+                    ? "bg-white text-black shadow-sm font-bold"
                     : "text-white/60 hover:text-white"
                 }`}
               >
@@ -134,7 +134,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
                 onClick={() => setDeliveryType("outswinger")}
                 className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                   deliveryType === "outswinger"
-                    ? "bg-[#00DAC3] text-black shadow-sm font-bold"
+                    ? "bg-white text-black shadow-sm font-bold"
                     : "text-white/60 hover:text-white"
                 }`}
               >
@@ -145,28 +145,28 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
         </div>
 
         {/* Tactical Pitch Box Visualization (SVG Top-Down 18-Yard Box View) */}
-        <div className="relative w-full h-44 sm:h-52 bg-[#09150E] rounded-2xl border border-emerald-500/25 p-3 overflow-hidden mb-4 shadow-inner">
+        <div className="relative w-full h-44 sm:h-52 bg-[#090A0E] rounded-2xl border border-white/10 p-3 overflow-hidden mb-4 shadow-inner">
           <svg viewBox="0 0 320 160" className="w-full h-full" aria-hidden="true">
             {/* Pitch Grass Grid Lines */}
-            <rect x="0" y="0" width="320" height="160" fill="#0B1A12" />
+            <rect x="0" y="0" width="320" height="160" fill="#0C0E14" />
             {/* Goal Line & Goal Box */}
-            <line x1="0" y1="150" x2="320" y2="150" stroke="#34D399" strokeWidth="1.5" strokeOpacity="0.5" />
+            <line x1="0" y1="150" x2="320" y2="150" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" />
             <rect x="110" y="146" width="100" height="4" fill="#FFFFFF" fillOpacity="0.8" />
-            <rect x="70" y="80" width="180" height="70" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.45" />
+            <rect x="70" y="80" width="180" height="70" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
             {/* 6-Yard Box */}
-            <rect x="115" y="125" width="90" height="25" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.4" />
+            <rect x="115" y="125" width="90" height="25" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
             {/* Penalty Spot & Arc */}
             <circle cx="160" cy="105" r="2" fill="#FFFFFF" />
-            <path d="M 130 80 A 30 30 0 0 1 190 80" fill="none" stroke="#34D399" strokeWidth="1" strokeOpacity="0.35" />
+            <path d="M 130 80 A 30 30 0 0 1 190 80" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
 
             {/* Corner Arc Origin */}
             {activeSide === "left" ? (
-              <path d="M 0 135 A 15 15 0 0 1 15 150" fill="none" stroke="#F1B82D" strokeWidth="2" />
+              <path d="M 0 135 A 15 15 0 0 1 15 150" fill="none" stroke="#FFFFFF" strokeWidth="2" />
             ) : (
-              <path d="M 320 135 A 15 15 0 0 0 305 150" fill="none" stroke="#F1B82D" strokeWidth="2" />
+              <path d="M 320 135 A 15 15 0 0 0 305 150" fill="none" stroke="#FFFFFF" strokeWidth="2" />
             )}
 
-            {/* Corner Flight Path Curved Arc */}
+            {/* Corner Flight Path Curved Arc (Luminous White Arc) */}
             {activeSide === "left" ? (
               <path
                 d={
@@ -175,7 +175,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
                     : "M 5 145 Q 90 70 160 105"
                 }
                 fill="none"
-                stroke="#F1B82D"
+                stroke="#FFFFFF"
                 strokeWidth="2.5"
                 strokeDasharray="4 2"
                 strokeLinecap="round"
@@ -188,7 +188,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
                     : "M 315 145 Q 230 70 160 105"
                 }
                 fill="none"
-                stroke="#F1B82D"
+                stroke="#FFFFFF"
                 strokeWidth="2.5"
                 strokeDasharray="4 2"
                 strokeLinecap="round"
@@ -197,19 +197,19 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
 
             {/* Player Target Hotspots */}
             <g className="animate-pulse">
-              {/* Van Dijk: Near post */}
+              {/* Van Dijk: Near post (LFC Red Highlight) */}
               <circle cx="138" cy="128" r="9" fill="#FF2636" fillOpacity="0.4" />
               <circle cx="138" cy="128" r="4.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="1" />
               <text x="138" y="120" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Van Dijk</text>
 
-              {/* Jacquet: Central spot */}
-              <circle cx="160" cy="105" r="8" fill="#00DAC3" fillOpacity="0.35" />
-              <circle cx="160" cy="105" r="4" fill="#00DAC3" stroke="#FFFFFF" strokeWidth="1" />
+              {/* Jacquet: Central spot (Luminous White) */}
+              <circle cx="160" cy="105" r="8" fill="#FFFFFF" fillOpacity="0.25" />
+              <circle cx="160" cy="105" r="4" fill="#FFFFFF" stroke="#8E8E93" strokeWidth="1" />
               <text x="160" y="98" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Jacquet</text>
 
-              {/* Isak: Far post */}
-              <circle cx="184" cy="130" r="7.5" fill="#F1B82D" fillOpacity="0.35" />
-              <circle cx="184" cy="130" r="4" fill="#F1B82D" stroke="#FFFFFF" strokeWidth="1" />
+              {/* Isak: Far post (Silver Grey) */}
+              <circle cx="184" cy="130" r="7.5" fill="#C7C7CC" fillOpacity="0.25" />
+              <circle cx="184" cy="130" r="4" fill="#C7C7CC" stroke="#8E8E93" strokeWidth="1" />
               <text x="184" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Isak</text>
             </g>
           </svg>
@@ -256,10 +256,10 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
         <div className="apple-tile p-3 rounded-xl border border-white/[0.06] text-xs">
           <div className="flex items-center justify-between mb-1.5">
             <span className="font-semibold text-white flex items-center gap-1.5">
-              <ShieldAlert className="w-3.5 h-3.5 text-[#F1B82D]" />
+              <ShieldAlert className="w-3.5 h-3.5 text-white/70" />
               Opposition Marking Vulnerability
             </span>
-            <span className="text-[10px] font-mono text-[#F1B82D]">Hybrid 60/40 Scheme</span>
+            <span className="text-[10px] font-mono text-white/70">Hybrid 60/40 Scheme</span>
           </div>
           <p className="text-[11px] text-[#8E8E93] leading-relaxed">
             <strong className="text-white">{awayTeam}</strong> deploys a 5-man zonal spine with man-to-man coverage on Van Dijk. Our inswinging near-post delivery creates natural separation for <strong>Jérémy Jacquet (#5)</strong> and far-post back-runners.

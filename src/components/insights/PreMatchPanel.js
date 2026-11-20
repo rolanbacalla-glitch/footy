@@ -136,15 +136,15 @@ function trendLabel(series) {
   const half = Math.floor(series.length / 2);
   const diff = (arr) => arr.reduce((s, p) => s + (p[0] - p[1]), 0) / arr.length;
   const delta = diff(series.slice(half)) - diff(series.slice(0, half));
-  if (delta > 0.2) return { text: "Improving", cls: "text-[#30D158]", arrow: "↗" };
+  if (delta > 0.2) return { text: "Improving", cls: "text-white", arrow: "↗" };
   if (delta < -0.2) return { text: "Declining", cls: "text-[#FF6961]", arrow: "↘" };
   return { text: "Steady", cls: "text-white/60", arrow: "→" };
 }
 
 const NEWS_STYLES = {
   out: { label: "Out", cls: "bg-[#FF453A]/20 text-[#FF6961] border-[#FF453A]/35" },
-  doubt: { label: "Doubt", cls: "bg-[#F1B82D]/20 text-[#F1B82D] border-[#F1B82D]/35" },
-  booking: { label: "1 off ban", cls: "bg-[#FFD60A]/15 text-[#FFD60A] border-[#FFD60A]/30" },
+  doubt: { label: "Doubt", cls: "bg-white/10 text-white/90 border-white/20" },
+  booking: { label: "1 off ban", cls: "bg-white/10 text-white/70 border-white/15" },
 };
 
 function Card({ icon: Icon, title, children, className = "" }) {
@@ -410,7 +410,7 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
               Rain {weather.rainPct}% • Wind {weather.windKmh} km/h
             </div>
             <div className="text-[11px] text-white/60">
-              {pm.pitch || "Hybrid grass"} • <span className="text-[#F1B82D]">{pm.attendance || "61,276 • Sold out"}</span>
+              {pm.pitch || "Hybrid grass"} • <span className="text-white/85">{pm.attendance || "61,276 • Sold out"}</span>
             </div>
             <p className="text-[9px] text-white/35">{weather.source}</p>
           </Card>
@@ -423,7 +423,7 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
             Matchday schedule
             {!confirmed && (
-              <span className="normal-case tracking-normal text-[#F1B82D] ml-2 font-medium">
+              <span className="normal-case tracking-normal text-white/80 ml-2 font-medium">
                 Line-ups in {Math.floor(lineupsInMins / 60)}h {lineupsInMins % 60}m
               </span>
             )}
@@ -432,7 +432,7 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
             <button
               type="button"
               onClick={onResetPreview}
-              className="text-[10px] px-2 py-0.5 rounded-full border border-[#F1B82D]/40 bg-[#F1B82D]/15 text-[#F1B82D] font-semibold cursor-pointer"
+              className="text-[10px] px-2 py-0.5 rounded-full border border-white/30 bg-white/10 text-white font-semibold cursor-pointer"
             >
               Previewing • back to now
             </button>
@@ -452,14 +452,14 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
                   aria-current={current ? "step" : undefined}
                   className="w-full text-left cursor-pointer group"
                 >
-                  <div className={`h-1 rounded-full mb-1.5 ${current ? "bg-[#F1B82D] shadow-[0_0_8px_rgba(241,184,45,0.7)]" : done ? "bg-[#30D158]/70" : "bg-white/10 group-hover:bg-white/25"}`} />
+                  <div className={`h-1 rounded-full mb-1.5 ${current ? "bg-[#FF2636] shadow-[0_0_8px_#FF2636]" : done ? "bg-white/60" : "bg-white/10 group-hover:bg-white/25"}`} />
                   <div className="flex items-center gap-1">
                     {done && !current ? (
-                      <Check className="w-3 h-3 text-[#30D158] shrink-0" />
+                      <Check className="w-3 h-3 text-white/80 shrink-0" />
                     ) : (
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${current ? "bg-[#F1B82D] animate-pulse" : "bg-white/25"}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${current ? "bg-[#FF2636] animate-pulse" : "bg-white/25"}`} />
                     )}
-                    <span className={`font-mono text-[11px] font-bold ${current ? "text-[#F1B82D]" : done ? "text-white/45" : "text-white/80"}`}>
+                    <span className={`font-mono text-[11px] font-bold ${current ? "text-white" : done ? "text-white/45" : "text-white/80"}`}>
                       {step.clock}
                     </span>
                   </div>

@@ -27,17 +27,19 @@
     --apple-label-secondary: #9A9AA2;          /* Clean secondary grey */
     --apple-label-tertiary: #686872;           /* Subdued tertiary grey */
 
-    /* Liverpool FC Iconic Red Palette */
+    /* Liverpool FC Iconic Red Palette & Luminous Monochrome Hierarchy */
     --apple-red: #FF2636;                      /* Electric Anfield Red (luminous highlights) */
     --apple-red-fill: #E31B23;                 /* Official Liverpool FC Red */
     --apple-red-deep: #C8102E;                 /* Heritage Crimson */
-    --apple-gold: #F1B82D;                     /* Heritage Crest Gold */
-    --apple-mint: #00DAC3;                     /* Tactical Data Cyan */
-    --apple-teal: #64D2FF;                     /* Secondary Metric Cyan */
-    --apple-green: #30D158;                    /* Status Pulse Green */
-    --apple-yellow: #FFD60A;                   /* Caution / Goal Indicator */
-    --apple-orange: #FF9F0A;                   /* Transition Orange */
-    --apple-blue: #0A84FF;                     /* RSS Accent Blue */
+    --apple-silver: #E5E5EA;                   /* Luminous Platinum / Ice Silver */
+    --apple-steel: #8E8E93;                    /* Precision Technical Steel Grey */
+    --apple-graphite: #48484A;                 /* Deep Muted Charcoal */
+    --apple-mint: #E5E5EA;                     /* Monochromatic Platinum (replaces cyan) */
+    --apple-teal: #D1D1D6;                     /* Monochromatic Silver (replaces teal) */
+    --apple-green: #FFFFFF;                    /* Monochromatic White (replaces green) */
+    --apple-yellow: #F2F2F7;                   /* Luminous Light Grey */
+    --apple-orange: #C7C7CC;                   /* Monochromatic Grey */
+    --apple-blue: #E5E5EA;                     /* Monochromatic Accent */
 
     /* Pitch Turf Shading */
     --apple-pitch-deep: #07100B;
