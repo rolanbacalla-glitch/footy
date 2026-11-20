@@ -2,42 +2,203 @@
 
 @layer base {
   :root {
-    --bg-main: #0D0D10;
-    --card-surface: #141419;
-    --card-border: #262630;
-    --lfc-red: #C8102E;
-    --lfc-teal: #00B2A9;
-    --lfc-gold: #F6EB61;
-    --pitch-dark: #08140E;
+    color-scheme: dark;
+
+    /* Refined Midnight Obsidian & Anfield Prestige Palette */
+    --apple-bg-base: #0B0E17;                  /* Deep Midnight Obsidian base canvas (nocturnal, eye-relaxing) */
+    --apple-bg-elevated: #131826;              /* Surface 1: Elevated card container (distinct tonal separation) */
+    --apple-bg-tertiary: #1C2337;              /* Surface 2: Secondary inner tile surface */
+    --apple-bg-quaternary: #263048;            /* Surface 3: Interactive hover fill */
+
+    /* Apple Liquid Glass Material (Overlays, Floating HUD & Navigation) */
+    --apple-glass-bg: rgba(19, 24, 38, 0.84);
+    --apple-glass-hud: rgba(15, 19, 31, 0.88);
+    --apple-glass-border: rgba(255, 255, 255, 0.12);
+
+    /* Separators, Hairlines & Specular Rim Borders */
+    --apple-separator: rgba(255, 255, 255, 0.10);
+    --apple-separator-opaque: #28324B;
+    --apple-hairline: rgba(255, 255, 255, 0.10);
+
+    /* Apple Label Hierarchy (WCAG 2.2 AAA calibrated) */
+    --apple-label-primary: #FFFFFF;
+    --apple-label-body: #F1F4F9;
+    --apple-label-secondary: #9BA8C0;
+    --apple-label-tertiary: #677590;
+
+    /* Authentic Anfield Identity & Vibrant Telemetry Accents */
+    --apple-red: #E63946;                      /* Iconic Anfield Crimson (vibrant, high legibility) */
+    --apple-red-fill: #C8102E;                 /* Official Liverpool FC Heritage Red */
+    --apple-gold: #F1B82D;                     /* LFC Heritage Crest Gold (prestige accent) */
+    --apple-mint: #00D2B4;                     /* Tactical Data Emerald (calm, clear telemetry) */
+    --apple-teal: #38BDF8;                     /* Tactical Data Cyan */
+    --apple-green: #22C55E;                    /* Live Match Signal Green */
+    --apple-yellow: #FBBF24;                   /* Match Telemetry Amber */
+    --apple-orange: #FB923C;                   /* Warning Amber */
+    --apple-blue: #3B82F6;                     /* System Focus Ring Blue */
+
+    /* Authentic Anfield Stadium Turf */
+    --apple-pitch-deep: #0C1E16;
+    --apple-pitch-mid: #132E22;
+    --apple-pitch-line: rgba(255, 255, 255, 0.22);
+  }
+
+  html {
+    background-color: var(--apple-bg-base);
+    color: var(--apple-label-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    background-color: var(--bg-main);
-    color: #FFFFFF;
-    font-family: var(--font-lfc-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--apple-bg-base);
+    background-image: 
+      radial-gradient(ellipse 90% 50% at 50% -20%, rgba(200, 16, 46, 0.09), transparent 65%),
+      radial-gradient(circle 600px at 95% 5%, rgba(241, 184, 45, 0.045), transparent 55%),
+      radial-gradient(circle 700px at 5% 90%, rgba(0, 210, 180, 0.035), transparent 55%);
+    background-attachment: fixed;
+    color: var(--apple-label-body);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-apple-sans), system-ui, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Crisp Apple-native keyboard focus indicator */
+  button:focus-visible,
+  select:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--apple-blue);
+    outline-offset: 2px;
   }
 }
 
-/* Custom Tactical Scrollbars */
+/* ─── Apple Liquid Glass Material (Navigation & Floating Overlays Only) ─── */
+.apple-glass {
+  background-color: var(--apple-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-color: var(--apple-glass-border);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.apple-glass-hud {
+  background-color: var(--apple-glass-hud);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* ─── Apple Elevated Surface Cards (Content Layer — Solid Tonal Elevation) ─── */
+.apple-card {
+  background-color: var(--apple-bg-elevated);
+  border: 1px solid var(--apple-hairline);
+  box-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.52),
+    0 4px 12px -2px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.apple-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 16px 40px -5px rgba(0, 0, 0, 0.62),
+    0 0 24px -2px rgba(200, 16, 46, 0.14),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.apple-tile {
+  background-color: var(--apple-bg-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.apple-segmented {
+  background-color: rgba(24, 30, 48, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Accessibility: Reduce Transparency & Reduce Motion (Apple HIG) ─── */
+@media (prefers-reduced-transparency: reduce) {
+  .apple-glass,
+  .apple-glass-hud {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: #1c1c1e;
+    border-color: #38383a;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Apple macOS Dark Mode Minimal Scrollbars ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0D0D10;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262630;
-  border-radius: 3px;
+  background: rgba(235, 235, 245, 0.22);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C8102E;
+  background: rgba(235, 235, 245, 0.38);
 }
 
-/* Range input accent styling */
+/* ─── Apple iOS / macOS Precision Range Sliders ─── */
 input[type="range"] {
-  accent-color: #C8102E;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #3a3a3c;
+  height: 5px;
+  border-radius: 9999px;
+  accent-color: var(--apple-red);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
 }

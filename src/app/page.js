@@ -6,8 +6,9 @@ import PitchCanvas from "../components/insights/PitchCanvas";
 import MomentumChart from "../components/insights/MomentumChart";
 import TimeMachineView from "../components/insights/TimeMachineView";
 import TransferScoutView from "../components/insights/TransferScoutView";
+import ClubNewsView from "../components/insights/ClubNewsView";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
-import { Calendar, Radio, ChevronRight, Sparkles } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 export default function AnfieldInsightsDashboard() {
   const [activeTab, setActiveTab] = useState("boot-room");
@@ -15,21 +16,26 @@ export default function AnfieldInsightsDashboard() {
   const [overlayMode, setOverlayMode] = useState("pass"); // 'pass' | 'heat' | 'shots'
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  const activeMatch = MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
+  const activeMatch =
+    MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
 
   return (
-    <main className="min-h-screen lg:h-screen w-full flex flex-col bg-[#0D0D10] text-white overflow-x-hidden lg:overflow-hidden select-none">
-      {/* 1. Persistent Sticky Navigation Header */}
+    <main className="min-h-screen lg:h-screen w-full flex flex-col bg-transparent text-[#F4F4F8] overflow-x-hidden lg:overflow-hidden select-none">
+      {/* 1. Persistent Apple Liquid Glass Navigation Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* 2. Main Body Dashboard Viewport */}
-      <div className="flex-1 p-3 md:p-5 flex flex-col overflow-y-auto lg:overflow-hidden gap-3">
-        {/* Universal Fixture Ribbon (Visible in Boot Room Live) */}
+      <div className="flex-1 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto lg:overflow-hidden gap-3.5 max-w-[1680px] w-full mx-auto">
+        {/* Universal Match Centre Fixture Ribbon (Apple Sports inspired pill bar) */}
         {activeTab === "boot-room" && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 shrink-0">
-            <span className="text-[11px] font-bold uppercase text-[#9CA3AF] tracking-wider shrink-0 flex items-center gap-1.5 pl-1">
-              <Calendar className="w-3.5 h-3.5 text-[#00B2A9]" />
-              Match Centre:
+          <div
+            role="tablist"
+            aria-label="Match Centre fixtures"
+            className="flex items-center gap-2 overflow-x-auto pb-1 shrink-0"
+          >
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#EBEBF5]/65 shrink-0 flex items-center gap-1.5 pl-1 pr-1">
+              <Calendar className="w-3.5 h-3.5 text-[#00BFA5]" strokeWidth={2} />
+              Match Centre
             </span>
 
             {MATCH_LIBRARY.map((m) => {
@@ -39,23 +45,33 @@ export default function AnfieldInsightsDashboard() {
               return (
                 <button
                   key={m.id}
+                  role="tab"
+                  aria-selected={isSelected}
                   onClick={() => {
                     setSelectedMatchId(m.id);
                     setSelectedPlayer(null);
                   }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer border ${
+                  className={`min-h-[38px] flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer border ${
                     isSelected
-                      ? "bg-[#141419] border-[#C8102E] text-white shadow-[0_0_12px_rgba(200,16,46,0.35)] ring-1 ring-[#C8102E]"
-                      : "bg-[#0D0D10] border-[#262630] text-[#9CA3AF] hover:text-white hover:border-[#383846]"
+                      ? "bg-[var(--apple-bg-tertiary)] border-[#F1B82D]/40 text-white shadow-[0_4px_16px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.14)]"
+                      : "bg-[var(--apple-bg-elevated)] border-white/[0.08] text-[#9BA8C0] hover:text-white hover:bg-[var(--apple-bg-tertiary)]/80 hover:border-white/15"
                   }`}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      isUpcoming ? "bg-[#F6EB61] animate-ping" : "bg-[#00B2A9]"
+                    className={`w-2 h-2 rounded-full shrink-0 ${
+                      isUpcoming
+                        ? "bg-[#F0C419] shadow-[0_0_8px_rgba(240,196,25,0.65)]"
+                        : "bg-[#00BFA5]"
                     }`}
-                  ></span>
-                  <span>{m.title}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#0D0D10] text-[#9CA3AF] border border-[#262630]">
+                  />
+                  <span className="tracking-[-0.01em]">{m.title}</span>
+                  <span
+                    className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
+                      isSelected
+                        ? "bg-[#C8102E]/22 text-[#FF6961] border border-[#C8102E]/35"
+                        : "bg-black/35 text-[#EBEBF5]/65 border border-white/[0.06]"
+                    }`}
+                  >
                     {m.statusText}
                   </span>
                 </button>
@@ -78,21 +94,25 @@ export default function AnfieldInsightsDashboard() {
             </div>
 
             {/* Right 1/3 Metrics & Match Momentum Controller */}
-            <div className="lg:w-1/3 overflow-y-auto">
+            <div className="lg:w-1/3 overflow-y-auto pr-0.5">
               <MomentumChart
                 activeMatch={activeMatch}
                 overlayMode={overlayMode}
                 setOverlayMode={setOverlayMode}
                 selectedPlayer={selectedPlayer}
+                setSelectedPlayer={setSelectedPlayer}
               />
             </div>
           </div>
         )}
 
-        {/* Tab 2: Anfield Time Machine */}
+        {/* Tab 2: Latest Club News (Top 10 Most Recent Free Sources) */}
+        {activeTab === "club-news" && <ClubNewsView />}
+
+        {/* Tab 3: Anfield Time Machine */}
         {activeTab === "time-machine" && <TimeMachineView />}
 
-        {/* Tab 3: Transfer Scout Simulator */}
+        {/* Tab 4: Transfer Scout Simulator */}
         {activeTab === "transfer-scout" && <TransferScoutView />}
       </div>
     </main>

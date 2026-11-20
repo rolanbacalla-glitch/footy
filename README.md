@@ -12,8 +12,8 @@ A high-performance Single Page Application (SPA) tactical intelligence and playe
 
 ### 1. 🏟️ [ Boot Room Live ] — Tactical Match Analysis
 - **Vector Pitch Canvas**: Normalised $(105\text{m} \times 68\text{m})$ pitch attacking towards **The Kop Stand** on the right.
-- **Pass Network Layer**: Liverpool Starting XI plotted by tactical touch locations with passing lines scaled by dyad frequency. Interactive node spotlighting highlights individual pass completion rates and On-Ball Value (OBV).
-- **Attacking Half-Space Heatmap**: Highlights tactical overloads in the Salah/Alexander-Arnold channel and isolated left cutback corridors.
+- **Pass Network Layer**: Liverpool Starting XI (under 2026/27 Head Coach **Andoni Iraola**, featuring Summer 2026 signings **Bradley Barcola #29**, **Jérémy Jacquet #5**, and **Víctor Muñoz #23** alongside **Alexander Isak #9**, **Florian Wirtz #7**, **Jeremie Frimpong #30**, **Milos Kerkez #6**, and **Giorgi Mamardashvili #25**) plotted by tactical touch locations with passing lines scaled by dyad frequency. Interactive node spotlighting highlights individual pass completion rates, primary passing combinations, and On-Ball Value (OBV).
+- **Attacking Half-Space Heatmap**: Highlights tactical overloads in the Barcola/Frimpong right channel and Kerkez/Wirtz left cutback corridors.
 - **Shots & xG Map**: Expected Goals shot plotting with radius scaled by probability and colour-coded by outcome.
 - **Match Momentum Area Wave**: Inline SVG cubic Bézier momentum chart ($-100$ to $+100$ territory dominance) with pinned match milestones.
 - **Key LFC Metrics**: Field Tilt ($71.4\%$), Defensive PPDA ($7.2$), Team xG differential, and Gegenpress turnovers.

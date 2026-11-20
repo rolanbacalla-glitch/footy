@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Shield, Activity, Clock, UserSearch, Radio, Calendar, ChevronRight } from "lucide-react";
+import { Shield, Activity, Newspaper, Clock, UserSearch, Radio } from "lucide-react";
 
 export default function Header({ activeTab, setActiveTab }) {
   const [matchData, setMatchData] = useState({
@@ -16,8 +16,13 @@ export default function Header({ activeTab, setActiveTab }) {
         if (res.ok) {
           const data = await res.json();
           setMatchData({
-            nextMatch: data.nextMatch || (data.matches && data.matches.find(m => m.status === "SCHEDULED")),
-            lastMatch: data.lastMatch || (data.matches && data.matches.filter(m => m.status === "FINISHED").pop()),
+            nextMatch:
+              data.nextMatch ||
+              (data.matches && data.matches.find((m) => m.status === "SCHEDULED")),
+            lastMatch:
+              data.lastMatch ||
+              (data.matches &&
+                data.matches.filter((m) => m.status === "FINISHED").pop()),
           });
         }
       } catch (e) {
@@ -28,97 +33,115 @@ export default function Header({ activeTab, setActiveTab }) {
   }, []);
 
   const tabs = [
-    { id: "boot-room", label: "Boot Room Live", icon: Activity, emoji: "🏟️" },
-    { id: "time-machine", label: "Anfield Time Machine", icon: Clock, emoji: "⏳" },
-    { id: "transfer-scout", label: "Transfer Scout", icon: UserSearch, emoji: "🔍" },
+    { id: "boot-room", label: "Boot Room", icon: Activity },
+    { id: "club-news", label: "Club News", icon: Newspaper },
+    { id: "time-machine", label: "Time Machine", icon: Clock },
+    { id: "transfer-scout", label: "Transfer Scout", icon: UserSearch },
   ];
 
   const nextMatch = matchData.nextMatch;
   const lastMatch = matchData.lastMatch;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0D0D10]/95 backdrop-blur-md border-b border-[#262630] px-3 sm:px-4 md:px-6 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-      {/* Brand & Badge */}
-      <div className="flex items-center justify-between w-full sm:w-auto">
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-[#C8102E] to-[#800A1D] shadow-[0_0_15px_rgba(200,16,46,0.5)] border border-[#C8102E]/40 shrink-0">
-            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.2]" />
-            <span className="absolute -top-1 -right-1 flex h-2 w-2 sm:h-2.5 sm:w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00B2A9] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-full w-full bg-[#00B2A9]"></span>
-            </span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="text-base sm:text-lg md:text-xl font-black tracking-wider text-white font-[family-name:var(--font-lfc-serif)]">
-                ANFIELD <span className="text-[#C8102E]">INSIGHTS</span>
-              </h1>
-              <span className="px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase rounded bg-[#00B2A9]/15 text-[#00B2A9] border border-[#00B2A9]/30">
-                LFC 2026/27
+    <header className="sticky top-0 z-50 apple-glass border-b px-3 sm:px-5 md:px-6 py-2.5">
+      <div className="max-w-[1680px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Brand Emblem & SF Pro Wordmark */}
+        <div className="flex items-center justify-between w-full sm:w-auto">
+          <div className="flex items-center gap-3">
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-[11px] bg-gradient-to-b from-[#C8102E] to-[#8A0A1D] shadow-[0_4px_16px_rgba(200,16,46,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] shrink-0">
+              <Shield className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
+              <span
+                aria-hidden="true"
+                className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5"
+              >
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#30D158] opacity-60" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#30D158] ring-2 ring-[#13141B]" />
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-[#9CA3AF] tracking-wide hidden xs:block">
-              LFC Advanced Tactical & Recruitment Intelligence
-            </p>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-[17px] sm:text-[19px] font-semibold tracking-[-0.025em] text-white leading-tight">
+                  Anfield <span className="text-[#E03535]">Insights</span>
+                </h1>
+                <span className="px-2 py-0.5 text-[10px] font-medium tracking-[0.02em] rounded-full bg-[#00BFA5]/14 text-[#00BFA5] border border-[#00BFA5]/25">
+                  2026/27 • Iraola Era
+                </span>
+              </div>
+              <p className="text-[11px] text-[#EBEBF5]/65 tracking-[-0.005em] hidden xs:block">
+                Liverpool FC Tactical &amp; Recruitment Intelligence
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Apple Sports-Style Live Match Pill */}
+        <div className="hidden xl:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#13141B]/92 border border-white/[0.08] shadow-[inset_0_0.5px_0_rgba(255,255,255,0.08)] text-xs">
+          <Radio
+            className="w-3.5 h-3.5 text-[#E03535] animate-pulse shrink-0"
+            strokeWidth={2.2}
+          />
+
+          {nextMatch ? (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-[#E5B338] tracking-[0.04em] uppercase text-[10px] bg-[#E5B338]/12 px-2 py-0.5 rounded-full border border-[#E5B338]/25">
+                Next
+              </span>
+              <span className="font-semibold text-white tracking-[-0.01em]">
+                {nextMatch.homeTeam} vs {nextMatch.awayTeam}
+              </span>
+              <span className="text-[#EBEBF5]/35">•</span>
+              <span className="text-[#00BFA5] font-medium">{nextMatch.competition}</span>
+              <span className="text-[#EBEBF5]/35">•</span>
+              <span className="text-[#EBEBF5]/68 text-[11px]">{nextMatch.venue}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-white">Anfield • The Kop Stand</span>
+              <span className="text-[#EBEBF5]/35">•</span>
+              <span className="text-[#00BFA5] font-medium">
+                Andoni Iraola (4-2-3-1 Vertical Press)
+              </span>
+            </div>
+          )}
+
+          {lastMatch && (
+            <div className="flex items-center gap-1.5 pl-2.5 border-l border-white/10 text-[11px] text-[#EBEBF5]/68">
+              <span>Last</span>
+              <span className="text-white font-semibold tabular-nums">
+                {lastMatch.homeTeam} {lastMatch.homeScore}–{lastMatch.awayScore}{" "}
+                {lastMatch.awayTeam}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Apple iOS/macOS Segmented Navigation Control */}
+        <nav
+          aria-label="Primary workspaces"
+          className="apple-segmented flex items-center gap-1 p-1 rounded-full w-full sm:w-auto justify-between sm:justify-start overflow-x-auto"
+        >
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`min-h-[36px] flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-[-0.01em] transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? "bg-[#C8102E] text-white shadow-[0_2px_12px_rgba(200,16,46,0.45),inset_0_0.5px_0_rgba(255,255,255,0.25)]"
+                    : "text-[#EBEBF5]/72 hover:text-white hover:bg-white/[0.07]"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2.1} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
-
-      {/* Live Match Ticker with Real-Time LFC Fixtures */}
-      <div className="hidden xl:flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-[#141419] border border-[#262630] text-xs">
-        <Radio className="w-3.5 h-3.5 text-[#C8102E] animate-pulse shrink-0" />
-        
-        {nextMatch ? (
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[#F6EB61] tracking-wider uppercase text-[10px] bg-[#F6EB61]/10 px-2 py-0.5 rounded border border-[#F6EB61]/25">
-              NEXT MATCH
-            </span>
-            <span className="font-bold text-white">
-              {nextMatch.homeTeam} vs {nextMatch.awayTeam}
-            </span>
-            <span className="text-[#9CA3AF]">•</span>
-            <span className="text-[#00B2A9] font-mono font-medium">{nextMatch.competition}</span>
-            <span className="text-[#9CA3AF]">•</span>
-            <span className="text-[#9CA3AF] font-mono text-[11px]">{nextMatch.venue}</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">ANFIELD • THE KOP STAND</span>
-            <span className="text-[#9CA3AF]">•</span>
-            <span className="text-[#00B2A9] font-mono font-medium">SHAPE: 4-3-3 (3-2-4-1 BUILD-UP)</span>
-          </div>
-        )}
-
-        {lastMatch && (
-          <div className="flex items-center gap-2 pl-2 border-l border-[#262630] text-[11px] text-[#9CA3AF]">
-            <span>Last:</span>
-            <span className="text-white font-mono font-semibold">
-              {lastMatch.homeTeam} {lastMatch.homeScore}-{lastMatch.awayScore} {lastMatch.awayTeam}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Tab Nav Controls */}
-      <nav className="flex items-center gap-1 p-1 rounded-xl bg-[#141419] border border-[#262630] w-full sm:w-auto justify-between sm:justify-start overflow-x-auto">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap ${
-                isActive
-                  ? "bg-gradient-to-r from-[#C8102E] to-[#990C22] text-white shadow-[0_2px_10px_rgba(200,16,46,0.4)] border border-[#C8102E]/60"
-                  : "text-[#9CA3AF] hover:text-white hover:bg-[#202028]"
-              }`}
-            >
-              <span className="text-sm">{tab.emoji}</span>
-              <span className="inline">{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
     </header>
   );
 }
