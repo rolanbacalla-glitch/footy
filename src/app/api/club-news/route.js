@@ -1,27 +1,35 @@
 import crypto from "node:crypto";
+import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
 
 export const dynamic = "force-dynamic";
 
-const FREE_NEWS_SOURCES = [
-  {
-    id: "google-news",
-    name: "Google News",
-    url: "https://news.google.com/rss/search?q=%22Liverpool+FC%22+OR+%22Liverpool%22+football+-%22East+Liverpool%22&hl=en-GB&gl=GB&ceid=GB:en",
-    accent: "blue",
-  },
-  {
-    id: "bbc-sport",
-    name: "BBC Sport",
-    url: "https://feeds.bbci.co.uk/sport/football/teams/liverpool/rss.xml",
-    accent: "yellow",
-  },
-  {
-    id: "the-guardian",
-    name: "The Guardian",
-    url: "https://www.theguardian.com/football/liverpool/rss",
-    accent: "mint",
-  },
-];
+function getNewsSourcesForClub(teamId) {
+  const club = PREMIER_LEAGUE_MANAGERS[teamId] || PREMIER_LEAGUE_MANAGERS["364"];
+  const bbcSlug = club.bbcSlug || "football";
+  const guardianSlug = club.guardianSlug || "football";
+  const clubNameQuery = encodeURIComponent(`"${club.name}" football`);
+
+  return [
+    {
+      id: "google-news",
+      name: "Google News",
+      url: `https://news.google.com/rss/search?q=${clubNameQuery}&hl=en-GB&gl=GB&ceid=GB:en`,
+      accent: "blue",
+    },
+    {
+      id: "bbc-sport",
+      name: "BBC Sport",
+      url: `https://feeds.bbci.co.uk/sport/football/teams/${bbcSlug}/rss.xml`,
+      accent: "yellow",
+    },
+    {
+      id: "the-guardian",
+      name: "The Guardian",
+      url: `https://www.theguardian.com/football/${guardianSlug}/rss`,
+      accent: "mint",
+    },
+  ];
+}
 
 function decodeHtmlEntities(input) {
   if (!input) return "";
@@ -88,7 +96,6 @@ function parseRssItems(xml, sourceMeta) {
 
     if (!rawTitle || !isSafeHttpUrl(rawLink)) continue;
 
-    // Google News appends " - Publisher" to headlines; separate cleanly for Apple News styling
     let headline = rawTitle;
     let publisher = rawSourceTag || sourceMeta.name;
 
@@ -103,7 +110,6 @@ function parseRssItems(xml, sourceMeta) {
       }
     }
 
-    // Remove redundant Google News description when it just repeats the headline + publisher
     let summary = rawDescription;
     if (
       sourceMeta.id === "google-news" &&
@@ -144,74 +150,79 @@ function parseRssItems(xml, sourceMeta) {
   return parsed;
 }
 
-function isRelevantLiverpoolStory(item) {
-  // Direct club RSS feeds are already scoped strictly to Liverpool FC
+function isRelevantStory(item, club) {
   if (item.feedId !== "google-news") return true;
   const text = `${item.title} ${item.summary}`.toLowerCase();
-  if (text.includes("east liverpool") || text.includes("liverpool nsw")) {
-    return false;
-  }
+  const clubNorm = club.name.toLowerCase();
+  const managerNorm = club.manager.toLowerCase();
+  const shortNorm = club.shortName.toLowerCase();
   return (
-    text.includes("liverpool") ||
-    text.includes("anfield") ||
-    text.includes("iraola") ||
-    text.includes("merseyside")
+    text.includes(clubNorm) ||
+    text.includes(managerNorm) ||
+    text.includes(shortNorm)
   );
 }
 
-function extractKeywords(title) {
-  const stopWords = new Set([
-    "liverpool", "football", "with", "from", "that", "this", "have", "will",
-    "after", "over", "into", "about", "ahead", "their", "what", "when", "where",
-    "news", "live", "latest", "transfer", "premier", "league",
-  ]);
+function tokenizeForOverlap(text) {
   return new Set(
-    title
+    text
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
-      .filter((w) => w.length >= 4 && !stopWords.has(w))
+      .filter((w) => w.length >= 4)
   );
 }
 
-function normaliseHeadlineKey(title) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 56);
-}
-
 function isDuplicateHeadline(candidate, existingList) {
-  const candKey = normaliseHeadlineKey(candidate.title);
-  const candWords = extractKeywords(candidate.title);
+  const cTokens = tokenizeForOverlap(candidate.title);
+  if (cTokens.size < 3) return false;
 
-  for (const existing of existingList) {
-    if (normaliseHeadlineKey(existing.title) === candKey) return true;
+  for (const item of existingList) {
+    const itemTokens = tokenizeForOverlap(item.title);
+    if (itemTokens.size < 3) continue;
 
-    const existingWords = extractKeywords(existing.title);
-    if (candWords.size >= 3 && existingWords.size >= 3) {
-      let overlap = 0;
-      for (const w of candWords) {
-        if (existingWords.has(w)) overlap++;
-      }
-      const minSize = Math.min(candWords.size, existingWords.size);
-      if (overlap / minSize >= 0.6) return true;
+    let overlap = 0;
+    for (const t of cTokens) {
+      if (itemTokens.has(t)) overlap += 1;
+    }
+    const minSize = Math.min(cTokens.size, itemTokens.size);
+    if (minSize > 0 && overlap / minSize >= 0.6) {
+      const timeDiff = Math.abs(candidate.timestamp - item.timestamp);
+      if (timeDiff <= 36 * 3600 * 1000) return true;
+      if (overlap / minSize >= 0.75) return true;
     }
   }
   return false;
 }
 
+// In-memory cache per club with 3 minute TTL
+const newsCache = new Map();
+const CACHE_TTL_MS = 3 * 60 * 1000;
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
+  const teamId = searchParams.get("teamId") || "364";
   const forceRefresh = searchParams.get("refresh") === "1";
 
+  const club = PREMIER_LEAGUE_MANAGERS[teamId] || PREMIER_LEAGUE_MANAGERS["364"];
+  const now = Date.now();
+
+  const cached = newsCache.get(teamId);
+  if (!forceRefresh && cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return Response.json(cached.payload, {
+      headers: {
+        "Cache-Control": "public, s-maxage=180, stale-while-revalidate=360",
+      },
+    });
+  }
+
+  const newsSources = getNewsSourcesForClub(teamId);
+
   const results = await Promise.allSettled(
-    FREE_NEWS_SOURCES.map(async (source) => {
+    newsSources.map(async (source) => {
       const res = await fetch(source.url, {
         headers: {
-          "User-Agent": "AnfieldInsights/1.0 (+Liverpool FC News Aggregator)",
+          "User-Agent": "FootballInsights/1.0 (+Premier League News Aggregator)",
           Accept: "application/rss+xml, application/xml, text/xml, */*",
         },
         signal: AbortSignal.timeout(8000),
@@ -234,7 +245,7 @@ export async function GET(request) {
   const sourcesStatus = [];
 
   results.forEach((result, index) => {
-    const meta = FREE_NEWS_SOURCES[index];
+    const meta = newsSources[index];
     if (result.status === "fulfilled") {
       allItems.push(...result.value.items);
       sourcesStatus.push({
@@ -255,15 +266,12 @@ export async function GET(request) {
     }
   });
 
-  // Filter to genuine Liverpool FC club coverage and sort strictly by most recent first
-  const relevantItems = allItems.filter(isRelevantLiverpoolStory);
+  const relevantItems = allItems.filter((item) => isRelevantStory(item, club));
   relevantItems.sort((a, b) => {
     if (b.timestamp !== a.timestamp) return b.timestamp - a.timestamp;
-    // When timestamps match, prefer direct publisher RSS (BBC / Guardian) over Google News redirect
     return (a.feedId === "google-news" ? 1 : 0) - (b.feedId === "google-news" ? 1 : 0);
   });
 
-  // Deduplicate overlapping headlines across feeds
   const deduped = [];
   const seenIds = new Set();
   const seenUrls = new Set();
@@ -276,10 +284,9 @@ export async function GET(request) {
     deduped.push(item);
   }
 
-  // Build top 10 overall + up to 10 per individual feed for instant source switching
   const topTen = deduped.slice(0, 10);
   const bySource = {};
-  for (const source of FREE_NEWS_SOURCES) {
+  for (const source of newsSources) {
     const seenBySourceIds = new Set();
     bySource[source.id] = relevantItems
       .filter((item) => {
@@ -291,22 +298,25 @@ export async function GET(request) {
       .slice(0, 10);
   }
 
-  return Response.json(
-    {
-      club: "Liverpool FC",
-      fetchedAt: new Date().toISOString(),
-      refreshIntervalSeconds: 180,
-      totalFound: deduped.length,
-      articles: topTen,
-      bySource,
-      sourcesStatus,
+  const payload = {
+    club: club.name,
+    teamId,
+    manager: club.manager,
+    fetchedAt: new Date().toISOString(),
+    refreshIntervalSeconds: 180,
+    totalFound: deduped.length,
+    articles: topTen,
+    bySource,
+    sourcesStatus,
+  };
+
+  newsCache.set(teamId, { timestamp: now, payload });
+
+  return Response.json(payload, {
+    headers: {
+      "Cache-Control": forceRefresh
+        ? "no-store"
+        : "public, s-maxage=180, stale-while-revalidate=360",
     },
-    {
-      headers: {
-        "Cache-Control": forceRefresh
-          ? "no-store"
-          : "public, s-maxage=180, stale-while-revalidate=360",
-      },
-    }
-  );
+  });
 }

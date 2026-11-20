@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Sparkles,
 } from "lucide-react";
+import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
 
 const REFRESH_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
 
@@ -31,7 +32,7 @@ const TOPIC_FILTERS = [
   {
     id: "matchday",
     label: "Matchday",
-    keywords: ["match", "goal", "win", "draw", "defeat", "premier league", "champions league", "anfield", "fixture", "lineup", "score"],
+    keywords: ["match", "goal", "win", "draw", "defeat", "premier league", "champions league", "fixture", "lineup", "score"],
   },
   {
     id: "injuries",
@@ -75,13 +76,15 @@ function getSourceBadgeClasses(accent) {
   return "bg-[#00DAC3]/14 text-[#00DAC3] border-[#00DAC3]/30";
 }
 
-export default function ClubNewsView() {
+export default function ClubNewsView({ selectedClubId = "364" }) {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFeed, setSelectedFeed] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
+
+  const clubInfo = PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
 
   const payloadRef = useRef(null);
   useEffect(() => {
@@ -95,9 +98,11 @@ export default function ClubNewsView() {
       }
       setError(null);
 
-      const res = await fetch(
-        forceRefresh ? "/api/club-news?refresh=1" : "/api/club-news"
-      );
+      const url = forceRefresh
+        ? `/api/club-news?teamId=${selectedClubId}&refresh=1`
+        : `/api/club-news?teamId=${selectedClubId}`;
+
+      const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`Feed unavailable (HTTP ${res.status})`);
       }
@@ -106,13 +111,13 @@ export default function ClubNewsView() {
       setPayload(data);
     } catch (err) {
       if (!payloadRef.current?.articles?.length) {
-        setError(err?.message || "Unable to load latest Liverpool FC news.");
+        setError(err?.message || `Unable to load latest ${clubInfo.name} news.`);
       }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [selectedClubId, clubInfo.name]);
 
   useEffect(() => {
     let active = true;
@@ -122,9 +127,11 @@ export default function ClubNewsView() {
         if (forceRefresh && active) {
           setRefreshing(true);
         }
-        const res = await fetch(
-          forceRefresh ? "/api/club-news?refresh=1" : "/api/club-news"
-        );
+        const url = forceRefresh
+          ? `/api/club-news?teamId=${selectedClubId}&refresh=1`
+          : `/api/club-news?teamId=${selectedClubId}`;
+
+        const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Feed unavailable (HTTP ${res.status})`);
         }
@@ -136,7 +143,7 @@ export default function ClubNewsView() {
       } catch (err) {
         if (active) {
           if (!payloadRef.current?.articles?.length) {
-            setError(err?.message || "Unable to load latest Liverpool FC news.");
+            setError(err?.message || `Unable to load latest ${clubInfo.name} news.`);
           }
         }
       } finally {
@@ -147,9 +154,9 @@ export default function ClubNewsView() {
       }
     }
 
+    setLoading(true);
     loadNews(false);
 
-    // Automatically refresh live club news every 3 minutes
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         loadNews(true);
@@ -160,7 +167,7 @@ export default function ClubNewsView() {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [selectedClubId, clubInfo.name]);
 
   const rawList =
     selectedFeed === "all"
@@ -194,7 +201,7 @@ export default function ClubNewsView() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Newspaper className="w-5 h-5 text-[#FF453A]" strokeWidth={2} />
                 <h2 className="text-[17px] font-semibold text-white tracking-[-0.02em]">
-                  Latest Liverpool FC News
+                  Latest {clubInfo.name} News
                 </h2>
                 <span className="text-[10px] font-semibold tabular-nums text-[#00DAC3] bg-[#00DAC3]/12 px-2.5 py-0.5 rounded-full border border-[#00DAC3]/25">
                   Top 10 Most Recent
@@ -212,8 +219,9 @@ export default function ClubNewsView() {
               className="min-h-[38px] self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/[0.08] text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-60"
             >
               <RefreshCw
-                className={`w-3.5 h-3.5 text-[#FF2636] ${refreshing ? "animate-spin" : ""
-                  }`}
+                className={`w-3.5 h-3.5 text-[#FF2636] ${
+                  refreshing ? "animate-spin" : ""
+                }`}
                 strokeWidth={2.2}
               />
               <span>{refreshing ? "Refreshing…" : "Refresh Feed"}</span>
@@ -236,10 +244,11 @@ export default function ClubNewsView() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setSelectedFeed(tab.id)}
-                    className={`min-h-[34px] pressable px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ${isActive
-                      ? "glass-crimson-pill text-white"
-                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                      }`}
+                    className={`min-h-[34px] pressable px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? "glass-crimson-pill text-white"
+                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                    }`}
                   >
                     {tab.label}
                   </button>
@@ -248,227 +257,29 @@ export default function ClubNewsView() {
             </div>
 
             {payload?.fetchedAt && (
-              <div className="flex items-center gap-3 text-[11px] text-[#EBEBF5]/60 tabular-nums">
-                <span className="inline-flex items-center gap-1.5 text-[#30D158] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] animate-pulse" />
-                  Auto-updates every 3 mins
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#EBEBF5]/45" />
-                  Updated {formatUkDateTime(payload.fetchedAt)}
-                </span>
-              </div>
+              <span className="text-[11px] text-[#8E8E93] tabular-nums self-end sm:self-auto">
+                Updated {formatRelativeTime(payload.fetchedAt)}
+              </span>
             )}
           </div>
-        </div>
 
-        {/* Loading Skeletons */}
-        {loading && (
-          <div className="space-y-3" aria-busy="true" aria-label="Loading latest club news">
-            <div className="apple-card rounded-[20px] p-5 animate-pulse">
-              <div className="h-4 w-32 bg-[#1A1A1A] rounded-full mb-3" />
-              <div className="h-6 w-4/5 bg-[#1A1A1A] rounded-lg mb-2" />
-              <div className="h-4 w-full bg-[#1A1A1A] rounded-lg mb-1.5" />
-              <div className="h-4 w-2/3 bg-[#1A1A1A] rounded-lg" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[...Array(6)].map((_, idx) => (
-                <div key={idx} className="apple-card rounded-[20px] p-4 animate-pulse">
-                  <div className="h-3.5 w-24 bg-[#1A1A1A] rounded-full mb-3" />
-                  <div className="h-4 w-full bg-[#1A1A1A] rounded mb-2" />
-                  <div className="h-4 w-3/4 bg-[#1A1A1A] rounded" />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {!loading && error && (
-          <div className="apple-card rounded-[20px] p-6 text-center flex flex-col items-center gap-3">
-            <AlertCircle className="w-8 h-8 text-[#E03535]" strokeWidth={1.8} />
-            <div>
-              <h3 className="text-sm font-semibold text-white">
-                Could not retrieve live news feeds
-              </h3>
-              <p className="text-xs text-[#EBEBF5]/68 mt-1">{error}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => fetchNews(true)}
-              className="min-h-[40px] px-5 py-2 rounded-full glass-crimson-pill text-white text-xs font-semibold cursor-pointer"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Empty Filter State */}
-        {!loading && !error && displayedArticles.length === 0 && (
-          <div className="apple-card rounded-[20px] p-8 text-center">
-            <p className="text-sm font-semibold text-white">
-              No recent headlines matched this filter
-            </p>
-            <p className="text-xs text-[#EBEBF5]/65 mt-1">
-              Try switching back to All Headlines or All Sources to see the full Top 10.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedFeed("all");
-                setSelectedTopic("all");
-              }}
-              className="mt-4 min-h-[38px] px-4 py-1.5 rounded-full bg-[#181818] hover:bg-[#222222] text-xs font-semibold text-white border border-white/10 cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
-
-        {/* Story #01 — Featured Lead Hero Card */}
-        {!loading && !error && leadArticle && (
-          <a
-            href={leadArticle.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="apple-card group glass-shimmer rounded-[24px] p-5 pressable block"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded-full glass-crimson-pill text-white tabular-nums">
-                  Top Story • #01
-                </span>
-                <span
-                  className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${getSourceBadgeClasses(
-                    leadArticle.feedAccent
-                  )}`}
-                >
-                  {leadArticle.feedName}
-                </span>
-                {leadArticle.publisher &&
-                  leadArticle.publisher !== leadArticle.feedName && (
-                    <span className="text-[11px] font-medium text-[#8E8E93]">
-                      via {leadArticle.publisher}
-                    </span>
-                  )}
-              </div>
-
-              <span className="text-[11px] font-medium tabular-nums text-[#8E8E93]">
-                {formatRelativeTime(leadArticle.publishedAt)}
-                {leadArticle.publishedAt
-                  ? ` • ${formatUkDateTime(leadArticle.publishedAt)}`
-                  : ""}
-              </span>
-            </div>
-
-            <h3 className="text-[18px] sm:text-[20px] font-bold text-white tracking-[-0.02em] leading-snug group-hover:text-[#FF4D5A] transition-colors">
-              {leadArticle.title}
-            </h3>
-
-            {leadArticle.summary && (
-              <p className="text-[13px] text-[#8E8E93] leading-relaxed mt-2">
-                {leadArticle.summary}
-              </p>
-            )}
-
-            <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
-              <span className="text-[#8E8E93] font-medium">
-                {leadArticle.publisher}
-              </span>
-              <span className="inline-flex items-center gap-1 font-semibold text-[#FF2636] group-hover:translate-x-0.5 transition-transform">
-                Read full article
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-          </a>
-        )}
-
-        {/* Stories #02 – #10 Grid */}
-        {!loading && !error && remainingArticles.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-2">
-            {remainingArticles.map((article, idx) => {
-              const rank = String(idx + 2).padStart(2, "0");
-              const itemKey = article.id
-                ? `${article.id}-${idx}`
-                : `article-${idx}-${article.url || rank}`;
-              return (
-                <a
-                  key={itemKey}
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="apple-card group rounded-[22px] p-4.5 pressable flex flex-col justify-between gap-3"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-6 h-6 rounded-full bg-[#1A1A1A] border border-white/10 text-[10px] font-semibold tabular-nums text-white flex items-center justify-center shrink-0">
-                          {rank}
-                        </span>
-                        <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${getSourceBadgeClasses(
-                            article.feedAccent
-                          )}`}
-                        >
-                          {article.feedName}
-                        </span>
-                      </div>
-
-                      <span className="text-[11px] text-[#8E8E93] tabular-nums shrink-0">
-                        {formatRelativeTime(article.publishedAt)}
-                      </span>
-                    </div>
-
-                    <h4 className="text-[14px] font-semibold text-white leading-snug tracking-[-0.015em] group-hover:text-[#FF4D5A] transition-colors line-clamp-3">
-                      {article.title}
-                    </h4>
-
-                    {article.summary && (
-                      <p className="text-xs text-[#8E8E93] leading-relaxed mt-1.5 line-clamp-2">
-                        {article.summary}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pt-2.5 border-t border-white/[0.06] flex items-center justify-between gap-2 text-[11px]">
-                    <span className="text-[#8E8E93] font-medium truncate">
-                      {article.publisher}
-                    </span>
-                    <span className="inline-flex items-center gap-1 font-semibold text-[#FF2636] shrink-0">
-                      Open
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* 1/3 Right Column: Free Sources Status & Topic Filter */}
-      <div className="lg:w-1/3 space-y-3.5 min-w-0">
-        {/* Topic Filter Chips */}
-        <div className="apple-card rounded-[24px] p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-[#F1B82D]" strokeWidth={2} />
-            <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-              Quick Topic Filter
-            </h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
+          {/* Micro-Filter by Topic */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+            <span className="text-[11px] font-medium text-[#8E8E93] shrink-0 mr-1">
+              Filter:
+            </span>
             {TOPIC_FILTERS.map((topic) => {
-              const isActive = selectedTopic === topic.id;
+              const isSelected = selectedTopic === topic.id;
               return (
                 <button
                   key={topic.id}
                   type="button"
                   onClick={() => setSelectedTopic(topic.id)}
-                  aria-pressed={isActive}
-                  className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${isActive
-                    ? "glass-crimson-pill text-white border-transparent"
-                    : "bg-[#1A1A1A] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
-                    }`}
+                  className={`min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-white/15 text-white border-white/25 font-semibold"
+                      : "bg-transparent text-[#8E8E93] border-white/[0.06] hover:text-white hover:bg-white/[0.05]"
+                  }`}
                 >
                   {topic.label}
                 </button>
@@ -477,52 +288,251 @@ export default function ClubNewsView() {
           </div>
         </div>
 
-        {/* Free Live RSS Sources Telemetry */}
-        <div className="apple-card rounded-[24px] p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#FF2636]" strokeWidth={2} />
-              <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-                Free Live News Sources
-              </h3>
+        {/* Loading State Skeleton */}
+        {loading && !payload && (
+          <div className="space-y-3">
+            <div className="apple-card rounded-[22px] p-6 animate-pulse space-y-3">
+              <div className="h-4 w-28 bg-white/10 rounded-full" />
+              <div className="h-6 w-3/4 bg-white/15 rounded-lg" />
+              <div className="h-4 w-full bg-white/10 rounded-lg" />
+              <div className="h-4 w-2/3 bg-white/10 rounded-lg" />
             </div>
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="apple-card rounded-[18px] p-4 animate-pulse flex items-center justify-between"
+              >
+                <div className="space-y-2 flex-1">
+                  <div className="h-3 w-20 bg-white/10 rounded-full" />
+                  <div className="h-4 w-4/5 bg-white/15 rounded" />
+                </div>
+                <div className="w-16 h-4 bg-white/10 rounded" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error Fallback Banner */}
+        {error && !displayedArticles.length && (
+          <div className="apple-card rounded-[20px] p-5 border border-[#FF453A]/30 bg-[#FF453A]/10 text-white flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-[#FF453A] shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <h3 className="text-sm font-semibold text-white">
+                News Feeds Temporarily Unavailable
+              </h3>
+              <p className="text-xs text-[#EBEBF5]/70 leading-relaxed">
+                {error} We automatically retry fetching live club feeds from Google News UK, BBC Sport, and The Guardian every 3 minutes.
+              </p>
+              <button
+                type="button"
+                onClick={() => fetchNews(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#FF453A] hover:underline pt-1 cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                Try Fetching Again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Articles List: Lead Feature Card + Compact Secondary List */}
+        {!loading && displayedArticles.length === 0 && !error && (
+          <div className="apple-card rounded-[20px] p-8 text-center text-[#8E8E93] space-y-2">
+            <p className="text-sm font-medium text-white">
+              No headlines match the selected filter.
+            </p>
+            <p className="text-xs">
+              Try switching back to &ldquo;All Sources&rdquo; or &ldquo;All Headlines&rdquo;.
+            </p>
+          </div>
+        )}
+
+        {/* 1. Lead Featured Headline Card */}
+        {leadArticle && (
+          <article className="apple-card rounded-[24px] p-5 sm:p-6 transition-all duration-300 hover:border-white/20 group relative overflow-hidden">
+            <div className="flex flex-col gap-3">
+              {/* Header meta */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${getSourceBadgeClasses(
+                      leadArticle.feedAccent
+                    )}`}
+                  >
+                    {leadArticle.feedName}
+                  </span>
+                  <span className="text-[11px] text-[#8E8E93] font-medium">
+                    {leadArticle.publisher}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-[#8E8E93] font-mono tabular-nums">
+                  <Clock className="w-3 h-3" />
+                  <span>{formatRelativeTime(leadArticle.publishedAt)}</span>
+                </div>
+              </div>
+
+              {/* Title & summary */}
+              <div className="space-y-2">
+                <a
+                  href={leadArticle.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug group-hover:text-[#FF4D5A] transition-colors focus:outline-none flex items-start justify-between gap-3"
+                >
+                  <span>{leadArticle.title}</span>
+                  <ArrowUpRight className="w-4 h-4 shrink-0 text-[#8E8E93] group-hover:text-white transition-colors mt-1" />
+                </a>
+                {leadArticle.summary && (
+                  <p className="text-xs sm:text-sm text-[#EBEBF5]/75 leading-relaxed font-normal">
+                    {leadArticle.summary}
+                  </p>
+                )}
+              </div>
+
+              {/* Footer action */}
+              <div className="pt-2 flex items-center justify-between border-t border-white/[0.06] text-xs">
+                <a
+                  href={leadArticle.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-white/90 hover:text-white flex items-center gap-1 text-[11px] group-hover:translate-x-0.5 transition-transform"
+                >
+                  <span>Read full coverage on {leadArticle.publisher}</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+                <span className="text-[10px] text-white/40 font-mono">
+                  {formatUkDateTime(leadArticle.publishedAt)}
+                </span>
+              </div>
+            </div>
+          </article>
+        )}
+
+        {/* 2. Secondary Compact Articles List (Items 2 - 10) */}
+        {remainingArticles.length > 0 && (
+          <div className="space-y-2.5">
+            {remainingArticles.map((article, index) => (
+              <article
+                key={article.id}
+                className="apple-card rounded-[18px] p-3.5 sm:p-4 transition-all duration-200 hover:border-white/20 hover:bg-[#15171E] group"
+              >
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-white/40 w-4">
+                        #{index + 2}
+                      </span>
+                      <span
+                        className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${getSourceBadgeClasses(
+                          article.feedAccent
+                        )}`}
+                      >
+                        {article.feedName}
+                      </span>
+                      <span className="text-[11px] text-[#8E8E93] truncate max-w-[140px] sm:max-w-[220px]">
+                        {article.publisher}
+                      </span>
+                    </div>
+
+                    <span className="text-[11px] text-[#8E8E93] font-mono tabular-nums shrink-0">
+                      {formatRelativeTime(article.publishedAt)}
+                    </span>
+                  </div>
+
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs sm:text-sm font-semibold text-white leading-snug group-hover:text-[#FF4D5A] transition-colors flex items-start justify-between gap-2"
+                  >
+                    <span>{article.title}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-[#8E8E93] group-hover:text-white mt-0.5" />
+                  </a>
+
+                  {article.summary && (
+                    <p className="text-[11px] text-[#EBEBF5]/65 line-clamp-2 leading-relaxed">
+                      {article.summary}
+                    </p>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 1/3 Right Column: Editorial Radar & Free Sources Registry */}
+      <div className="lg:w-1/3 flex flex-col gap-3.5 shrink-0">
+        {/* Source Health Card */}
+        <div className="apple-card rounded-[20px] p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[#0A84FF]" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">
+              Active Sources Registry
+            </h3>
           </div>
 
           <div className="space-y-2">
             {(payload?.sourcesStatus || [
-              { id: "google-news", name: "Google News", accent: "blue", ok: true, count: 0 },
-              { id: "bbc-sport", name: "BBC Sport", accent: "yellow", ok: true, count: 0 },
-              { id: "the-guardian", name: "The Guardian", accent: "mint", ok: true, count: 0 },
-            ]).map((src) => (
+              { id: "google-news", name: "Google News", accent: "blue", ok: true },
+              { id: "bbc-sport", name: "BBC Sport", accent: "yellow", ok: true },
+              { id: "the-guardian", name: "The Guardian", accent: "mint", ok: true },
+            ]).map((s) => (
               <div
-                key={src.id}
-                className="apple-tile px-3 py-2.5 rounded-[14px] flex items-center justify-between gap-2"
+                key={s.id}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2
-                    className={`w-4 h-4 shrink-0 ${src.ok ? "text-[#FF2636]" : "text-[#8E8E93]"
-                      }`}
-                    strokeWidth={2}
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      s.ok ? "bg-[#30D158]" : "bg-[#FF453A]"
+                    }`}
                   />
-                  <div>
-                    <span className="text-xs font-semibold text-white block">
-                      {src.name}
-                    </span>
-                    <span className="text-[10px] text-[#8E8E93]">
-                      Public RSS • UK (en-GB)
-                    </span>
-                  </div>
+                  <span className="text-xs font-semibold text-white">
+                    {s.name}
+                  </span>
                 </div>
-                <span className="text-[11px] font-mono tabular-nums font-semibold text-[#FF2636]">
-                  {loading ? "—" : `${src.count} items`}
-                </span>
+                <div className="flex items-center gap-2 text-[10px] text-white/50 font-mono">
+                  <span>{s.ok ? "Live & Synced" : "Unreachable"}</span>
+                  {typeof s.count === "number" && (
+                    <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/70">
+                      {s.count} items
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          <p className="text-[11px] text-[#8E8E93] leading-relaxed mt-3 pt-3 border-t border-white/[0.08]">
-            Headlines are deduplicated across feeds, ordered strictly by publication timestamp, and capped to the <strong className="text-white">Top 10 most recent</strong> stories.
-          </p>
+          <div className="pt-2 border-t border-white/[0.06] text-[10px] text-[#8E8E93] leading-relaxed">
+            All news headlines are drawn directly from open syndication streams. No login, synthetic articles, or paywalls.
+          </div>
+        </div>
+
+        {/* Manager Tactical Spotlight Card */}
+        <div className="apple-card rounded-[20px] p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#FFD60A]" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#8E8E93]">
+              {clubInfo.name} Command
+            </h3>
+          </div>
+
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
+            <div className="text-[10px] uppercase font-bold text-[#FF4D5A] tracking-wider">
+              Official Head Coach
+            </div>
+            <div className="text-sm font-bold text-white">{clubInfo.manager}</div>
+            <div className="text-xs text-white/60">
+              Nationality: <span className="text-white">{clubInfo.nationality}</span>
+            </div>
+            <div className="text-xs text-white/60">
+              Tactical Setup: <span className="font-mono text-white/90">{clubInfo.formation}</span>
+            </div>
+            <div className="text-xs text-[#8E8E93] pt-1 border-t border-white/[0.06] mt-2 leading-relaxed">
+              {clubInfo.tacticalStyle}
+            </div>
+          </div>
         </div>
       </div>
     </div>

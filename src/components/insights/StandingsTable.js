@@ -12,8 +12,9 @@ import {
   Activity,
   ArrowUpRight,
 } from "lucide-react";
+import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
 
-export default function StandingsTable() {
+export default function StandingsTable({ selectedClubId = "364", onSelectClub }) {
   const [standings, setStandings] = useState([]);
   const [source, setSource] = useState("Connecting to live feed...");
   const [isLive, setIsLive] = useState(false);
@@ -43,12 +44,10 @@ export default function StandingsTable() {
   }, []);
 
   useEffect(() => {
-    // Initial fetch via timer to prevent React synchronous effect warnings
     const initialTimer = setTimeout(() => {
       fetchStandings();
     }, 0);
 
-    // Auto-refresh every 3 minutes
     const interval = setInterval(() => {
       fetchStandings();
     }, 3 * 60 * 1000);
@@ -60,7 +59,8 @@ export default function StandingsTable() {
   }, [fetchStandings]);
 
   const displayedRows = isExpanded ? standings : standings.slice(0, 6);
-  const lfcRank = standings.find((t) => t.isLfc)?.rank || null;
+  const selectedTeamInfo = PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
+  const currentClubRank = standings.find((t) => String(t.id) === String(selectedClubId))?.rank || null;
 
   return (
     <div className="apple-tile rounded-2xl border border-white/[0.08] p-4 bg-[#0B0E14] text-white">
@@ -75,9 +75,9 @@ export default function StandingsTable() {
               <h3 className="text-sm font-bold tracking-tight text-white">
                 Premier League Live Standings
               </h3>
-              {lfcRank && (
+              {currentClubRank && (
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#FF2636]/20 text-[#FF4D5A] border border-[#FF2636]/30">
-                  LFC Pos: #{lfcRank}
+                  {selectedTeamInfo.shortName} Pos: #{currentClubRank}
                 </span>
               )}
             </div>
@@ -152,7 +152,7 @@ export default function StandingsTable() {
           <thead>
             <tr className="border-b border-white/[0.06] text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">
               <th className="py-2 pl-2 w-8 text-center">Pos</th>
-              <th className="py-2 pl-2">Club & Head Coach</th>
+              <th className="py-2 pl-2">Club &amp; Head Coach</th>
               <th className="py-2 text-center w-10">P</th>
               <th className="py-2 text-center w-8">W</th>
               <th className="py-2 text-center w-8">D</th>
@@ -168,14 +168,20 @@ export default function StandingsTable() {
               const isUel = rank === 5;
               const isUecl = rank === 6;
               const isRelegation = rank >= 18;
+              const isCurrentSelected = String(team.id) === String(selectedClubId);
 
               return (
                 <tr
                   key={team.id || team.name}
-                  className={`transition-colors ${
-                    team.isLfc
+                  onClick={() => {
+                    if (onSelectClub && team.id) {
+                      onSelectClub(String(team.id));
+                    }
+                  }}
+                  className={`transition-colors cursor-pointer ${
+                    isCurrentSelected
                       ? "bg-[#FF2636]/15 font-semibold text-white shadow-inner"
-                      : "hover:bg-white/[0.03] text-white/85"
+                      : "hover:bg-white/[0.04] text-white/85"
                   }`}
                 >
                   {/* Position with qualification badge stripe */}
@@ -200,12 +206,12 @@ export default function StandingsTable() {
                   <td className="py-2.5 pl-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs ${team.isLfc ? "font-bold text-white" : "font-medium"}`}>
+                        <span className={`text-xs ${isCurrentSelected ? "font-bold text-white" : "font-medium"}`}>
                           {team.name}
                         </span>
-                        {team.isLfc && (
+                        {isCurrentSelected && (
                           <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#FF2636] text-white">
-                            LFC
+                            Selected
                           </span>
                         )}
                       </div>
@@ -223,15 +229,35 @@ export default function StandingsTable() {
                     </div>
                   </td>
 
-                  {/* Stats */}
-                  <td className="py-2.5 text-center font-mono text-white/70">{team.played}</td>
-                  <td className="py-2.5 text-center font-mono text-white/60">{team.wins}</td>
-                  <td className="py-2.5 text-center font-mono text-white/60">{team.draws}</td>
-                  <td className="py-2.5 text-center font-mono text-white/60">{team.losses}</td>
-                  <td className={`py-2.5 text-center font-mono ${team.goalDiff > 0 ? "text-emerald-400" : team.goalDiff < 0 ? "text-rose-400" : "text-white/60"}`}>
+                  {/* Played, Won, Drawn, Lost */}
+                  <td className="py-2.5 text-center font-mono tabular-nums text-white/70">
+                    {team.played}
+                  </td>
+                  <td className="py-2.5 text-center font-mono tabular-nums text-emerald-400">
+                    {team.wins}
+                  </td>
+                  <td className="py-2.5 text-center font-mono tabular-nums text-white/50">
+                    {team.draws}
+                  </td>
+                  <td className="py-2.5 text-center font-mono tabular-nums text-rose-400/80">
+                    {team.losses}
+                  </td>
+
+                  {/* Goal Difference */}
+                  <td
+                    className={`py-2.5 text-center font-mono tabular-nums font-semibold ${
+                      team.goalDiff > 0
+                        ? "text-emerald-400"
+                        : team.goalDiff < 0
+                        ? "text-rose-400"
+                        : "text-white/40"
+                    }`}
+                  >
                     {team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}
                   </td>
-                  <td className="py-2.5 text-center font-mono font-bold text-sm text-white">
+
+                  {/* Points */}
+                  <td className="py-2.5 text-center font-mono tabular-nums font-bold text-sm text-white">
                     {team.points}
                   </td>
                 </tr>
@@ -241,16 +267,14 @@ export default function StandingsTable() {
         </table>
       </div>
 
-      {/* Table Footer Controls */}
-      <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-white/40">
-        <span>Official Premier League Rules: Points &gt; GD &gt; GF</span>
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-white/70 hover:text-white transition cursor-pointer font-medium"
-        >
-          {isExpanded ? "Collapse to Top 6" : `View all 20 Premier League clubs (${standings.length})`}
-        </button>
+      {/* Table Footer Insight / Navigation Link */}
+      <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-white/40">
+        <span>Click any row to switch active tactical intelligence</span>
+        {lastUpdated && (
+          <span className="font-mono text-[10px]">
+            Updated: {new Date(lastUpdated).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
       </div>
     </div>
   );

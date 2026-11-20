@@ -1,23 +1,24 @@
 export const dynamic = "force-dynamic";
 
+import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
+
 /**
- * Authoritative Live Sports Intelligence Engine
- * Fetches real-time feeds from ESPN Sports API + Open-Meteo Satellite Weather
+ * Authoritative Multi-Club Live Sports Intelligence Engine
+ * Fetches real-time feeds from ESPN Sports API
  * Zero synthetic or fabricated mock data.
+ * Accepts ?teamId=... parameter (defaults to Liverpool 364)
  */
 
-const LFC_TEAM_ID = "364"; // Liverpool FC ESPN ID
-const MUFC_TEAM_ID = "360"; // Manchester United ESPN ID
-
-export async function GET() {
-  const now = new Date();
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const teamId = searchParams.get("teamId") || "364";
+  const clubInfo = PREMIER_LEAGUE_MANAGERS[teamId] || PREMIER_LEAGUE_MANAGERS["364"];
 
   let liveMatches = [];
-  let standings = { lfc: null, mufc: null };
+  let standings = { selected: null, opponent: null };
   let liveNextEvent = null;
   let liveRoster = [];
-  let liveRecentResults = [];
-  let derbyNewsHeadline = null;
+  let clubNewsHeadline = null;
   let dataSource = "espn_verified_live";
 
   try {
@@ -28,10 +29,10 @@ export async function GET() {
       fetch("https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings", {
         next: { revalidate: 180 },
       }),
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${LFC_TEAM_ID}`, {
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}`, {
         next: { revalidate: 60 },
       }),
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${LFC_TEAM_ID}/roster`, {
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}/roster`, {
         next: { revalidate: 600 },
       }),
       fetch("https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/news", {
@@ -39,7 +40,39 @@ export async function GET() {
       }),
     ]);
 
-    // 1. Live Standings
+    // 1. Next Fixture & Broadcast Details
+    let nextOpponentId = null;
+    if (teamRes.status === "fulfilled" && teamRes.value.ok) {
+      const teamData = await teamRes.value.json();
+      const nextEvt = teamData.team?.nextEvent?.[0];
+      if (nextEvt) {
+        const comp = nextEvt.competitions?.[0];
+        const competitors = comp?.competitors || [];
+        const homeComp = competitors.find((c) => c.homeAway === "home");
+        const awayComp = competitors.find((c) => c.homeAway === "away");
+        const isHome = String(homeComp?.team?.id) === String(teamId);
+        const oppComp = isHome ? awayComp : homeComp;
+        nextOpponentId = oppComp?.team?.id;
+
+        liveNextEvent = {
+          id: nextEvt.id,
+          name: nextEvt.name,
+          date: nextEvt.date,
+          status: comp?.status?.type?.detail || "Scheduled",
+          state: comp?.status?.type?.state || "pre",
+          venue: comp?.venue?.fullName || clubInfo.stadium,
+          competition: nextEvt.league?.name || "English Premier League",
+          broadcast: comp?.broadcasts?.[0]?.media?.shortName || (isHome ? "Sky Sports" : "TNT Sports"),
+          isHome,
+          opponent: oppComp?.team?.displayName || "Opponent",
+          opponentId: nextOpponentId,
+          homeTeam: homeComp?.team?.displayName || "Home",
+          awayTeam: awayComp?.team?.displayName || "Away",
+        };
+      }
+    }
+
+    // 2. Live Standings
     if (standingsRes.status === "fulfilled" && standingsRes.value.ok) {
       const data = await standingsRes.value.json();
       const entries = data.children?.[0]?.standings?.entries || [];
@@ -57,31 +90,13 @@ export async function GET() {
         };
       };
 
-      const lfcEntry = entries.find((r) => r.team?.id === LFC_TEAM_ID || r.team?.displayName?.includes("Liverpool"));
-      const mufcEntry = entries.find((r) => r.team?.id === MUFC_TEAM_ID || r.team?.displayName?.includes("Manchester United"));
+      const selectedEntry = entries.find((r) => r.team?.id === teamId || r.team?.displayName?.toLowerCase().includes(clubInfo.name.toLowerCase()));
+      const oppEntry = nextOpponentId ? entries.find((r) => r.team?.id === nextOpponentId) : null;
 
       standings = {
-        lfc: getStats(lfcEntry),
-        mufc: getStats(mufcEntry),
+        selected: getStats(selectedEntry),
+        opponent: getStats(oppEntry),
       };
-    }
-
-    // 2. Next Fixture & Broadcast Details
-    if (teamRes.status === "fulfilled" && teamRes.value.ok) {
-      const teamData = await teamRes.value.json();
-      const nextEvt = teamData.team?.nextEvent?.[0];
-      if (nextEvt) {
-        liveNextEvent = {
-          id: nextEvt.id,
-          name: nextEvt.name,
-          date: nextEvt.date,
-          status: nextEvt.competitions?.[0]?.status?.type?.detail || "Scheduled",
-          state: nextEvt.competitions?.[0]?.status?.type?.state || "pre",
-          venue: nextEvt.competitions?.[0]?.venue?.fullName || "Anfield",
-          competition: nextEvt.league?.name || "English Premier League",
-          broadcast: nextEvt.competitions?.[0]?.broadcasts?.[0]?.media?.shortName || "Sky Sports",
-        };
-      }
     }
 
     // 3. Live Verified Roster
@@ -98,15 +113,16 @@ export async function GET() {
     // 4. News Headline
     if (newsRes.status === "fulfilled" && newsRes.value.ok) {
       const newsData = await newsRes.value.json();
-      const derbyArticle = (newsData.articles || []).find((a) =>
-        a.headline?.toLowerCase().includes("liverpool") && a.headline?.toLowerCase().includes("united")
+      const clubArticle = (newsData.articles || []).find((a) =>
+        a.headline?.toLowerCase().includes(clubInfo.name.toLowerCase()) ||
+        a.description?.toLowerCase().includes(clubInfo.name.toLowerCase())
       );
-      if (derbyArticle) {
-        derbyNewsHeadline = {
-          headline: derbyArticle.headline,
-          description: derbyArticle.description,
-          url: derbyArticle.links?.web?.href,
-          published: derbyArticle.published,
+      if (clubArticle) {
+        clubNewsHeadline = {
+          headline: clubArticle.headline,
+          description: clubArticle.description,
+          url: clubArticle.links?.web?.href,
+          published: clubArticle.published,
         };
       }
     }
@@ -138,16 +154,21 @@ export async function GET() {
   }
 
   return Response.json({
-    verifiedAt: now.toISOString(),
+    verifiedAt: new Date().toISOString(),
     status: "LIVE_VERIFIED",
     source: dataSource,
+    teamId,
+    clubName: clubInfo.name,
+    manager: clubInfo.manager,
+    formation: clubInfo.formation,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {
       totalSquadSize: liveRoster.length,
-      sampleActive: liveRoster.slice(0, 15),
+      sampleActive: liveRoster.slice(0, 11),
     },
-    derbyNewsHeadline,
+    clubNewsHeadline,
     currentGameweekMatches: liveMatches,
+    liveRoster,
   });
 }

@@ -1,35 +1,40 @@
 import { NextResponse } from "next/server";
+import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
 
-// Cache live fixtures for 10 minutes to respect API etiquette
-let cachedSchedule = null;
-let lastFetchedTime = 0;
+// In-memory per-club cache (10 minutes TTL)
+const scheduleCache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
 export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const teamId = searchParams.get("teamId") || "364"; // Default Liverpool (364)
+  const clubInfo = PREMIER_LEAGUE_MANAGERS[teamId] || { name: "Liverpool", shortName: "LIV" };
+
   const now = Date.now();
-  if (cachedSchedule && now - lastFetchedTime < CACHE_TTL_MS) {
-    return NextResponse.json(cachedSchedule);
+  const cached = scheduleCache.get(teamId);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return NextResponse.json(cached.payload);
   }
 
   try {
-    // 1. Fetch upcoming fixtures
-    const upcomingUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/364/schedule?fixture=true";
-    // 2. Fetch past match results
-    const resultsUrl = "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/364/schedule";
+    // 1. Fetch upcoming fixtures for the chosen club
+    const upcomingUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}/schedule?fixture=true`;
+    // 2. Fetch past match results for the chosen club
+    const resultsUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}/schedule`;
 
     const [upcomingRes, resultsRes] = await Promise.all([
       fetch(upcomingUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; AnfieldInsights/1.0)", Accept: "application/json" },
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; FootballInsights/1.0)", Accept: "application/json" },
         next: { revalidate: 600 },
       }),
       fetch(resultsUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; AnfieldInsights/1.0)", Accept: "application/json" },
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; FootballInsights/1.0)", Accept: "application/json" },
         next: { revalidate: 600 },
       }),
     ]);
 
     if (!upcomingRes.ok && !resultsRes.ok) {
-      throw new Error("Failed to reach ESPN schedule feeds");
+      throw new Error(`Failed to reach ESPN schedule feeds for team ${teamId}`);
     }
 
     const upcomingData = upcomingRes.ok ? await upcomingRes.json() : { events: [] };
@@ -44,31 +49,37 @@ export async function GET(request) {
 
         const homeName = home.team?.displayName || "Home";
         const awayName = away.team?.displayName || "Away";
-        const isLfcHome = home.team?.id === "364";
-        const opponent = isLfcHome ? awayName : homeName;
+        const isSelectedClubHome = String(home.team?.id) === String(teamId);
+        const opponent = isSelectedClubHome ? awayName : homeName;
+        const opponentId = isSelectedClubHome ? away.team?.id : home.team?.id;
 
         const dateIso = ev.date;
         const statusDesc = comp.status?.type?.description || (isUpcoming ? "Scheduled" : "Full Time");
-        const homeScore = home.score?.displayValue ?? null;
-        const awayScore = away.score?.displayValue ?? null;
+        
+        // Cleanly parse scores: completed matches have a real score, while unplayed upcoming matches do not
+        const homeScore = !isUpcoming && home.score?.displayValue !== undefined ? String(home.score.displayValue) : null;
+        const awayScore = !isUpcoming && away.score?.displayValue !== undefined ? String(away.score.displayValue) : null;
 
         // Broadcast channels
         const broadcasts = (comp.broadcasts || []).flatMap((b) => b.media?.shortName || b.names || []);
 
         return {
           id: `espn-${ev.id}`,
-          title: `Liverpool vs ${opponent}`,
+          title: `${clubInfo.name} vs ${opponent}`,
+          clubName: clubInfo.name,
+          clubId: teamId,
           opponent,
-          isHome: isLfcHome,
-          venue: comp.venue?.fullName || (isLfcHome ? "Anfield" : `${opponent} Stadium`),
+          opponentId,
+          isHome: isSelectedClubHome,
+          venue: comp.venue?.fullName || (isSelectedClubHome ? `${clubInfo.name} Stadium` : `${opponent} Stadium`),
           competition: ev.league?.name || "Premier League",
           date: dateIso,
-          statusText: isUpcoming ? statusDesc.toUpperCase() : `${homeScore} - ${awayScore}`,
+          statusText: isUpcoming ? statusDesc.toUpperCase() : (homeScore !== null && awayScore !== null ? `${homeScore} - ${awayScore}` : "FT"),
           homeScore,
           awayScore,
           isLive: comp.status?.type?.state === "in",
           isUpcoming,
-          broadcast: broadcasts[0] || (isLfcHome ? "Sky Sports" : "TNT Sports"),
+          broadcast: broadcasts[0] || (isSelectedClubHome ? "Sky Sports" : "TNT Sports"),
         };
       });
     };
@@ -77,22 +88,24 @@ export async function GET(request) {
     const parsedRecent = parseEvents(resultsData.events || [], false);
 
     const payload = {
-      source: "ESPN Official Live Schedule Feed",
+      source: `ESPN Official Live Schedule Feed (${clubInfo.name})`,
+      teamId,
+      teamName: clubInfo.name,
       isLive: true,
       lastUpdated: new Date().toISOString(),
       upcoming: parsedUpcoming,
       recent: parsedRecent,
     };
 
-    cachedSchedule = payload;
-    lastFetchedTime = now;
+    scheduleCache.set(teamId, { timestamp: now, payload });
 
     return NextResponse.json(payload);
   } catch (err) {
-    console.error("Error fetching live ESPN schedule:", err);
+    console.error(`Error fetching live ESPN schedule for team ${teamId}:`, err);
     return NextResponse.json(
       {
         source: "ESPN Live Feed (Failed)",
+        teamId,
         isLive: false,
         error: err.message,
         upcoming: [],

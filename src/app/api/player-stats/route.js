@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchWithFallback } from "../../../lib/apiFallback";
 
 const ESPN_ATHLETE_IDS = {
+  // Liverpool
   alisson: "196876",
   vandijk: "157892",
   frimpong: "281119",
@@ -13,6 +14,30 @@ const ESPN_ATHLETE_IDS = {
   wirtz: "303748",
   barcola: "328238",
   isak: "235662",
+  // Arsenal
+  raya: "196176",
+  gabriel: "236322",
+  saliba: "277385",
+  timber: "282716",
+  calafiori: "298329",
+  rice: "241077",
+  odegaard: "216837",
+  saka: "249301",
+  havertz: "217834",
+  gyokeres: "228670",
+  // Man City
+  ederson: "196788",
+  dias: "223405",
+  gvardiol: "266563",
+  rodri: "220556",
+  foden: "239088",
+  haaland: "249015",
+  // Man United
+  onana: "207909",
+  martinez: "248888",
+  fernandes: "197365",
+  mainoo: "338870",
+  hojlund: "298283",
 };
 
 const cache = new Map();
@@ -26,7 +51,11 @@ export async function GET(request) {
     return NextResponse.json({ error: "playerId query parameter required" }, { status: 400 });
   }
 
-  const athleteId = ESPN_ATHLETE_IDS[playerId.toLowerCase()];
+  // Support direct numeric athlete IDs or slug lookup
+  const athleteId = /^\d+$/.test(playerId)
+    ? playerId
+    : ESPN_ATHLETE_IDS[playerId.toLowerCase()];
+
   if (!athleteId) {
     return NextResponse.json(
       {

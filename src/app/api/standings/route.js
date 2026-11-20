@@ -45,7 +45,6 @@ export async function GET() {
         rank: parseInt(getStat("rank"), 10),
         name: team.displayName,
         shortName: team.shortDisplayName || team.abbreviation,
-        crest: team.logos?.[0]?.href || `/crests/${(team.displayName || "").toLowerCase().replace(/[^a-z0-9]/g, "")}.svg`,
         played: parseInt(getStat("gamesPlayed"), 10),
         wins: parseInt(getStat("wins"), 10),
         draws: parseInt(getStat("ties"), 10),

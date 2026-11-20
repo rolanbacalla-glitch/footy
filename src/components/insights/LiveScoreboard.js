@@ -18,18 +18,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export function getTeamCrest(teamName = "") {
-  const norm = (teamName || "").toLowerCase().trim();
-  if (norm.includes("liverpool")) return "/crests/liverpool.svg";
-  if (norm.includes("united") || norm.includes("man utd") || norm.includes("manutd") || norm === "man united") return "/crests/manutd.svg";
-  if (norm.includes("city") || norm.includes("man city")) return "/crests/man-city.svg";
-  if (norm.includes("chelsea")) return "/crests/chelsea.svg";
-  if (norm.includes("palace") || norm.includes("crystal palace")) return "/crests/crystal-palace.svg";
-  if (norm.includes("brighton")) return "/crests/brighton.svg";
-  if (norm.includes("villarreal")) return "/crests/villarreal.svg";
-  return null;
-}
-
 export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const [seconds, setSeconds] = useState(42);
   const [countdownSeconds, setCountdownSeconds] = useState(16155); // ~4 hours 29 mins 15 secs
@@ -174,8 +162,6 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
 
   const homeTeam = activeMatch?.homeTeam || "Liverpool";
   const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Man United";
-  const homeCrest = activeMatch?.homeCrest || getTeamCrest(homeTeam);
-  const awayCrest = activeMatch?.awayCrest || getTeamCrest(awayTeam);
 
   const homeScorers = isMatchdayPreMatch ? [] : (activeMatch?.homeScorers || [
     { player: "A. Isak", min: "28'" },

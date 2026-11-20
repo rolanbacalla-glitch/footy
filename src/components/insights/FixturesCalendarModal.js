@@ -12,7 +12,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-export default function FixturesCalendarModal({ isOpen, onClose, fixtures = [], onSelectFixture }) {
+export default function FixturesCalendarModal({ isOpen, onClose, fixtures = [], onSelectFixture, clubName = "Liverpool FC" }) {
   const [filter, setFilter] = useState("all"); // 'all' | 'home' | 'away'
 
   if (!isOpen) return null;
@@ -43,10 +43,10 @@ export default function FixturesCalendarModal({ isOpen, onClose, fixtures = [], 
             </div>
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                Liverpool FC Full Fixture Schedule
+                {clubName} Full Fixture Schedule
               </h3>
               <p className="text-xs text-white/50 mt-0.5">
-                Official Premier League & European campaign • Real ESPN feed ({fixtures.length} matches)
+                Official Premier League &amp; Cup campaigns • Real ESPN feed ({fixtures.length} matches)
               </p>
             </div>
           </div>
