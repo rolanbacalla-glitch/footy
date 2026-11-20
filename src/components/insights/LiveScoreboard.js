@@ -39,10 +39,21 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
   const [liveFactData, setLiveFactData] = useState(null);
 
-  // Live Fact-Checking Sync from real Premier League / ESPN feeds
+  const isLive = activeMatch?.type === "LIVE" || activeMatch?.isLive;
+  const isMatchdayPreMatch =
+    activeMatch?.type === "MATCHDAY" ||
+    activeMatch?.status === "PRE_MATCH" ||
+    (activeMatch?.isMatchday && !activeMatch?.isLive);
+  const isFinished = activeMatch?.type === "RECENT";
+
+  // Adaptive Live Fact-Checking Polling
+  // 15s during live in-play; 60s during pre-match countdown; 5m for finished/archive matches
   useEffect(() => {
     let isMounted = true;
     async function checkLiveFacts() {
+      // Pause network requests if the user has minimized or switched tabs
+      if (typeof document !== "undefined" && document.hidden) return;
+
       try {
         const res = await fetch("/api/live-fixtures");
         if (res.ok) {
@@ -53,20 +64,28 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
         // Silent fallback
       }
     }
+
     checkLiveFacts();
-    const interval = setInterval(checkLiveFacts, 60000); // 1-minute live verification polling
+
+    const pollIntervalMs = isLive ? 15000 : isMatchdayPreMatch ? 60000 : 300000;
+    const interval = setInterval(checkLiveFacts, pollIntervalMs);
+
+    // Refresh immediately when tab regains focus
+    const handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && !document.hidden) checkLiveFacts();
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
     return () => {
       isMounted = false;
       clearInterval(interval);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
     };
-  }, []);
-
-  const isLive = activeMatch?.type === "LIVE" || activeMatch?.isLive;
-  const isMatchdayPreMatch =
-    activeMatch?.type === "MATCHDAY" ||
-    activeMatch?.status === "PRE_MATCH" ||
-    (activeMatch?.isMatchday && !activeMatch?.isLive);
-  const isFinished = activeMatch?.type === "RECENT";
+  }, [isLive, isMatchdayPreMatch]);
 
   // Match clock seconds ticker for live match
   useEffect(() => {
