@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { fetchWithFallback } from "../../../lib/apiFallback";
 
-// Authoritative ESPN Athlete ID mapping for Liverpool FC Starting Squad
 const ESPN_ATHLETE_IDS = {
   alisson: "196876",
   vandijk: "157892",
@@ -15,7 +15,6 @@ const ESPN_ATHLETE_IDS = {
   isak: "235662",
 };
 
-// In-memory cache to prevent excessive roundtrips (TTL 5 minutes)
 const cache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -45,26 +44,24 @@ export async function GET(request) {
     return NextResponse.json(cached.data);
   }
 
+  // Automatic Fallback Chain (2500ms timeout per provider)
+  const endpoints = [
+    {
+      name: "ESPN Overview V3 Feed",
+      url: `https://site.web.api.espn.com/apis/common/v3/sports/soccer/athletes/${athleteId}/overview`,
+    },
+    {
+      name: "ESPN Primary Athlete V2 Feed",
+      url: `https://site.api.espn.com/apis/site/v2/sports/soccer/athletes/${athleteId}`,
+    },
+  ];
+
   try {
-    const espnUrl = `https://site.web.api.espn.com/apis/common/v3/sports/soccer/athletes/${athleteId}/overview`;
-    const res = await fetch(espnUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; AnfieldInsights/1.0)",
-        Accept: "application/json",
-      },
-      next: { revalidate: 300 },
-    });
-
-    if (!res.ok) {
-      throw new Error(`ESPN API responded with HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
+    const { data, provider, tier } = await fetchWithFallback(endpoints, { timeoutMs: 2500 });
     const statsObj = data?.statistics || {};
     const names = statsObj.names || [];
     const splits = statsObj.splits || [];
 
-    // Aggregate domestic and European competitive club matches (Premier League, Champions League, Carabao Cup)
     let totalStarts = 0;
     let totalGoals = 0;
     let totalAssists = 0;
@@ -93,7 +90,6 @@ export async function GET(request) {
       const saves = parseInt(statMap.saves || "0", 10);
       const cleanSheets = parseInt(statMap.cleanSheet || "0", 10);
 
-      // Include all current season splits
       if (compName.includes("2026-27") || compName.includes("Premier League") || compName.includes("Champions League")) {
         totalStarts += isNaN(starts) ? 0 : starts;
         totalGoals += isNaN(goals) ? 0 : goals;
@@ -114,11 +110,10 @@ export async function GET(request) {
       }
     }
 
-    // Estimate season minutes from starts (average 82 minutes per start)
     const estimatedMinutes = totalStarts * 82;
 
     const liveStats = {
-      source: "ESPN Live Athlete API",
+      source: `${provider} (Tier ${tier})`,
       isLive: true,
       lastUpdated: new Date().toISOString(),
       athleteId,
@@ -137,10 +132,10 @@ export async function GET(request) {
     cache.set(athleteId, { data: liveStats, timestamp: now });
     return NextResponse.json(liveStats);
   } catch (err) {
-    console.error(`Failed to fetch live stats for athlete ${athleteId}:`, err);
+    console.error(`Fallback Chain Exhausted for Athlete ${athleteId}:`, err);
     return NextResponse.json(
       {
-        source: "ESPN Athlete API (Unreachable)",
+        source: "Fallback Chain Exhausted",
         isLive: false,
         error: err.message,
       },
