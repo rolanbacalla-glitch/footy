@@ -15,7 +15,6 @@ export default function PitchCanvas({
   const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
   const [showChannels, setShowChannels] = useState(true);
-  const [pillMode, setPillMode] = useState("pills"); // "pills" | "minimal"
 
   const activePlayerId = selectedPlayer?.id || hoveredPlayer?.id || null;
 
@@ -100,34 +99,19 @@ export default function PitchCanvas({
           {/* Right Action Tools */}
           <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             {overlayMode === "pass" && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowChannels(!showChannels)}
-                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${showChannels
-                    ? "bg-[#1A1A1A] text-white border-white/20"
-                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                    }`}
-                  title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
-                >
-                  <Layers className="w-3 h-3 text-[#FF2636]" />
-                  <span className="hidden sm:inline">5 Tactical Corridors</span>
-                  <span className="sm:hidden">Corridors</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPillMode(pillMode === "pills" ? "minimal" : "pills")}
-                  className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${pillMode === "pills"
-                    ? "bg-[#1A1A1A] text-white border-white/20"
-                    : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
-                    }`}
-                  title="Toggle between sleek glass pills and minimal labels"
-                >
-                  <Sparkles className="w-3 h-3 text-[#FF2636]" />
-                  <span>{pillMode === "pills" ? "Glass Pills" : "Minimal Labels"}</span>
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => setShowChannels(!showChannels)}
+                className={`min-h-[28px] flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${showChannels
+                  ? "bg-[#1A1A1A] text-white border-white/20"
+                  : "bg-transparent text-[#8E8E93] border-white/[0.08] hover:text-white"
+                  }`}
+                title="Toggle 5 tactical vertical channels (UEFA/PL standard)"
+              >
+                <Layers className="w-3 h-3 text-[#FF2636]" />
+                <span className="hidden sm:inline">5 Tactical Corridors</span>
+                <span className="sm:hidden">Corridors</span>
+              </button>
             )}
 
             {activeMatch?.expectedShape && (
@@ -340,55 +324,20 @@ export default function PitchCanvas({
             <rect x="103" y="30.34" width="1.5" height="7.32" strokeOpacity="0.4" />
           </g>
 
-          {/* 5. Stand Identity & Tactical Direction */}
+          {/* 5. Authentic Stadium Stand Watermark (Whisper-Quiet) */}
           <text
             x="6.5"
             y="6.2"
             fill="#8E8E93"
-            fillOpacity="0.55"
-            fontSize="2.1"
-            fontWeight="700"
-            letterSpacing="0.14"
+            fillOpacity="0.25"
+            fontSize="1.6"
+            fontWeight="600"
+            letterSpacing="0.10"
           >
             ANFIELD ROAD STAND
           </text>
 
-          {/* Attacking Direction Crimson Glass HUD Pill */}
-          <g>
-            <rect
-              x="69"
-              y="3.2"
-              width="32"
-              height="4.2"
-              rx="2.1"
-              fill="url(#glassCrimsonPillGrad)"
-              stroke="rgba(255,255,255,0.45)"
-              strokeWidth="0.3"
-              filter="url(#passBeamGlow)"
-            />
-            {/* Top specular highlight rim */}
-            <path
-              d="M 71.1 3.5 L 98.9 3.5"
-              stroke="#FFFFFF"
-              strokeOpacity="0.65"
-              strokeWidth="0.35"
-              strokeLinecap="round"
-            />
-            <text
-              x="85"
-              y="6.0"
-              textAnchor="middle"
-              fill="#FFFFFF"
-              fontSize="1.8"
-              fontWeight="700"
-              letterSpacing="0.06"
-              className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-            >
-              THE KOP • ATTACKING ➔
-            </text>
-          </g>
-
-          {/* ═══════ OVERLAY 1: TACTICAL PASS NETWORK ═══════ */}
+          {/* ═══════ OVERLAY 1: TACTICAL PASS NETWORK (CALM & FOCUSED) ═══════ */}
           {overlayMode === "pass" && (
             <g id="pass-network-layer">
               {/* Pass Connections (Vectors) */}
@@ -418,13 +367,13 @@ export default function PitchCanvas({
                 const mx = (x1 + x2) / 2;
                 const my = (y1 + y2) / 2;
 
-                // Scaled stroke width based on pass count
-                const baseStroke = Math.min(Math.max((link.count - 10) / 12 * 0.9 + 0.65, 0.7), 2.5);
-                const strokeWidth = isConnected ? baseStroke * 1.35 : baseStroke;
+                // Scaled stroke width: calm, hairline-to-subtle default; bold accent when connected/hovered
+                const baseStroke = Math.min(Math.max((link.count - 10) / 12 * 0.45 + 0.4, 0.4), 1.6);
+                const strokeWidth = isConnected ? baseStroke * 1.5 + 0.6 : baseStroke;
 
-                // Opacity based on pass frequency
-                const defaultOpacity = Math.min(0.42 + link.count / 65, 0.82);
-                const opacity = isDimmed ? 0.06 : isConnected ? 0.98 : defaultOpacity;
+                // Opacity: subtle muted white/grey vectors by default (Opta/StatsBomb style)
+                const defaultOpacity = Math.min(0.18 + link.count / 140, 0.45);
+                const opacity = isDimmed ? 0.04 : isConnected ? 0.95 : defaultOpacity;
 
                 const isHovered = hoveredLink === `${link.from}-${link.to}`;
 
@@ -443,33 +392,33 @@ export default function PitchCanvas({
                         x2={x2}
                         y2={y2}
                         stroke="#FF2636"
-                        strokeOpacity="0.45"
-                        strokeWidth={strokeWidth + 1.8}
+                        strokeOpacity="0.40"
+                        strokeWidth={strokeWidth + 1.4}
                         strokeLinecap="round"
                         filter="url(#passBeamGlow)"
                       />
                     )}
 
-                    {/* Main Dynamic Pass Vector */}
+                    {/* Main Dynamic Pass Vector: Muted crisp grey-white by default, Electric Crimson when connected */}
                     <line
                       x1={x1}
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke={isConnected ? "#FF2636" : "#E31B23"}
+                      stroke={isConnected ? "#FF2636" : "rgba(255, 255, 255, 0.65)"}
                       strokeOpacity={opacity}
                       strokeWidth={strokeWidth}
                       strokeLinecap="round"
                     />
 
-                    {/* Directional Chevron at 62% along the vector */}
-                    {dist > 15 && !isDimmed && (
+                    {/* Directional Chevron: only shown on focused or hovered connections to eliminate clutter */}
+                    {(isConnected || isHovered) && dist > 14 && (
                       <path
-                        d={`M ${x1 + ux * (dist * 0.62) - uy * 1.0} ${y1 + uy * (dist * 0.62) + ux * 1.0} L ${x1 + ux * (dist * 0.62) + ux * 1.2} ${y1 + uy * (dist * 0.62) + uy * 1.2} L ${x1 + ux * (dist * 0.62) + uy * 1.0} ${y1 + uy * (dist * 0.62) - ux * 1.0}`}
+                        d={`M ${x1 + ux * (dist * 0.58) - uy * 0.8} ${y1 + uy * (dist * 0.58) + ux * 0.8} L ${x1 + ux * (dist * 0.58) + ux * 1.1} ${y1 + uy * (dist * 0.58) + uy * 1.1} L ${x1 + ux * (dist * 0.58) + uy * 0.8} ${y1 + uy * (dist * 0.58) - ux * 0.8}`}
                         fill="none"
-                        stroke={isConnected ? "#FFFFFF" : "#FF3848"}
-                        strokeOpacity={isConnected ? 0.95 : 0.65}
-                        strokeWidth="0.45"
+                        stroke="#FFFFFF"
+                        strokeOpacity="0.95"
+                        strokeWidth="0.4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -487,7 +436,7 @@ export default function PitchCanvas({
                 const displayName = getPlayerDisplayName(player.name);
                 const shortPos = getShortPos(player.pos);
                 const fullLabel = `${displayName} • ${shortPos}`;
-                const capsuleWidth = Math.max(fullLabel.length * 0.96 + 3.2, 11);
+                const capsuleWidth = Math.max(fullLabel.length * 0.92 + 2.8, 10);
 
                 return (
                   <g
@@ -499,55 +448,31 @@ export default function PitchCanvas({
                     onMouseEnter={() => setHoveredPlayer(player)}
                     onMouseLeave={() => setHoveredPlayer(null)}
                   >
-                    {/* Outer Concentric Touch Halo (Touch Volume Metric) */}
-                    <circle
-                      cx={player.x}
-                      cy={player.y}
-                      r={radius + 1.1}
-                      fill="none"
-                      stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.24)"}
-                      strokeWidth="0.32"
-                      strokeDasharray="1.2, 1.2"
-                      className={isActive ? "animate-spin" : ""}
-                      style={{
-                        transformOrigin: `${player.x}px ${player.y}px`,
-                        animationDuration: "10s",
-                      }}
-                    />
-
-                    {/* Active Spotlight Animated Halo */}
+                    {/* Active Spotlight Animated Halo: only on selected/hovered node */}
                     {isActive && (
                       <circle
                         cx={player.x}
                         cy={player.y}
-                        r={radius + 2.4}
+                        r={radius + 1.8}
                         fill="none"
                         stroke="#FF2636"
-                        strokeWidth="0.45"
+                        strokeWidth="0.4"
                         strokeDasharray="1.5, 1.2"
                         className="animate-pulse"
                       />
                     )}
 
-                    {/* Core Anfield Crest Circle Badge */}
+                    {/* Core Anfield Jersey Circle Badge (Solid, clean contrast) */}
                     <circle
                       cx={player.x}
                       cy={player.y}
                       r={radius}
                       fill={isActive ? "url(#playerBadgeActive)" : "url(#playerBadgeRed)"}
-                      fillOpacity={isPredicted && !isActive ? 0.55 : 1}
+                      fillOpacity={isPredicted && !isActive ? 0.75 : 1}
                       stroke="#FFFFFF"
-                      strokeOpacity="0.95"
-                      strokeWidth={isActive ? "0.65" : "0.45"}
-                      strokeDasharray={isPredicted ? "0.9, 0.6" : undefined}
+                      strokeOpacity={isActive ? "1" : "0.7"}
+                      strokeWidth={isActive ? "0.6" : "0.35"}
                       filter={isActive ? "url(#activePlayerHalo)" : "url(#nodeDropShadow)"}
-                    />
-
-                    {/* Subtle Glass Specular Crescent */}
-                    <path
-                      d={`M ${player.x - radius * 0.75} ${player.y - radius * 0.2} A ${radius * 0.8} ${radius * 0.8} 0 0 1 ${player.x + radius * 0.75} ${player.y - radius * 0.2} A ${radius} ${radius * 0.5} 0 0 0 ${player.x - radius * 0.75} ${player.y - radius * 0.2}`}
-                      fill="#FFFFFF"
-                      fillOpacity="0.22"
                     />
 
                     {/* Bold Jersey Number */}
@@ -563,57 +488,31 @@ export default function PitchCanvas({
                       {player.number}
                     </text>
 
-                    {/* Tactical Info Pill or Clean Text Label */}
-                    {pillMode === "pills" ? (
-                      /* Refined Sleek Glass Capsule (Semi-translucent, non-occluding) */
-                      <g className="pointer-events-none select-none" filter="url(#nodeDropShadow)">
-                        <rect
-                          x={player.x - capsuleWidth / 2}
-                          y={placement.y}
-                          width={capsuleWidth}
-                          height={3.2}
-                          rx={1.6}
-                          fill={isActive ? "rgba(45, 10, 14, 0.88)" : "rgba(10, 14, 18, 0.76)"}
-                          stroke={isActive ? "#FF2636" : "rgba(255,255,255,0.18)"}
-                          strokeWidth="0.25"
-                        />
-                        <text
-                          x={player.x}
-                          y={placement.y + 2.15}
-                          textAnchor="middle"
-                          fontSize="1.3"
-                          fontWeight="600"
-                          fill="#FFFFFF"
-                          className="tracking-[-0.01em]"
-                        >
-                          {displayName}{" "}
-                          <tspan fill="#8E8E93" fontSize="1.0" fontWeight="500">
-                            • {shortPos}
+                    {/* Direct Clean Typographic Label (Whisper quiet, no boxy borders) */}
+                    <g className="pointer-events-none select-none">
+                      <text
+                        x={player.x}
+                        y={placement.y + 1.9}
+                        textAnchor="middle"
+                        fontSize={isActive ? "1.4" : "1.25"}
+                        fontWeight={isActive ? "700" : "600"}
+                        fill={isActive ? "#FFFFFF" : "#E5E5EA"}
+                        filter="drop-shadow(0 1px 3px rgba(0,0,0,0.95))"
+                        className="tracking-[-0.01em]"
+                      >
+                        {displayName}
+                        {isActive && (
+                          <tspan fill="#FF2636" fontSize="1.0" fontWeight="600">
+                            {" "}• {shortPos}
                           </tspan>
-                        </text>
-                      </g>
-                    ) : (
-                      /* Clean Minimal Pitch Text (Direct names on pitch) */
-                      <g className="pointer-events-none select-none">
-                        <text
-                          x={player.x}
-                          y={placement.y + 2.15}
-                          textAnchor="middle"
-                          fontSize="1.45"
-                          fontWeight="700"
-                          fill="#FFFFFF"
-                          filter="drop-shadow(0 1px 2px rgba(0,0,0,0.95))"
-                          className="tracking-[-0.01em]"
-                        >
-                          {displayName}
-                        </text>
-                      </g>
-                    )}
+                        )}
+                      </text>
+                    </g>
                   </g>
                 );
               })}
 
-              {/* ═══════ LAYER 4: DEDICATED FOREGROUND PASS VOLUME BADGES (NEVER OCCLUDED) ═══════ */}
+              {/* ═══════ LAYER 4: INTERACTIVE FOCUS PASS VOLUME BADGES (PROGRESSIVE DISCLOSURE) ═══════ */}
               <g id="pass-volume-badges-layer">
                 {passLinks.map((link, idx) => {
                   const p1 = getPlayer(link.from);
@@ -623,28 +522,18 @@ export default function PitchCanvas({
                   const isConnected =
                     activePlayerId &&
                     (link.from === activePlayerId || link.to === activePlayerId);
-                  const isDimmed = activePlayerId && !isConnected;
                   const isHovered = hoveredLink === `${link.from}-${link.to}`;
 
-                  // Show badge for high volume (count >= 25) or when focused/hovered
-                  if (!((link.count >= 25 || isConnected || isHovered) && !isDimmed)) {
+                  // Progressive disclosure: Only show badge when player or link is active/hovered
+                  if (!isConnected && !isHovered) {
                     return null;
                   }
 
-                  // Smart positioning along link vector to guarantee clearance from player capsules
-                  let t = 0.5;
-                  if (
-                    (link.from === "gravenberch" && link.to === "macallister") ||
-                    (link.from === "macallister" && link.to === "gravenberch") ||
-                    (link.from === "endo" && link.to === "gravenberch") ||
-                    (link.from === "gravenberch" && link.to === "endo")
-                  ) {
-                    t = 0.44;
-                  }
-
+                  // Position along link vector
+                  const t = 0.5;
                   const bx = p1.x + (p2.x - p1.x) * t;
                   const by = p1.y + (p2.y - p1.y) * t;
-                  const badgeW = link.count >= 100 ? 7.2 : 6.4;
+                  const badgeW = link.count >= 100 ? 6.8 : 5.8;
 
                   return (
                     <g
@@ -654,21 +543,21 @@ export default function PitchCanvas({
                     >
                       <rect
                         x={bx - badgeW / 2}
-                        y={by - 1.8}
+                        y={by - 1.6}
                         width={badgeW}
-                        height="3.6"
-                        rx="1.8"
-                        fill={isConnected || isHovered ? "#240406" : "#0D0E12"}
-                        fillOpacity="0.96"
-                        stroke={isConnected || isHovered ? "#FF2636" : "rgba(255,255,255,0.24)"}
-                        strokeWidth={isConnected || isHovered ? "0.45" : "0.3"}
+                        height="3.2"
+                        rx="1.6"
+                        fill="#121212"
+                        fillOpacity="0.95"
+                        stroke="#FF2636"
+                        strokeWidth="0.35"
                       />
                       <text
                         x={bx}
-                        y={by + 0.72}
+                        y={by + 0.65}
                         textAnchor="middle"
-                        fill={isConnected || isHovered ? "#FF2636" : "#FFFFFF"}
-                        fontSize="1.6"
+                        fill="#FFFFFF"
+                        fontSize="1.45"
                         fontWeight="700"
                         className="tabular-nums font-mono"
                       >
