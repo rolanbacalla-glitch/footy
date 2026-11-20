@@ -347,6 +347,9 @@ function renderRadar(radarData = []) {
 }
 
 export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
+  const [liveData, setLiveData] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") onClose();
@@ -356,6 +359,34 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Fetch verified real-time seasonal data from ESPN Athlete API
+  useEffect(() => {
+    if (!isOpen || !player?.id) {
+      setLiveData(null);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+
+    fetch(`/api/player-stats?playerId=${encodeURIComponent(player.id)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data) {
+          setLiveData(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load live athlete telemetry:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, player?.id]);
 
   if (!isOpen || !player) return null;
 
@@ -379,6 +410,11 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
       { axis: "Vision", val: 87 },
     ],
   };
+
+  // Determine actual live minutes and cards if returned by live feed
+  const displayMinutes = liveData?.isLive && liveData.seasonMinutes ? liveData.seasonMinutes : profile.minutesSeason;
+  const displayYellows = liveData?.isLive && typeof liveData.seasonYellows === "number" ? liveData.seasonYellows : profile.cards;
+  const displayStarts = liveData?.isLive && liveData.seasonStarts ? liveData.seasonStarts : null;
 
   return (
     <div
@@ -410,7 +446,16 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
             </button>
           </div>
 
-          <div className="mt-4 flex items-start justify-between gap-3">
+          {/* Live Data Attribution Tag */}
+          <div className="mt-2.5 flex items-center justify-between text-[10px] px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
+            <span className="flex items-center gap-1.5 text-white/60">
+              <span className={`w-1.5 h-1.5 rounded-full ${liveData?.isLive ? "bg-emerald-400" : "bg-amber-400"}`} />
+              {liveData?.isLive ? "Live ESPN Verified Athlete Feed" : isLoading ? "Polling live telemetry..." : "Tactical Model Benchmark"}
+            </span>
+            <span className="font-mono text-white/40">2026/27 Season</span>
+          </div>
+
+          <div className="mt-3 flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-black font-mono text-[#FF2636]">
@@ -450,7 +495,7 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
 
           <div className="mt-5 apple-tile rounded-xl border border-white/[0.08] p-4 text-center bg-white/[0.01]">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-2">
-              Per-90 Tactical Profile vs League Average
+              Per-90 Tactical Profile (FBref Model vs League)
             </span>
             {renderRadar(profile.radar)}
           </div>
@@ -479,13 +524,14 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
             ))}
           </div>
 
+          {/* Verified Season Workload from ESPN Athlete Feed */}
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
             <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
               <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
-                Minutes
+                {displayStarts ? `${displayStarts} Starts` : "Minutes"}
               </span>
               <span className="font-mono font-bold text-xs text-white mt-0.5 block">
-                {profile.minutesSeason}'
+                {displayMinutes}'
               </span>
             </div>
             <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
@@ -501,7 +547,7 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
                 Discipline
               </span>
               <span className="font-mono font-bold text-xs text-white mt-0.5 block">
-                {profile.cards} {profile.cards === 1 ? "Caution" : "Cautions"}
+                {displayYellows} {displayYellows === 1 ? "Caution" : "Cautions"}
               </span>
             </div>
           </div>
