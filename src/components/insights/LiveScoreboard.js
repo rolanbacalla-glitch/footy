@@ -361,7 +361,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                 </span>
               </div>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                Ruben Amorim • 3-4-2-1
+                Mauricio Pochettino • 4-2-3-1
               </p>
 
               {/* Status / Scorers */}

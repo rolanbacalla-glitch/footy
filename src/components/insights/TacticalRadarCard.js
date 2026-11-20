@@ -2,17 +2,20 @@
 
 import React, { useState } from "react";
 import { Radar, Swords, Shield, Zap, Target, Gauge } from "lucide-react";
+import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 
 export default function TacticalRadarCard({ activeMatch }) {
   const [comparisonMode, setComparisonMode] = useState("manager"); // 'manager' | 'territory'
 
   const homeManager = "Andoni Iraola (4-2-3-1)";
-  const awayManager = activeMatch?.opponent === "Manchester United" || activeMatch?.awayTeam === "Man United"
-    ? "Rúben Amorim (3-4-2-1)"
+  const awayTeamIdentifier = activeMatch?.opponent || activeMatch?.awayTeam || "Manchester United";
+  const oppInfo = getTeamManagerInfo(awayTeamIdentifier);
+  const awayManager = oppInfo
+    ? `${oppInfo.manager} (${oppInfo.formation})`
     : "Opposition Setup";
 
   // Tactical Radar Dimensions (Scale: 0 to 100)
-  // LFC (Iraola 2026/27) vs Manchester United (Amorim 2026/27)
+  // LFC (Iraola 4-2-3-1) vs Opponent (e.g., Pochettino 4-2-3-1)
   const dimensions = [
     { label: "Vertical Press", lfc: 94, opp: 72, lfcVal: "6.4 PPDA", oppVal: "10.2 PPDA" },
     { label: "Direct Progression", lfc: 88, opp: 65, lfcVal: "3.4 m/s", oppVal: "2.1 m/s" },

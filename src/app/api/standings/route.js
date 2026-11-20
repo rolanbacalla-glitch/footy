@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchWithFallback } from "../../../lib/apiFallback";
+import { getTeamManagerInfo } from "../../../data/premierLeagueManagers";
 
 // Cache live standings for 3 minutes
 let cachedStandings = null;
@@ -37,6 +38,8 @@ export async function GET() {
         return item?.displayValue ?? item?.value ?? 0;
       };
 
+      const managerInfo = getTeamManagerInfo(team.id || team.displayName);
+
       return {
         id: team.id,
         rank: parseInt(getStat("rank"), 10),
@@ -51,6 +54,10 @@ export async function GET() {
         goalsAgainst: parseInt(getStat("pointsAgainst"), 10),
         goalDiff: parseInt(getStat("pointDifferential"), 10),
         points: parseInt(getStat("points"), 10),
+        manager: managerInfo?.manager || "Official Head Coach",
+        formation: managerInfo?.formation || "Tactical Setup",
+        tacticalStyle: managerInfo?.tacticalStyle || "Premier League System",
+        captain: managerInfo?.captain || "Team Captain",
         isLfc: team.id === "364" || team.displayName?.includes("Liverpool"),
       };
     });

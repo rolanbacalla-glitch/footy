@@ -152,7 +152,7 @@ export default function StandingsTable() {
           <thead>
             <tr className="border-b border-white/[0.06] text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">
               <th className="py-2 pl-2 w-8 text-center">Pos</th>
-              <th className="py-2 pl-2">Club</th>
+              <th className="py-2 pl-2">Club & Head Coach</th>
               <th className="py-2 text-center w-10">P</th>
               <th className="py-2 text-center w-8">W</th>
               <th className="py-2 text-center w-8">D</th>
@@ -196,16 +196,29 @@ export default function StandingsTable() {
                     {team.rank}
                   </td>
 
-                  {/* Club Name */}
+                  {/* Club Name & Head Coach */}
                   <td className="py-2.5 pl-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs ${team.isLfc ? "font-bold text-white" : "font-medium"}`}>
-                        {team.name}
-                      </span>
-                      {team.isLfc && (
-                        <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#FF2636] text-white">
-                          LFC
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs ${team.isLfc ? "font-bold text-white" : "font-medium"}`}>
+                          {team.name}
                         </span>
+                        {team.isLfc && (
+                          <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#FF2636] text-white">
+                            LFC
+                          </span>
+                        )}
+                      </div>
+                      {team.manager && (
+                        <div className="text-[10px] text-white/50 flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[#8E8E93]">{team.manager}</span>
+                          {team.formation && (
+                            <>
+                              <span>•</span>
+                              <span className="font-mono text-white/40">{team.formation}</span>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
                   </td>
