@@ -6,7 +6,8 @@ export const MATCH_LIBRARY = [
   // ─── UPCOMING PREVIEW: MANCHESTER UNITED (NORTH-WEST DERBY) ─────────────────
   {
     id: "preview-manutd",
-    type: "UPCOMING",
+    type: "MATCHDAY",
+    isMatchday: true,
     title: "Liverpool vs Man United",
     opponent: "Manchester United",
     competition: "North-West Derby • PL",
