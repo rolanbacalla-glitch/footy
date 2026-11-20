@@ -65,7 +65,7 @@ export const MATCH_LIBRARY = [
     ],
     startingXI: [
       { id: "alisson", name: "Alisson", number: 1, pos: "GK", x: 7, y: 34, touches: 46, obv: 0.41, passes: 38, comp: 91.2 },
-      { id: "frimpong", name: "Frimpong", number: 30, pos: "RB / WB", x: 52, y: 60, touches: 82, obv: 0.94, passes: 61, comp: 85.2 },
+      { id: "frimpong", name: "Frimpong", number: 30, pos: "RB / WB", x: 52, y: 57, touches: 82, obv: 0.94, passes: 61, comp: 85.2 },
       { id: "jacquet", name: "Jérémy Jacquet", number: 5, pos: "CB", x: 28, y: 45, touches: 81, obv: 0.54, passes: 73, comp: 94.6 },
       { id: "vandijk", name: "Van Dijk", number: 4, pos: "CB (C)", x: 26, y: 23, touches: 92, obv: 0.68, passes: 86, comp: 95.3 },
       { id: "kerkez", name: "Kerkez", number: 6, pos: "LB", x: 46, y: 10, touches: 77, obv: 0.62, passes: 63, comp: 87.4 },
@@ -73,7 +73,7 @@ export const MATCH_LIBRARY = [
       { id: "macallister", name: "Mac Allister", number: 10, pos: "DM", x: 55, y: 25, touches: 86, obv: 0.91, passes: 75, comp: 91.5 },
       { id: "szoboszlai", name: "Szoboszlai", number: 8, pos: "AM / Press", x: 68, y: 42, touches: 74, obv: 0.85, passes: 59, comp: 86.1 },
       { id: "wirtz", name: "Florian Wirtz", number: 7, pos: "LW / No.10", x: 74, y: 20, touches: 84, obv: 1.34, passes: 68, comp: 89.4 },
-      { id: "barcola", name: "Bradley Barcola", number: 29, pos: "RW / WF", x: 84, y: 55, touches: 72, obv: 1.31, passes: 47, comp: 83.2 },
+      { id: "barcola", name: "Bradley Barcola", number: 29, pos: "RW / WF", x: 84, y: 54, touches: 72, obv: 1.31, passes: 47, comp: 83.2 },
       { id: "isak", name: "Alexander Isak", number: 9, pos: "CF", x: 89, y: 34, touches: 56, obv: 1.22, passes: 34, comp: 82.4 },
     ],
     passLinks: [
@@ -134,7 +134,7 @@ export const MATCH_LIBRARY = [
     ],
     startingXI: [
       { id: "alisson", name: "Alisson", number: 1, pos: "GK", x: 7, y: 34, touches: 46, obv: 0.41, passes: 38, comp: 91.2 },
-      { id: "frimpong", name: "Frimpong", number: 30, pos: "RB / WB", x: 52, y: 60, touches: 82, obv: 0.94, passes: 61, comp: 85.2 },
+      { id: "frimpong", name: "Frimpong", number: 30, pos: "RB / WB", x: 52, y: 57, touches: 82, obv: 0.94, passes: 61, comp: 85.2 },
       { id: "jacquet", name: "Jérémy Jacquet", number: 5, pos: "CB", x: 28, y: 45, touches: 81, obv: 0.54, passes: 73, comp: 94.6 },
       { id: "vandijk", name: "Van Dijk", number: 4, pos: "CB (C)", x: 26, y: 23, touches: 92, obv: 0.68, passes: 86, comp: 95.3 },
       { id: "kerkez", name: "Kerkez", number: 6, pos: "LB", x: 46, y: 10, touches: 77, obv: 0.62, passes: 63, comp: 87.4 },
@@ -142,7 +142,7 @@ export const MATCH_LIBRARY = [
       { id: "macallister", name: "Mac Allister", number: 10, pos: "DM", x: 55, y: 25, touches: 86, obv: 0.91, passes: 75, comp: 91.5 },
       { id: "szoboszlai", name: "Szoboszlai", number: 8, pos: "AM / Press", x: 68, y: 42, touches: 74, obv: 0.85, passes: 59, comp: 86.1 },
       { id: "wirtz", name: "Florian Wirtz", number: 7, pos: "LW / No.10", x: 74, y: 20, touches: 84, obv: 1.34, passes: 68, comp: 89.4 },
-      { id: "barcola", name: "Bradley Barcola", number: 29, pos: "RW / WF", x: 84, y: 55, touches: 72, obv: 1.31, passes: 47, comp: 83.2 },
+      { id: "barcola", name: "Bradley Barcola", number: 29, pos: "RW / WF", x: 84, y: 54, touches: 72, obv: 1.31, passes: 47, comp: 83.2 },
       { id: "isak", name: "Alexander Isak", number: 9, pos: "CF", x: 89, y: 34, touches: 56, obv: 1.22, passes: 34, comp: 82.4 },
     ],
     passLinks: [

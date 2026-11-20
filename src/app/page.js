@@ -84,7 +84,7 @@ export default function AnfieldInsightsDashboard() {
     MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
 
   return (
-    <main className="relative min-h-screen lg:h-screen w-full flex flex-col bg-[#050608] text-white overflow-x-hidden lg:overflow-hidden select-none">
+    <main className="relative min-h-screen w-full flex flex-col bg-[#050608] text-white overflow-x-hidden select-none">
       {/* Dynamic Ambient Glassmorphism Light Pools (Subtle LFC Crimson & Deep Emerald Atmosphere) */}
       <div
         aria-hidden="true"
@@ -103,7 +103,7 @@ export default function AnfieldInsightsDashboard() {
       />
 
       {/* 2. Main Body Dashboard Viewport */}
-      <div className="relative z-10 flex-1 min-h-0 px-3 py-3 sm:px-5 sm:py-4 flex flex-col overflow-y-auto gap-3.5 max-w-[1680px] w-full mx-auto">
+      <div className="relative z-10 flex-1 px-3 py-3 sm:px-5 sm:py-4 flex flex-col gap-3.5 max-w-[1680px] w-full mx-auto">
         {/* Universal Match Centre Fixture Ribbon (Apple Sports inspired pill bar) */}
         {activeTab === "boot-room" && (
           <div
@@ -167,16 +167,16 @@ export default function AnfieldInsightsDashboard() {
 
         {/* Tab 1: Boot Room Live (Tactical Visualisation + Momentum Split) */}
         {activeTab === "boot-room" && (
-          <div className="w-full flex-1 flex flex-col gap-3.5 overflow-y-auto min-h-0">
+          <div className="w-full flex flex-col gap-3.5 min-h-0">
             {/* Live Match Scoreboard View — Only available during an active live match */}
             {activeMatch?.type === "LIVE" && (
               <LiveScoreboard activeMatch={activeMatch} />
             )}
 
             {/* Tactical Pitch Canvas & Match Momentum */}
-            <div className="w-full flex-1 flex flex-col lg:flex-row gap-4 min-h-[460px] lg:min-h-[500px]">
-              {/* Left 2/3 Tactical Pitch Canvas */}
-              <div className="flex-1 lg:w-2/3 h-[460px] lg:h-full">
+            <div className="w-full flex flex-col lg:flex-row gap-4">
+              {/* Left 2/3 Tactical Pitch Canvas — Zero inner scrolling */}
+              <div className="flex-1 lg:w-2/3 flex flex-col overflow-hidden">
                 <PitchCanvas
                   activeMatch={activeMatch}
                   overlayMode={overlayMode}
@@ -186,7 +186,7 @@ export default function AnfieldInsightsDashboard() {
               </div>
 
               {/* Right 1/3 Metrics & Match Momentum Controller */}
-              <div className="lg:w-1/3 overflow-y-auto pr-0.5">
+              <div className="lg:w-1/3">
                 <MomentumChart
                   activeMatch={activeMatch}
                   overlayMode={overlayMode}

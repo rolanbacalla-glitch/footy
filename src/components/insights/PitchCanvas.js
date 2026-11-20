@@ -47,12 +47,12 @@ export default function PitchCanvas({
 
   // Smart placement to ensure player info pills never overlap pass lines or pass volume badges
   const getPlayerLabelPlacement = (player, radius) => {
-    // Mac Allister (#10) and Endo (#3) have heavy pass links directly below them (badge 34) -> place label ABOVE
-    // Players near the bottom touchline (y > 61) -> place label ABOVE
+    // Mac Allister (#10) and Endo (#3) have heavy pass links directly below them -> place label ABOVE
+    // Any player in the lower half (y >= 50, e.g. Frimpong, Barcola, Bradley, Chiesa) -> place label ABOVE to prevent bottom touchline overlap
     const placeAbove =
       player.id === "macallister" ||
       player.id === "endo" ||
-      player.y > 61;
+      player.y >= 50;
 
     const capsuleHeight = 3.2;
     const capsuleY = placeAbove
@@ -75,7 +75,7 @@ export default function PitchCanvas({
   };
 
   return (
-    <div className="apple-card relative w-full h-full min-h-[400px] sm:min-h-[460px] flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none bg-[#0D120F] border border-white/[0.08]">
+    <div className="apple-card relative w-full h-full flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none bg-[#0D120F] border border-white/[0.08]">
       {/* Stadium Pitch Atmospheric Vignette */}
       <div
         aria-hidden="true"
@@ -166,12 +166,12 @@ export default function PitchCanvas({
       </div>
 
       {/* SVG Pitch Canvas Area */}
-      <div className="relative z-10 flex-1 w-full flex items-center justify-center overflow-x-auto py-1">
+      <div className="relative z-10 flex-1 w-full flex items-center justify-center overflow-hidden py-1">
         <svg
           role="img"
           aria-label={`Anfield tactical pitch showing ${modeLabel} for ${activeMatch?.title || "Liverpool FC"}`}
           viewBox="0 0 105 68"
-          className="w-full h-auto min-w-[320px] max-h-[500px] object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.65)]"
+          className="w-full h-auto max-h-[580px] object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.65)]"
         >
           <defs>
             {/* Authentic Pitch Turf Gradient */}
