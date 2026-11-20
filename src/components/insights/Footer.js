@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShieldCheck, Cookie, FileText, Lock, Activity, Radio, ExternalLink, X } from "lucide-react";
+import { ShieldCheck, Cookie, FileText, Lock, Activity, Info, X } from "lucide-react";
 
 export default function Footer({ setActiveTab }) {
-  const [modalType, setModalType] = useState(null); // "cookies" | "privacy" | "terms" | "disclaimer" | null
+  const [modalType, setModalType] = useState(null); // "about" | "cookies" | "privacy" | "terms" | "disclaimer" | null
 
   return (
     <>
@@ -66,12 +66,22 @@ export default function Footer({ setActiveTab }) {
               </ul>
             </div>
 
-            {/* Col 4: Platform Compliance & Data Sources */}
+            {/* Col 4: Platform Compliance & Governance */}
             <div>
               <h4 className="font-bold text-xs uppercase tracking-[0.16em] text-[#FF2636] mb-5">
                 Data & Governance
               </h4>
               <ul className="space-y-3 text-sm">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setModalType("about")}
+                    className="text-[#8E8E93] hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Info className="w-3.5 h-3.5 text-white/60" />
+                    About Us
+                  </button>
+                </li>
                 <li>
                   <button
                     type="button"
@@ -144,11 +154,13 @@ export default function Footer({ setActiveTab }) {
           >
             <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
+                {modalType === "about" && <Info className="w-5 h-5 text-[#FF2636]" />}
                 {modalType === "cookies" && <Cookie className="w-5 h-5 text-[#FF2636]" />}
                 {modalType === "privacy" && <Lock className="w-5 h-5 text-[#FF2636]" />}
                 {modalType === "terms" && <FileText className="w-5 h-5 text-[#FF2636]" />}
                 {modalType === "disclaimer" && <ShieldCheck className="w-5 h-5 text-[#FF2636]" />}
                 <span>
+                  {modalType === "about" && "About Anfield Insights"}
                   {modalType === "cookies" && "Cookie & Storage Preferences"}
                   {modalType === "privacy" && "Privacy Notice & Data Protection"}
                   {modalType === "terms" && "Terms of Service"}
@@ -166,6 +178,20 @@ export default function Footer({ setActiveTab }) {
             </div>
 
             <div className="text-sm text-[#8E8E93] space-y-3 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+              {modalType === "about" && (
+                <>
+                  <p>
+                    <strong>Anfield Insights</strong> is an independent digital analytics publication dedicated to providing supporters, analysts, and tacticians with rigorous, data-driven match intelligence for Liverpool Football Club.
+                  </p>
+                  <p>
+                    Our mission is to bridge high-tier professional performance metrics with accessible, publication-grade interactive visualisations. We combine live Premier League telemetry feeds, verified Opta spatial coordinates, and predictive Expected Goals (xG) models into a unified, distraction-free command centre.
+                  </p>
+                  <p>
+                    Built with an uncompromising standard for zero synthetic data, all match statistics, athlete metrics, and live pitch representations reflect verified real-time feeds.
+                  </p>
+                </>
+              )}
+
               {modalType === "cookies" && (
                 <>
                   <p>
