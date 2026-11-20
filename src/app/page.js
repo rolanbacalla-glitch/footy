@@ -14,6 +14,7 @@ import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
 import StandingsTable from "../components/insights/StandingsTable";
 import PostMatchTacticalArchive from "../components/insights/PostMatchTacticalArchive";
 import AudioCommentaryBar from "../components/insights/AudioCommentaryBar";
+import FixturesCalendarModal from "../components/insights/FixturesCalendarModal";
 import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
@@ -56,6 +57,7 @@ export default function AnfieldInsightsDashboard() {
   const [matchdayPhase, setMatchdayPhase] = useState("BUILD_UP");
   const [liveSchedule, setLiveSchedule] = useState({ upcoming: [], recent: [] });
   const [scheduleFilter, setScheduleFilter] = useState("all"); // 'all' | 'upcoming' | 'recent'
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // Hydrate real fixture schedule from ESPN live endpoint
   useEffect(() => {
@@ -230,41 +232,55 @@ export default function AnfieldInsightsDashboard() {
                 );
               })()}
 
-              {/* 3. Real ESPN Upcoming Fixtures (Next 4 calendar ties) */}
-              {liveSchedule.upcoming
-                .filter((fx) => !fx.opponent?.toLowerCase().includes("manchester united"))
-                .slice(0, 4)
-                .map((fx) => {
-                  const isSelected = selectedMatchId === fx.id;
-                  const formattedDate = new Date(fx.date).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                  });
+              {/* 3. Next Single Upcoming Fixture */}
+              {(() => {
+                const nextFx = liveSchedule.upcoming.find(
+                  (fx) => !fx.opponent?.toLowerCase().includes("manchester united")
+                );
+                if (!nextFx) return null;
+                const isSelected = selectedMatchId === nextFx.id;
+                const formattedDate = new Date(nextFx.date).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                });
 
-                  return (
-                    <button
-                      key={fx.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedMatchId(fx.id);
-                        setSelectedPlayer(null);
-                      }}
-                      className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
-                        isSelected
-                          ? "glass-crimson-pill text-white"
-                          : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                      <span className="tracking-[-0.01em]">
-                        {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
-                      </span>
-                      <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
-                        {formattedDate} • {fx.broadcast}
-                      </span>
-                    </button>
-                  );
-                })}
+                return (
+                  <button
+                    key={nextFx.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedMatchId(nextFx.id);
+                      setSelectedPlayer(null);
+                    }}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
+                      isSelected
+                        ? "glass-crimson-pill text-white"
+                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                    <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
+                      Next:
+                    </span>
+                    <span className="tracking-[-0.01em]">
+                      {nextFx.isHome ? `vs ${nextFx.opponent}` : `@ ${nextFx.opponent}`}
+                    </span>
+                    <span className="text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full bg-white/[0.04] text-white/70 border border-white/[0.08]">
+                      {formattedDate} • {nextFx.broadcast}
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* 4. Section Launcher: All Upcoming Matches Calendar Modal */}
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(true)}
+                className="min-h-[38px] pressable flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white/80 hover:text-white transition"
+              >
+                <Calendar className="w-3.5 h-3.5 text-[#FF2636]" />
+                <span>All Fixtures ({liveSchedule.upcoming.length})</span>
+              </button>
             </div>
           </div>
         )}
@@ -344,6 +360,14 @@ export default function AnfieldInsightsDashboard() {
         player={selectedPlayer}
         isOpen={Boolean(selectedPlayer)}
         onClose={() => setSelectedPlayer(null)}
+      />
+
+      {/* Full Season Fixtures Calendar Modal */}
+      <FixturesCalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        fixtures={liveSchedule.upcoming}
+        onSelectFixture={(id) => setSelectedMatchId(id)}
       />
 
       {/* Ambient Live Matchday Commentary Audio Player */}
