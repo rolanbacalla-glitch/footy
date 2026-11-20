@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Shield,
   Clock,
@@ -15,6 +16,18 @@ import {
   AlertCircle,
   Sparkles,
 } from "lucide-react";
+
+export function getTeamCrest(teamName = "") {
+  const norm = (teamName || "").toLowerCase().trim();
+  if (norm.includes("liverpool")) return "/crests/liverpool.svg";
+  if (norm.includes("united") || norm.includes("man utd") || norm.includes("manutd") || norm === "man united") return "/crests/manutd.svg";
+  if (norm.includes("city") || norm.includes("man city")) return "/crests/man-city.svg";
+  if (norm.includes("chelsea")) return "/crests/chelsea.svg";
+  if (norm.includes("palace") || norm.includes("crystal palace")) return "/crests/crystal-palace.svg";
+  if (norm.includes("brighton")) return "/crests/brighton.svg";
+  if (norm.includes("villarreal")) return "/crests/villarreal.svg";
+  return null;
+}
 
 export default function LiveScoreboard({ activeMatch }) {
   const [seconds, setSeconds] = useState(42);
@@ -84,6 +97,8 @@ export default function LiveScoreboard({ activeMatch }) {
 
   const homeTeam = activeMatch?.homeTeam || "Liverpool";
   const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Man United";
+  const homeCrest = activeMatch?.homeCrest || getTeamCrest(homeTeam);
+  const awayCrest = activeMatch?.awayCrest || getTeamCrest(awayTeam);
 
   const homeScorers = isMatchdayPreMatch ? [] : (activeMatch?.homeScorers || [
     { player: "A. Isak", min: "28'" },
@@ -218,12 +233,24 @@ export default function LiveScoreboard({ activeMatch }) {
               )}
             </div>
 
-            {/* Liverpool Crest Monogram */}
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-[18px] bg-gradient-to-br from-[#E31B23] via-[#C8102E] to-[#800A1A] p-0.5 shadow-[0_8px_24px_rgba(227,27,35,0.45)] shrink-0 flex items-center justify-center border border-white/25">
-              <div className="w-full h-full rounded-[16px] bg-[#140204]/70 flex flex-col items-center justify-center text-white">
-                <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#E31B23]" strokeWidth={1.8} />
-                <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">LFC</span>
-              </div>
+            {/* Liverpool Official Club Badge */}
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 p-2 sm:p-2.5 rounded-[22px] bg-gradient-to-br from-[#E31B23]/25 via-white/[0.05] to-black/70 border border-white/20 shadow-[0_8px_24px_rgba(227,27,35,0.4)] shrink-0 flex items-center justify-center backdrop-blur-xl group hover:border-[#E31B23]/60 transition-all">
+              {homeCrest ? (
+                <Image
+                  src={homeCrest}
+                  alt={`${homeTeam} Official Club Badge`}
+                  width={72}
+                  height={72}
+                  unoptimized
+                  priority
+                  className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] transform transition-transform group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full rounded-[16px] bg-[#140204]/70 flex flex-col items-center justify-center text-white">
+                  <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#E31B23]" strokeWidth={1.8} />
+                  <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">LFC</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -254,12 +281,24 @@ export default function LiveScoreboard({ activeMatch }) {
 
           {/* Away Team (Manchester United) */}
           <div className="md:col-span-3 flex items-center justify-start gap-3 sm:gap-4 order-3">
-            {/* Away Crest Monogram */}
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-[18px] bg-gradient-to-br from-[#2E2E38] via-[#1E1E24] to-[#121216] p-0.5 shadow-[0_8px_24px_rgba(0,0,0,0.5)] shrink-0 flex items-center justify-center border border-white/20">
-              <div className="w-full h-full rounded-[16px] bg-[#121214]/80 flex flex-col items-center justify-center text-white">
-                <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#C8102E]" strokeWidth={1.8} />
-                <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">MUFC</span>
-              </div>
+            {/* Away Official Club Badge */}
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 p-2 sm:p-2.5 rounded-[22px] bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-black/70 border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] shrink-0 flex items-center justify-center backdrop-blur-xl group hover:border-white/40 transition-all">
+              {awayCrest ? (
+                <Image
+                  src={awayCrest}
+                  alt={`${awayTeam} Official Club Badge`}
+                  width={72}
+                  height={72}
+                  unoptimized
+                  priority
+                  className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] transform transition-transform group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full rounded-[16px] bg-[#121214]/80 flex flex-col items-center justify-center text-white">
+                  <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-[#C8102E]" strokeWidth={1.8} />
+                  <span className="text-[9px] font-black tracking-widest text-[#F1B82D]">MUFC</span>
+                </div>
+              )}
             </div>
 
             <div className="text-left">
