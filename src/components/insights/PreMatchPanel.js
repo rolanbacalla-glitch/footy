@@ -22,12 +22,96 @@ import {
 // ─── Matchday phases (Premier League timings relative to kick-off) ───────────
 // Line-ups must be published 75 minutes before kick-off; warm-ups ~45 minutes.
 export const MATCHDAY_PHASES = [
-  { id: "BUILD_UP", label: "Matchday", at: Infinity, clock: "", note: "Matchday build-up" },
-  { id: "GATES", label: "Turnstiles Open", at: 7200, clock: "14:30", note: "Turnstiles open" },
-  { id: "LINEUPS", label: "Line-ups In", at: 4500, clock: "15:15", note: "Official line-ups published" },
-  { id: "WARMUPS", label: "Warm-ups", at: 2700, clock: "15:45", note: "Players out for warm-ups" },
-  { id: "TUNNEL", label: "Tunnel & YNWA", at: 300, clock: "16:25", note: "Teams in the tunnel • You'll Never Walk Alone" },
-  { id: "KICKOFF", label: "Kick-off", at: 0, clock: "16:30", note: "Kick-off • live data starts" },
+  {
+    id: "BUILD_UP",
+    label: "Matchday",
+    at: Infinity,
+    clock: "",
+    note: "Matchday build-up",
+    headline: "Anfield Matchday Preparation",
+    summary: "Stadium operations commenced. Match programmes on sale across Walton Breck Road and Anfield Road.",
+    details: [
+      "Retail store & museum open to match ticket holders",
+      "Official team coaches depart team hotels en route to Anfield",
+      "Pitch inspection completed by Premier League match officials",
+    ],
+    actionLabel: "View Match Context",
+  },
+  {
+    id: "GATES",
+    label: "Turnstiles Open",
+    at: 7200,
+    clock: "14:30",
+    note: "Turnstiles open • Fans arriving",
+    headline: "Turnstiles Open Across All Four Stands",
+    summary: "Anfield stadium gates open 2 hours prior to kick-off across the Kop, Sir Kenny Dalglish Stand, Main Stand, and Anfield Road Stand.",
+    details: [
+      "Access control active at 61,276 capacity; NFC digital passes scan at turnstiles",
+      "Players' coach arrival at Paisley Square entrance scheduled for 14:45",
+      "Concourse kiosks open with local culinary specials and digital match programmes",
+    ],
+    actionLabel: "Stadium Access Guide",
+  },
+  {
+    id: "LINEUPS",
+    label: "Line-ups In",
+    at: 4500,
+    clock: "15:15",
+    note: "Official team sheets published",
+    headline: "Premier League Official Team Sheets Exchanged",
+    summary: "Official starting XIs and 9-player substitutes benches submitted to match referee and broadcast directors under the Premier League T-75 rule.",
+    details: [
+      "Confirmed starting line-ups officially verified and locked into match protocol",
+      "Pitch status transitions from Predicted XI to Confirmed Tactical Shape",
+      "Opposition bench composition and formation nuances published to analyst feeds",
+    ],
+    actionLabel: "Inspect Confirmed XI",
+  },
+  {
+    id: "WARMUPS",
+    label: "Warm-ups",
+    at: 2700,
+    clock: "15:45",
+    note: "Players out for warm-ups",
+    headline: "Squads Emerge onto Anfield Pitch for Drills",
+    summary: "Goalkeepers start warm-up routines under John Achterberg & coaching staff at 15:45; outfield squads emerge at 15:52 to Anfield crowd applause.",
+    details: [
+      "Rondo possession drills, progressive passing channels, and counter-press triggers",
+      "High-intensity sprint activations and box finishing routines facing the Kop",
+      "Stadium stadium sound system begins match playlist countdown",
+    ],
+    actionLabel: "View Tactical Drills",
+  },
+  {
+    id: "TUNNEL",
+    label: "Tunnel & YNWA",
+    at: 300,
+    clock: "16:25",
+    note: "Teams in the tunnel • You'll Never Walk Alone",
+    headline: "Tunnel Assembly & 'You'll Never Walk Alone'",
+    summary: "Captains lead both squads into the Anfield tunnel beneath the iconic 'This Is Anfield' sign as Gerry and the Pacemakers plays to a standing crowd.",
+    details: [
+      "Full stadium scarf display across all tiers of The Kop and Main Stand",
+      "Final tactical reminders from manager in tunnel corridor prior to referee bell",
+      "Coin toss with club captains and match referee on the centre circle",
+    ],
+    actionLabel: "Listen to Atmosphere",
+  },
+  {
+    id: "KICKOFF",
+    label: "Kick-off",
+    at: 0,
+    clock: "16:30",
+    note: "Kick-off • Live data starts",
+    headline: "Referee Whistle & Live Telemetry Ingest",
+    summary: "Official kick-off whistle. Real-time ball possession, expected goals (xG), high-press intensity (PPDA), and pass networks commence live feed.",
+    details: [
+      "Live telemetry switches to 15-second high-frequency refresh rate",
+      "Opta/StatsPerform positional tracking and heatmaps begin plotting live",
+      "Real-time tactical mismatch and momentum radar activated",
+    ],
+    actionLabel: "Switch to Live Match Centre",
+  },
 ];
 
 export function getMatchdayPhase(countdownSeconds) {
@@ -418,7 +502,7 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
       )}
 
       {/* Matchday schedule timeline */}
-      <div className="apple-tile rounded-xl border border-white/[0.06] p-3">
+      <div className="apple-tile rounded-xl border border-white/[0.06] p-3 transition-all duration-300">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
             Matchday schedule
@@ -432,15 +516,16 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
             <button
               type="button"
               onClick={onResetPreview}
-              className="text-[10px] px-2 py-0.5 rounded-full border border-white/30 bg-white/10 text-white font-semibold cursor-pointer"
+              className="text-[10px] px-2.5 py-0.5 rounded-full border border-[#FF2636]/40 bg-[#FF2636]/15 text-white font-semibold cursor-pointer hover:bg-[#FF2636]/25 transition flex items-center gap-1.5"
             >
-              Previewing • back to now
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
+              Previewing {phase.label} • Return to live clock
             </button>
           ) : (
-            <span className="text-[10px] text-white/35">Select a step to preview that stage</span>
+            <span className="text-[10px] text-white/40">Select a stage below to preview schedule details</span>
           )}
         </div>
-        <ol className="grid grid-cols-5 gap-1">
+        <ol className="grid grid-cols-5 gap-1.5">
           {MATCHDAY_PHASES.slice(1).map((step) => {
             const done = countdownSeconds < step.at;
             const current = phase.id === step.id;
@@ -450,20 +535,44 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
                   type="button"
                   onClick={() => onPreviewPhase(step.at)}
                   aria-current={current ? "step" : undefined}
-                  className="w-full text-left cursor-pointer group"
+                  className={`w-full text-left cursor-pointer group p-1.5 rounded-lg transition-all ${
+                    current
+                      ? "bg-white/[0.08] ring-1 ring-[#FF2636]/50 shadow-sm"
+                      : "hover:bg-white/[0.04]"
+                  }`}
                 >
-                  <div className={`h-1 rounded-full mb-1.5 ${current ? "bg-[#FF2636] shadow-[0_0_8px_#FF2636]" : done ? "bg-white/60" : "bg-white/10 group-hover:bg-white/25"}`} />
+                  <div
+                    className={`h-1 rounded-full mb-1.5 transition-all ${
+                      current
+                        ? "bg-[#FF2636] shadow-[0_0_10px_#FF2636]"
+                        : done
+                        ? "bg-white/60"
+                        : "bg-white/10 group-hover:bg-white/25"
+                    }`}
+                  />
                   <div className="flex items-center gap-1">
                     {done && !current ? (
                       <Check className="w-3 h-3 text-white/80 shrink-0" />
                     ) : (
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${current ? "bg-[#FF2636] animate-pulse" : "bg-white/25"}`} />
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          current ? "bg-[#FF2636] animate-pulse" : "bg-white/25"
+                        }`}
+                      />
                     )}
-                    <span className={`font-mono text-[11px] font-bold ${current ? "text-white" : done ? "text-white/45" : "text-white/80"}`}>
+                    <span
+                      className={`font-mono text-[11px] font-bold ${
+                        current ? "text-white" : done ? "text-white/45" : "text-white/80"
+                      }`}
+                    >
                       {step.clock}
                     </span>
                   </div>
-                  <span className={`block text-[10px] leading-tight mt-0.5 ${current ? "text-white" : done ? "text-white/40" : "text-white/60"}`}>
+                  <span
+                    className={`block text-[10px] leading-tight mt-0.5 font-medium truncate ${
+                      current ? "text-white font-semibold" : done ? "text-white/40" : "text-white/60"
+                    }`}
+                  >
                     {step.label}
                   </span>
                 </button>
@@ -471,6 +580,61 @@ export default function PreMatchPanel({ activeMatch, phase, countdownSeconds, on
             );
           })}
         </ol>
+
+        {/* Selected Stage Detail Card */}
+        {phase && phase.id !== "BUILD_UP" && (
+          <div className="mt-3 pt-3 border-t border-white/[0.08] rounded-lg bg-black/30 p-3 ring-1 ring-white/[0.05] animate-fadeIn">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#FF2636]/20 text-[#FF4D5A] border border-[#FF2636]/30">
+                  {phase.clock || "LIVE"}
+                </span>
+                <span className="text-xs font-bold text-white tracking-tight">
+                  {phase.headline}
+                </span>
+              </div>
+              <span className="text-[10px] font-medium text-white/50">
+                {isPreviewing ? "Stage Simulation Active" : "Upcoming Milestone"}
+              </span>
+            </div>
+
+            <p className="text-[11px] text-white/75 mt-1.5 leading-relaxed">
+              {phase.summary}
+            </p>
+
+            {phase.details && phase.details.length > 0 && (
+              <ul className="mt-2.5 space-y-1.5">
+                {phase.details.map((detail, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-[10px] text-white/65">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636]/80 mt-1 shrink-0" />
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
+              <div className="text-[10px] text-white/40 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Tactical sync: {phase.id === "LINEUPS" || phase.id === "WARMUPS" || phase.id === "TUNNEL" || phase.id === "KICKOFF" ? "Confirmed Squads Active" : "Predicted XI active"}</span>
+              </div>
+              {phase.actionLabel && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (phase.id === "LINEUPS") {
+                      const el = document.getElementById("pitch-canvas");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="text-[10px] px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-medium transition cursor-pointer border border-white/15"
+                >
+                  {phase.actionLabel}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* DeepMind TacticAI Set-Piece Modal */}
