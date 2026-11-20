@@ -13,7 +13,6 @@ import ClubNewsView from "../components/insights/ClubNewsView";
 import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
 import StandingsTable from "../components/insights/StandingsTable";
 import PostMatchTacticalArchive from "../components/insights/PostMatchTacticalArchive";
-import AudioCommentaryBar from "../components/insights/AudioCommentaryBar";
 import FixturesCalendarModal from "../components/insights/FixturesCalendarModal";
 import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
@@ -369,9 +368,6 @@ export default function AnfieldInsightsDashboard() {
         fixtures={liveSchedule.upcoming}
         onSelectFixture={(id) => setSelectedMatchId(id)}
       />
-
-      {/* Ambient Live Matchday Commentary Audio Player */}
-      <AudioCommentaryBar />
 
       {/* Global Apple & travel-kin Styled Footer */}
       <Footer setActiveTab={setActiveTab} />
