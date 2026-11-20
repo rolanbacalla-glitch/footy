@@ -108,7 +108,7 @@ export default function Footer({ setActiveTab }) {
                     onClick={() => setModalType("disclaimer")}
                     className="text-[#8E8E93] hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#FF2636]" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-white/60" />
                     Trademark Notice
                   </button>
                 </li>
