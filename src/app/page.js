@@ -12,6 +12,7 @@ import TransferScoutView from "../components/insights/TransferScoutView";
 import ClubNewsView from "../components/insights/ClubNewsView";
 import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
 import StandingsTable from "../components/insights/StandingsTable";
+import PostMatchTacticalArchive from "../components/insights/PostMatchTacticalArchive";
 import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
@@ -306,7 +307,10 @@ export default function AnfieldInsightsDashboard() {
 
         {/* Tab 3: Anfield Match Archives */}
         {(activeTab === "match-archives" || activeTab === "time-machine") && (
-          <TimeMachineView />
+          <div className="flex flex-col gap-4">
+            <PostMatchTacticalArchive match={activeMatch} />
+            <TimeMachineView />
+          </div>
         )}
 
         {/* Tab 4: Transfer Scout Simulator */}
