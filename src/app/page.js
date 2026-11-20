@@ -10,6 +10,7 @@ import MomentumChart from "../components/insights/MomentumChart";
 import TimeMachineView from "../components/insights/TimeMachineView";
 import TransferScoutView from "../components/insights/TransferScoutView";
 import ClubNewsView from "../components/insights/ClubNewsView";
+import Footer from "../components/insights/Footer";
 import { MATCH_LIBRARY } from "../data/matchLibrary";
 import { Calendar } from "lucide-react";
 
@@ -238,6 +239,9 @@ export default function AnfieldInsightsDashboard() {
         {/* Tab 4: Transfer Scout Simulator */}
         {activeTab === "transfer-scout" && <TransferScoutView />}
       </div>
+
+      {/* Global Apple & travel-kin Styled Footer */}
+      <Footer setActiveTab={setActiveTab} />
     </main>
   );
 }
