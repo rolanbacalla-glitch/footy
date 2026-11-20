@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Shield, Activity, Newspaper, Clock, UserSearch, Menu, X } from "lucide-react";
+import { Shield, Activity, Newspaper, Clock, UserSearch, Menu, X, ChevronDown, Check } from "lucide-react";
 import FootballLogo from "./FootballLogo";
+import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
 
 export default function Header({ activeTab, setActiveTab }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClubDropdownOpen, setIsClubDropdownOpen] = useState(false);
+  const [selectedClubId, setSelectedClubId] = useState("364"); // Default to Liverpool (364)
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,12 +21,30 @@ export default function Header({ activeTab, setActiveTab }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsClubDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const tabs = [
     { id: "boot-room", label: "Boot Room", icon: Activity },
     { id: "club-news", label: "Club News", icon: Newspaper },
     { id: "match-archives", label: "Match Archives", icon: Clock },
     { id: "transfer-scout", label: "Transfer Scout", icon: UserSearch },
   ];
+
+  const clubList = Object.entries(PREMIER_LEAGUE_MANAGERS).map(([id, info]) => ({
+    id,
+    ...info,
+  })).sort((a, b) => a.name.localeCompare(b.name));
+
+  const selectedClub = PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
 
   return (
     <>
@@ -96,21 +118,64 @@ export default function Header({ activeTab, setActiveTab }) {
             })}
           </nav>
 
-          {/* Desktop Right Action Area (Matchday Hub indicator pill inspired by travel-kin profile/explore) */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Desktop Right Action Area: Premier League Club Selector Dropdown */}
+          <div className="hidden md:flex items-center relative" ref={dropdownRef}>
             <button
-              onClick={() => setActiveTab("boot-room")}
-              className="flex items-center gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-full border border-white/10 backdrop-blur-md transition-all active:scale-95 cursor-pointer text-xs font-semibold"
+              type="button"
+              onClick={() => setIsClubDropdownOpen(!isClubDropdownOpen)}
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-white/[0.06] hover:bg-white/[0.12] text-white rounded-full border border-white/15 backdrop-blur-md transition-all active:scale-95 cursor-pointer text-xs font-semibold"
+              aria-haspopup="listbox"
+              aria-expanded={isClubDropdownOpen}
+              aria-label="Select Premier League club"
             >
-              <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-pulse" />
-              <span>North-West Derby</span>
+              <span className="w-2 h-2 rounded-full bg-[#30D158]" />
+              <span className="text-white/80 font-normal">Club:</span>
+              <span className="text-white font-bold">{selectedClub.name}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-white/60 transition-transform duration-200 ${isClubDropdownOpen ? "rotate-180 text-white" : ""}`} />
             </button>
-            <button
-              onClick={() => setActiveTab("boot-room")}
-              className="px-4 py-1.5 bg-[#FF2636] hover:bg-[#E31B23] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-[0_0_14px_rgba(255,38,54,0.35)] transition-all duration-200 active:scale-95 cursor-pointer"
-            >
-              Tactical Hub
-            </button>
+
+            {/* Dropdown Menu Modal */}
+            {isClubDropdownOpen && (
+              <div
+                role="listbox"
+                aria-label="Premier League Clubs"
+                className="absolute right-0 top-full mt-2 w-72 max-h-96 overflow-y-auto rounded-2xl bg-[#0E1218]/95 backdrop-blur-2xl border border-white/15 p-2 shadow-[0_16px_40px_rgba(0,0,0,0.85)] z-50 animate-fade-in divide-y divide-white/[0.04]"
+              >
+                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">
+                  Select Premier League Club (20)
+                </div>
+                <div className="py-1">
+                  {clubList.map((club) => {
+                    const isSelected = club.id === selectedClubId;
+                    return (
+                      <button
+                        key={club.id}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => {
+                          setSelectedClubId(club.id);
+                          setIsClubDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer text-left ${
+                          isSelected
+                            ? "bg-[#FF2636]/20 text-white font-bold border border-[#FF2636]/40"
+                            : "text-white/80 hover:bg-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <div>
+                          <div className="font-semibold text-white">{club.name}</div>
+                          <div className="text-[10px] text-[#8E8E93] mt-0.5">
+                            {club.manager} • <span className="font-mono text-white/50">{club.formation}</span>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-[#FF4D5A]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Toggle Button (travel-kin pattern) */}
