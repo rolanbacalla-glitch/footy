@@ -91,7 +91,7 @@ export default function PitchCanvas({
               <button
                 type="button"
                 onClick={() => setSelectedPlayer(null)}
-                className="min-h-[28px] flex items-center gap-1 text-[11px] font-semibold text-white bg-[#E31B23] hover:bg-[#FF2636] px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(227,27,35,0.4)] transition-colors cursor-pointer"
+                className="min-h-[28px] flex items-center gap-1.5 text-[11px] font-semibold text-white glass-crimson-pill px-3 py-1 cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" />
                 Reset Focus
@@ -161,6 +161,13 @@ export default function PitchCanvas({
               <stop offset="50%" stopColor="#FF2636" />
               <stop offset="100%" stopColor="#A80916" />
             </radialGradient>
+
+            {/* SVG Crimson Glassmorphism Pill Gradient */}
+            <linearGradient id="glassCrimsonPillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FF3848" stopOpacity="0.92" />
+              <stop offset="50%" stopColor="#E31B23" stopOpacity="0.84" />
+              <stop offset="100%" stopColor="#9E0A16" stopOpacity="0.94" />
+            </linearGradient>
 
             {/* Heatmap Gradients */}
             <radialGradient id="heatKopRight" cx="50%" cy="50%" r="50%">
@@ -278,7 +285,7 @@ export default function PitchCanvas({
             ANFIELD ROAD STAND
           </text>
 
-          {/* Attacking Direction HUD Pill */}
+          {/* Attacking Direction Crimson Glass HUD Pill */}
           <g>
             <rect
               x="69"
@@ -286,19 +293,28 @@ export default function PitchCanvas({
               width="32"
               height="4.2"
               rx="2.1"
-              fill="#121212"
-              fillOpacity="0.88"
-              stroke="rgba(227,27,35,0.4)"
-              strokeWidth="0.25"
+              fill="url(#glassCrimsonPillGrad)"
+              stroke="rgba(255,255,255,0.45)"
+              strokeWidth="0.3"
+              filter="url(#passBeamGlow)"
+            />
+            {/* Top specular highlight rim */}
+            <path
+              d="M 71.1 3.5 L 98.9 3.5"
+              stroke="#FFFFFF"
+              strokeOpacity="0.65"
+              strokeWidth="0.35"
+              strokeLinecap="round"
             />
             <text
               x="85"
               y="6.0"
               textAnchor="middle"
-              fill="#FF2636"
+              fill="#FFFFFF"
               fontSize="1.8"
               fontWeight="700"
               letterSpacing="0.06"
+              className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
             >
               THE KOP • ATTACKING ➔
             </text>

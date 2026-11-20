@@ -48,13 +48,13 @@ export default function Header({ activeTab, setActiveTab }) {
         {/* Brand Emblem & SF Pro Wordmark */}
         <div className="flex items-center justify-between w-full sm:w-auto">
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-9 h-9 rounded-[12px] bg-gradient-to-b from-[#E31B23] to-[#A30D18] shadow-[0_4px_16px_rgba(227,27,35,0.4),inset_0_1px_0_rgba(255,255,255,0.25)] shrink-0">
-              <Shield className="w-[18px] h-[18px] text-white" strokeWidth={2.2} />
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-[12px] glass-crimson-card shrink-0">
+              <Shield className="w-[18px] h-[18px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" strokeWidth={2.2} />
               <span
                 aria-hidden="true"
                 className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5"
               >
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-60" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF2636] ring-2 ring-[#121212]" />
               </span>
             </div>
@@ -131,7 +131,7 @@ export default function Header({ activeTab, setActiveTab }) {
                 aria-current={isActive ? "page" : undefined}
                 className={`min-h-[36px] flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold tracking-[-0.01em] transition-all duration-200 cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? "bg-[#E31B23] text-white shadow-[0_2px_12px_rgba(227,27,35,0.45)]"
+                    ? "glass-crimson-pill text-white"
                     : "text-[#8E8E93] hover:text-white hover:bg-white/[0.06]"
                 }`}
               >

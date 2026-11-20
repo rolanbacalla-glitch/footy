@@ -193,7 +193,7 @@ export default function MomentumChart({
                 aria-pressed={isActive}
                 className={`min-h-[54px] flex flex-col items-center justify-center py-2 px-1.5 rounded-[12px] text-center transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? "bg-[#E31B23] text-white shadow-[0_2px_12px_rgba(227,27,35,0.4)]"
+                    ? "glass-crimson-pill text-white"
                     : "text-[#8E8E93] hover:text-white hover:bg-white/[0.05]"
                 }`}
               >
@@ -334,17 +334,22 @@ export default function MomentumChart({
             </span>
           </div>
 
-          {/* Card 2: Signature OKX Solid Red Highlight Card for Field Tilt */}
-          <div className="bg-[#E31B23] p-3 rounded-[16px] text-white flex flex-col justify-between shadow-[0_4px_16px_rgba(227,27,35,0.35)]">
-            <span className="text-white/80 text-[11px] font-semibold uppercase tracking-[0.04em] block">
-              Field Tilt
-            </span>
+          {/* Card 2: Signature Crimson Glassmorphic Highlight Card for Field Tilt */}
+          <div className="glass-crimson-card p-3 rounded-[16px] text-white flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-white/85 text-[11px] font-semibold uppercase tracking-[0.05em] block drop-shadow-sm">
+                Field Tilt
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 border border-white/30 text-white shadow-inner">
+                Dominance
+              </span>
+            </div>
             <div className="flex items-baseline gap-1 my-0.5">
-              <span className="text-[26px] font-extrabold tracking-tight text-white tabular-nums">
+              <span className="text-[26px] font-extrabold tracking-tight text-white tabular-nums drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
                 {metrics.fieldTilt}%
               </span>
             </div>
-            <span className="text-[10px] text-white/90 font-medium block">
+            <span className="text-[10px] text-white/95 font-medium block drop-shadow-sm">
               Anfield Territorial Domination
             </span>
           </div>

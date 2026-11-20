@@ -230,7 +230,7 @@ export default function ClubNewsView() {
                     onClick={() => setSelectedFeed(tab.id)}
                     className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       isActive
-                        ? "bg-[#E31B23] text-white shadow-[0_2px_10px_rgba(227,27,35,0.4)]"
+                        ? "glass-crimson-pill text-white"
                         : "bg-[#181818] border border-white/[0.06] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                     }`}
                   >
@@ -289,7 +289,7 @@ export default function ClubNewsView() {
             <button
               type="button"
               onClick={() => fetchNews(true)}
-              className="min-h-[40px] px-4 py-2 rounded-full bg-[#C8102E] hover:bg-[#E03535] text-white text-xs font-semibold cursor-pointer transition-colors shadow-[0_2px_10px_rgba(200,16,46,0.35)]"
+              className="min-h-[40px] px-5 py-2 rounded-full glass-crimson-pill text-white text-xs font-semibold cursor-pointer"
             >
               Try Again
             </button>
@@ -328,7 +328,7 @@ export default function ClubNewsView() {
           >
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded-full bg-[#E31B23] text-white tabular-nums shadow-[0_2px_10px_rgba(227,27,35,0.4)]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded-full glass-crimson-pill text-white tabular-nums">
                   Top Story • #01
                 </span>
                 <span
@@ -460,7 +460,7 @@ export default function ClubNewsView() {
                   aria-pressed={isActive}
                   className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
                     isActive
-                      ? "bg-[#E31B23] border-transparent text-white shadow-[0_2px_10px_rgba(227,27,35,0.4)]"
+                      ? "glass-crimson-pill text-white border-transparent"
                       : "bg-[#1A1A1A] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                   }`}
                 >

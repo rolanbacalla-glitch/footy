@@ -53,7 +53,7 @@ export default function AnfieldInsightsDashboard() {
                   }}
                   className={`min-h-[38px] flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer border ${
                     isSelected
-                      ? "bg-[#E31B23] border-transparent text-white shadow-[0_2px_12px_rgba(227,27,35,0.45)]"
+                      ? "glass-crimson-pill text-white"
                       : "bg-[#181818] border-white/[0.08] text-[#8E8E93] hover:text-white hover:bg-[#222222]"
                   }`}
                 >
@@ -61,14 +61,16 @@ export default function AnfieldInsightsDashboard() {
                     className={`w-2 h-2 rounded-full shrink-0 ${
                       isUpcoming
                         ? "bg-[#FFD60A] shadow-[0_0_8px_rgba(255,214,10,0.65)]"
-                        : "bg-[#E31B23]"
+                        : isSelected
+                          ? "bg-white shadow-[0_0_8px_#FFFFFF]"
+                          : "bg-[#E31B23]"
                     }`}
                   />
                   <span className="tracking-[-0.01em]">{m.title}</span>
                   <span
                     className={`text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full ${
                       isSelected
-                        ? "bg-black/35 text-white border border-white/20"
+                        ? "bg-black/40 text-white border border-white/25 shadow-inner"
                         : "bg-black/40 text-[#8E8E93] border border-white/[0.06]"
                     }`}
                   >
