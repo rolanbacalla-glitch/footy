@@ -299,9 +299,9 @@ export default function FootballInsightsDashboard() {
             )}
 
             {/* Tactical Pitch Canvas & Match Momentum */}
-            <div className="w-full flex flex-col lg:flex-row gap-4">
+            <div className="w-full flex flex-col lg:flex-row items-start gap-4">
               {/* Left 2/3 Tactical Pitch Canvas — Zero inner scrolling */}
-              <div className="flex-1 lg:w-2/3 flex flex-col overflow-hidden">
+              <div className="flex-1 lg:w-2/3 w-full flex flex-col overflow-hidden">
                 <PitchCanvas
                   activeMatch={activeMatch}
                   overlayMode={overlayMode}
@@ -318,7 +318,7 @@ export default function FootballInsightsDashboard() {
               </div>
 
               {/* Right 1/3 Metrics & Match Momentum Controller */}
-              <div className="lg:w-1/3 flex flex-col gap-4">
+              <div className="lg:w-1/3 w-full flex flex-col gap-4">
                 <MomentumChart
                   activeMatch={activeMatch}
                   overlayMode={overlayMode}

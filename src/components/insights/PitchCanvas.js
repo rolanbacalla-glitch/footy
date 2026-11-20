@@ -76,7 +76,7 @@ export default function PitchCanvas({
   };
 
   return (
-    <div className="apple-card relative w-full h-full flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none bg-[#0D120F] border border-white/[0.08]">
+    <div className="apple-card relative w-full flex flex-col justify-between rounded-[24px] overflow-hidden p-3 sm:p-4 md:p-5 select-none bg-[#0D120F] border border-white/[0.08]">
       {/* Stadium Pitch Atmospheric Vignette */}
       <div
         aria-hidden="true"
