@@ -348,45 +348,44 @@ function renderRadar(radarData = []) {
 
 export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
   const [liveData, setLiveData] = React.useState(null);
-  const [isHydrating, setIsHydrating] = React.useState(true);
+  const [isClosing, setIsClosing] = React.useState(false);
+
+  const handleClose = React.useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 220);
+  }, [onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
     };
     if (isOpen) {
+      setIsClosing(false);
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
-  // Premium Apple-grade telemetry hydration sequence (450ms staged telemetry scan)
+  // Fetch verified real-time seasonal data from ESPN Athlete API
   useEffect(() => {
     if (!isOpen || !player?.id) {
       setLiveData(null);
-      setIsHydrating(true);
       return;
     }
     let cancelled = false;
-    setIsHydrating(true);
 
-    const minLoadTimer = new Promise((resolve) => setTimeout(resolve, 480));
-    const dataFetch = fetch(`/api/player-stats?playerId=${encodeURIComponent(player.id)}`)
+    fetch(`/api/player-stats?playerId=${encodeURIComponent(player.id)}`)
       .then((res) => res.json())
-      .catch((err) => {
-        console.error("Failed to load live athlete telemetry:", err);
-        return null;
-      });
-
-    Promise.all([dataFetch, minLoadTimer])
-      .then(([data]) => {
-        if (!cancelled) {
-          if (data) setLiveData(data);
-          setIsHydrating(false);
+      .then((data) => {
+        if (!cancelled && data) {
+          setLiveData(data);
         }
       })
-      .catch(() => {
-        if (!cancelled) setIsHydrating(false);
+      .catch((err) => {
+        console.error("Failed to load live athlete telemetry:", err);
       });
 
     return () => {
@@ -426,11 +425,16 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-label={`Player Dossier: ${profile.fullName}`}
-      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fadeIn transition-opacity"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+        isClosing ? "opacity-0" : "opacity-100"
+      }`}
+      onClick={handleClose}
     >
+      {/* Native App Slide-Over Sheet: Slide in from right (100% -> 0) */}
       <div
-        className="relative w-full max-w-md h-full bg-[#0D1117] border-l border-white/[0.1] shadow-2xl overflow-y-auto p-5 flex flex-col justify-between"
+        className={`relative w-full max-w-md h-full bg-[#0D1117] border-l border-white/[0.1] shadow-2xl overflow-y-auto p-5 flex flex-col justify-between ${
+          isClosing ? "animate-slide-out-right" : "animate-slide-in-right"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div>
@@ -444,7 +448,7 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
             </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition cursor-pointer"
               aria-label="Close dossier"
             >
@@ -452,169 +456,123 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
             </button>
           </div>
 
-          {/* Staged Telemetry Loading State vs Fully Hydrated State */}
-          {isHydrating ? (
-            <div className="mt-4 space-y-4 animate-pulse">
-              {/* Top Tag Skeleton */}
-              <div className="flex items-center justify-between text-[10px] px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-ping" />
-                  <span className="text-white/70 font-mono">Synchronising official athlete feed...</span>
-                </div>
-                <span className="font-mono text-white/30">Connecting</span>
-              </div>
-
-              {/* Player Hero Skeleton */}
-              <div className="flex items-start justify-between gap-3 pt-2">
-                <div className="space-y-2">
-                  <div className="h-6 w-44 rounded-md bg-white/[0.08]" />
-                  <div className="h-3.5 w-32 rounded bg-white/[0.04]" />
-                </div>
-                <div className="space-y-1.5 flex flex-col items-end">
-                  <div className="h-2.5 w-16 rounded bg-white/[0.05]" />
-                  <div className="h-5 w-12 rounded bg-white/[0.08]" />
-                </div>
-              </div>
-
-              {/* Tactical Instructions Skeleton */}
-              <div className="rounded-xl border border-white/[0.06] p-4 bg-white/[0.02] space-y-2">
-                <div className="h-3 w-36 rounded bg-white/[0.08]" />
-                <div className="h-3 w-full rounded bg-white/[0.04]" />
-                <div className="h-3 w-3/4 rounded bg-white/[0.04]" />
-              </div>
-
-              {/* Radar Skeleton Area */}
-              <div className="rounded-xl border border-white/[0.06] p-6 bg-white/[0.01] flex flex-col items-center justify-center gap-3">
-                <div className="w-28 h-28 rounded-full border border-dashed border-white/10 animate-spin" />
-                <span className="text-[10px] font-mono text-[#8E8E93]">Plotting tactical geometry...</span>
-              </div>
-
-              {/* KPI Skeletons */}
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-10 rounded-lg bg-white/[0.03] border border-white/[0.04]" />
-                ))}
-              </div>
+          <div>
+            {/* Live Data Attribution Tag */}
+            <div className="mt-2.5 flex items-center justify-between text-[10px] px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
+              <span className="flex items-center gap-1.5 text-white/60">
+                <span className={`w-1.5 h-1.5 rounded-full ${liveData?.isLive ? "bg-emerald-400" : "bg-amber-400"}`} />
+                {liveData?.isLive ? "Live ESPN Verified Athlete Feed" : "Tactical Model Benchmark"}
+              </span>
+              <span className="font-mono text-white/40">2026/27 Season</span>
             </div>
-          ) : (
-            <div className="animate-fadeIn">
-              {/* Live Data Attribution Tag */}
-              <div className="mt-2.5 flex items-center justify-between text-[10px] px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
-                <span className="flex items-center gap-1.5 text-white/60">
-                  <span className={`w-1.5 h-1.5 rounded-full ${liveData?.isLive ? "bg-emerald-400" : "bg-amber-400"}`} />
-                  {liveData?.isLive ? "Live ESPN Verified Athlete Feed" : "Tactical Model Benchmark"}
-                </span>
-                <span className="font-mono text-white/40">2026/27 Season</span>
-              </div>
 
-              {/* Player Hero Section */}
-              <div className="mt-3 flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-black font-mono text-[#FF2636]">
-                      #{player.number}
-                    </span>
-                    <h3 className="text-lg font-bold text-white tracking-tight">
-                      {profile.fullName}
-                    </h3>
-                  </div>
-                  <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">
-                    {profile.role} • <span className="text-white/80">{player.pos}</span>
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-[#8E8E93] uppercase tracking-wider font-semibold">
-                    Fitness Index
+            {/* Player Hero Section */}
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black font-mono text-[#FF2636]">
+                    #{player.number}
                   </span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <HeartPulse className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="font-mono font-bold text-sm text-white">
-                      {profile.fitness}%
-                    </span>
-                  </div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">
+                    {profile.fullName}
+                  </h3>
                 </div>
-              </div>
-
-              {/* Tactical Instructions */}
-              <div className="apple-tile rounded-xl border border-white/[0.08] p-3.5 mt-4 bg-white/[0.02]">
-                <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
-                  <Zap className="w-3.5 h-3.5 text-[#FF2636]" />
-                  <span>Head Coach Tactical Instruction</span>
-                </div>
-                <p className="text-xs text-white/70 mt-1.5 leading-relaxed">
-                  {profile.instructions}
+                <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">
+                  {profile.role} • <span className="text-white/80">{player.pos}</span>
                 </p>
               </div>
 
-              {/* Radar */}
-              <div className="mt-5 apple-tile rounded-xl border border-white/[0.08] p-4 text-center bg-white/[0.01]">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-2">
-                  Per-90 Tactical Profile (FBref Model vs League)
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] text-[#8E8E93] uppercase tracking-wider font-semibold">
+                  Fitness Index
                 </span>
-                {renderRadar(profile.radar)}
-              </div>
-
-              {/* KPIs */}
-              <div className="mt-4 space-y-2.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block">
-                  Key Performance Indicators
-                </span>
-                {profile.metrics.map((m, idx) => (
-                  <div
-                    key={idx}
-                    className="apple-tile rounded-lg border border-white/[0.06] p-2.5 flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="text-xs text-white/80 font-medium block">
-                        {m.label}
-                      </span>
-                      <span className="text-[10px] text-[#8E8E93]">
-                        {m.benchmark}
-                      </span>
-                    </div>
-                    <span className="font-mono font-bold text-sm text-white">
-                      {m.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Workload */}
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
-                    {displayStarts ? `${displayStarts} Starts` : "Minutes"}
-                  </span>
-                  <span className="font-mono font-bold text-xs text-white mt-0.5 block">
-                    {displayMinutes}'
-                  </span>
-                </div>
-                <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
-                    OBV Metric
-                  </span>
-                  <span className="font-mono font-bold text-xs text-emerald-400 mt-0.5 block">
-                    +{(player.obv || 0.65).toFixed(2)}
-                  </span>
-                </div>
-                <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
-                    Discipline
-                  </span>
-                  <span className="font-mono font-bold text-xs text-white mt-0.5 block">
-                    {displayYellows} {displayYellows === 1 ? "Caution" : "Cautions"}
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <HeartPulse className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="font-mono font-bold text-sm text-white">
+                    {profile.fitness}%
                   </span>
                 </div>
               </div>
             </div>
-          )}
+
+            {/* Tactical Instructions */}
+            <div className="apple-tile rounded-xl border border-white/[0.08] p-3.5 mt-4 bg-white/[0.02]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
+                <Zap className="w-3.5 h-3.5 text-[#FF2636]" />
+                <span>Head Coach Tactical Instruction</span>
+              </div>
+              <p className="text-xs text-white/70 mt-1.5 leading-relaxed">
+                {profile.instructions}
+              </p>
+            </div>
+
+            {/* Radar */}
+            <div className="mt-5 apple-tile rounded-xl border border-white/[0.08] p-4 text-center bg-white/[0.01]">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-2">
+                Per-90 Tactical Profile (FBref Model vs League)
+              </span>
+              {renderRadar(profile.radar)}
+            </div>
+
+            {/* KPIs */}
+            <div className="mt-4 space-y-2.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block">
+                Key Performance Indicators
+              </span>
+              {profile.metrics.map((m, idx) => (
+                <div
+                  key={idx}
+                  className="apple-tile rounded-lg border border-white/[0.06] p-2.5 flex items-center justify-between"
+                >
+                  <div>
+                    <span className="text-xs text-white/80 font-medium block">
+                      {m.label}
+                    </span>
+                    <span className="text-[10px] text-[#8E8E93]">
+                      {m.benchmark}
+                    </span>
+                  </div>
+                  <span className="font-mono font-bold text-sm text-white">
+                    {m.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Workload */}
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
+                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+                  {displayStarts ? `${displayStarts} Starts` : "Minutes"}
+                </span>
+                <span className="font-mono font-bold text-xs text-white mt-0.5 block">
+                  {displayMinutes}'
+                </span>
+              </div>
+              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
+                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+                  OBV Metric
+                </span>
+                <span className="font-mono font-bold text-xs text-emerald-400 mt-0.5 block">
+                  +{(player.obv || 0.65).toFixed(2)}
+                </span>
+              </div>
+              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
+                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+                  Discipline
+                </span>
+                <span className="font-mono font-bold text-xs text-white mt-0.5 block">
+                  {displayYellows} {displayYellows === 1 ? "Caution" : "Cautions"}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="pt-4 border-t border-white/[0.08] mt-6">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold tracking-tight transition cursor-pointer border border-white/15"
           >
             Return to Pitch Canvas
