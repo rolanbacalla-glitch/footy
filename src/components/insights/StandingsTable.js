@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   Trophy,
@@ -21,7 +21,7 @@ export default function StandingsTable() {
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const fetchStandings = () => {
+  const fetchStandings = useCallback(() => {
     setIsLoading(true);
     fetch("/api/standings")
       .then((res) => res.json())
@@ -40,14 +40,24 @@ export default function StandingsTable() {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, []);
 
   useEffect(() => {
-    fetchStandings();
+    // Initial fetch via timer to prevent React synchronous effect warnings
+    const initialTimer = setTimeout(() => {
+      fetchStandings();
+    }, 0);
+
     // Auto-refresh every 3 minutes
-    const interval = setInterval(fetchStandings, 3 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(() => {
+      fetchStandings();
+    }, 3 * 60 * 1000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [fetchStandings]);
 
   const displayedRows = isExpanded ? standings : standings.slice(0, 6);
   const lfcRank = standings.find((t) => t.isLfc)?.rank || null;

@@ -363,7 +363,6 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
       if (e.key === "Escape") handleClose();
     };
     if (isOpen) {
-      setIsClosing(false);
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -371,10 +370,7 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
 
   // Fetch verified real-time seasonal data from ESPN Athlete API
   useEffect(() => {
-    if (!isOpen || !player?.id) {
-      setLiveData(null);
-      return;
-    }
+    if (!isOpen || !player?.id) return;
     let cancelled = false;
 
     fetch(`/api/player-stats?playerId=${encodeURIComponent(player.id)}`)
@@ -546,7 +542,7 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
                   {displayStarts ? `${displayStarts} Starts` : "Minutes"}
                 </span>
                 <span className="font-mono font-bold text-xs text-white mt-0.5 block">
-                  {displayMinutes}'
+                  {displayMinutes}&apos;
                 </span>
               </div>
               <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
