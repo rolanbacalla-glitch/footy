@@ -29,6 +29,71 @@ export const MATCH_LIBRARY = [
       ppda: 6.4,
       counterPressRegains: 27,
     },
+    preMatch: {
+      kickoffHour: 16,
+      winProbability: { home: 58, draw: 23, away: 19 },
+      winProbabilitySource: "Opta Power Rankings & Market Odds; adjusted for squad selection",
+      projectedXg: [2.54, 0.92],
+      // Oldest → most recent (Liverpool form in 2026/27)
+      form: {
+        home: ["W", "W", "W", "W", "D", "W"],
+        away: ["W", "L", "D", "W", "L", "L"],
+      },
+      // [xG for, xG against] per match, oldest → most recent
+      xgTrend: {
+        home: [[1.42, 1.88], [2.05, 1.21], [2.61, 1.52], [1.94, 0.71], [2.18, 1.12], [2.64, 1.04]],
+        away: [[1.71, 1.10], [1.22, 1.64], [1.35, 1.29], [1.48, 1.02], [0.94, 1.71], [1.02, 1.83]],
+      },
+      teamNews: {
+        home: [
+          { name: "Giovanni Leoni", status: "out", detail: "ACL Rehabilitation • Expected Mar 2027" },
+          { name: "Alexis Mac Allister", status: "doubt", detail: "Hamstring Strain • Late fitness test" },
+          { name: "Milos Kerkez", status: "booking", detail: "4 cautions • 1 from tactical ban" },
+        ],
+        away: [
+          { name: "Lisandro Martínez", status: "out", detail: "Knee Collateral • Expected Jan 2027" },
+          { name: "Mason Mount", status: "doubt", detail: "Calf tightness • Assessed on matchday" },
+          { name: "Casemiro", status: "booking", detail: "4 cautions • 1 from tactical ban" },
+        ],
+      },
+      keyDuel: {
+        home: { name: "Bradley Barcola", number: 29, stat: "4.1", label: "successful dribbles /90" },
+        away: { name: "Patrick Dorgu", number: 13, stat: "1.9", label: "times dribbled past /90" },
+        takeaway: "Barcola v Dorgu on Liverpool's right is the primary mismatch. Frimpong's overlapping undercuts create 2-on-1 vertical overloads.",
+      },
+      headToHead: [
+        { date: "19 Oct 2025", fixture: "Liverpool 1–2 Man United", score: "1–2", result: "L", venue: "Anfield" },
+        { date: "5 Jan 2025", fixture: "Liverpool 2–2 Man United", score: "2–2", result: "D", venue: "Anfield" },
+        { date: "1 Sep 2024", fixture: "Man United 0–3 Liverpool", score: "3–0", result: "W", venue: "Old Trafford" },
+        { date: "7 Apr 2024", fixture: "Man United 2–2 Liverpool", score: "2–2", result: "D", venue: "Old Trafford" },
+        { date: "17 Mar 2024", fixture: "Man United 4–3 Liverpool (aet)", score: "3–4", result: "L", venue: "Old Trafford" },
+      ],
+      tactical: {
+        ppda: 6.4,
+        opponentTurnovers: 14,
+        takeaway: "United build out via a back-three shape. Facing Iraola's aggressive vertical press, they yield ~14 turnovers/game in defensive third.",
+      },
+      setPieces: {
+        home: { for: 0.38, against: 0.21 },
+        away: { for: 0.29, against: 0.34 },
+        takeaway: "Liverpool generate +0.17 xG net differential from set pieces. Inswinging Kop-end corners offer high-value chances.",
+      },
+      rest: {
+        home: { days: 6, last: "Crystal Palace (A), Sat 8 Nov" },
+        away: { days: 3, last: "Carabao Cup (A), Tue 18 Nov" },
+        flag: "United arrive on 3 days' recovery after away midweek travel, creating a significant physical drop-off window after 60'.",
+      },
+      officials: { referee: "Anthony Taylor", var: "Darren England", cardsPerGame: "4.1", pensPerGame: "0.24" },
+      conditions: { tempC: 9, rainPct: 40, windKmh: 18, summary: "Overcast" },
+      pitch: "Hybrid grass • Pristine",
+      attendance: "61,276 • Capacity Sell-Out",
+      milestones: [
+        "Virgil van Dijk is set to make his 350th Premier League appearance",
+        "Florian Wirtz has 6 goal involvements in his last 5 league matches",
+        "Alexander Isak is 1 goal away from reaching double figures this season",
+        "Liverpool are undefeated across their last 6 fixtures in all competitions",
+      ],
+    },
     momentumPoints: [
       { min: 0, val: 32 },
       { min: 15, val: 68, event: "Iraola High-Press Blitz" },
