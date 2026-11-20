@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <radialGradient id="prismA_glow" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stopColor="#FF2636" stopOpacity="0.35" />
+      <stop offset="60%" stopColor="#C8102E" stopOpacity="0.08" />
+      <stop offset="100%" stopColor="#0B0E11" stopOpacity="0" />
+    </radialGradient>
+    <linearGradient id="prismA_rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FF4D5A" />
+      <stop offset="50%" stopColor="#C8102E" />
+      <stop offset="100%" stopColor="#8A0713" />
+    </linearGradient>
+    <linearGradient id="prismA_sheen" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.25" />
+      <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+    </linearGradient>
+    <filter id="prismA_drop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#C8102E" floodOpacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow Background -->
+  <rect width="120" height="120" rx="28" fill="#0A0C0F" />
+  <circle cx="60" cy="58" r="50" fill="url(#prismA_glow)" />
+
+  <!-- Tactical Hexagon Field / Pitch Aperture -->
+  <polygon points="60,18 96,38 96,80 60,100 24,80 24,38"
+           stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-dasharray="3 3" fill="none" />
+
+  <!-- Shield Shape Geometry (Trademark-safe Modern Vector) -->
+  <path d="M 60 22 C 78 22 92 28 92 46 C 92 70 60 92 60 92 C 60 92 28 70 28 46 C 28 28 42 22 60 22 Z"
+        fill="#12151B" stroke="url(#prismA_rim)" stroke-width="3" filter="url(#prismA_drop)" />
+
+  <!-- Subtle Specular Glass Sheen -->
+  <path d="M 60 24 C 74 24 88 29 88 44 C 88 56 78 68 60 76 C 42 68 32 56 32 44 C 32 29 46 24 60 24 Z"
+        fill="url(#prismA_sheen)" />
+
+  <!-- Monogram 'A' Intersected with Tactical Passing Vector Axis -->
+  <!-- Left Leg of A -->
+  <path d="M 60 32 L 42 74" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+  <!-- Right Leg of A (Crimson Accent) -->
+  <path d="M 60 32 L 78 74" stroke="#FF2636" stroke-width="4.5" stroke-linecap="round" />
+  <!-- Crossbar: Tactical Coordinate Vector -->
+  <line x1="48" y1="58" x2="72" y2="58" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Focal Tactical Beacon (The Kop Optical Aperture) -->
+  <circle cx="60" cy="32" r="4" fill="#FFFFFF" />
+  <circle cx="60" cy="32" r="1.8" fill="#C8102E" />
+
+  <!-- Coordinate Nodes on Crossbar -->
+  <circle cx="48" cy="58" r="2.2" fill="#FFFFFF" />
+  <circle cx="72" cy="58" r="2.2" fill="#FF2636" />
+</svg>
