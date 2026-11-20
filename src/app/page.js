@@ -157,11 +157,11 @@ export default function FootballInsightsDashboard() {
     const isHome = targetFixture?.isHome ?? true;
     const formattedDate = targetFixture?.date
       ? new Date(targetFixture.date).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "22 Nov 2026 • 16:30";
 
     return {
@@ -212,9 +212,9 @@ export default function FootballInsightsDashboard() {
         { from: "lcm", to: "cf", count: 14 },
       ],
       shots: [
-        { id: "s1", x: 86, y: 48, outcome: "goal", xg: 0.38, minute: "24'", player: "Centre Forward" },
-        { id: "s2", x: 78, y: 36, outcome: "saved", xg: 0.14, minute: "38'", player: "Playmaker" },
-        { id: "s3", x: 82, y: 62, outcome: "blocked", xg: 0.09, minute: "55'", player: "Right Winger" },
+        { id: "s1", x: 86, y: 48, outcome: "goal", xg: 0.38, xG: 0.38, minute: "24'", player: "Centre Forward" },
+        { id: "s2", x: 78, y: 36, outcome: "saved", xg: 0.14, xG: 0.14, minute: "38'", player: "Playmaker" },
+        { id: "s3", x: 82, y: 62, outcome: "blocked", xg: 0.09, xG: 0.09, minute: "55'", player: "Right Winger" },
       ],
     };
   })();
@@ -274,17 +274,16 @@ export default function FootballInsightsDashboard() {
 
                 return (
                   <button
-                    key={nextFx.id}
+                    key={`ribbon-next-${nextFx.id}`}
                     type="button"
                     onClick={() => {
                       setSelectedMatchId(nextFx.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
-                      isSelected
-                        ? "glass-crimson-pill text-white"
-                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                    }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${isSelected
+                      ? "glass-crimson-pill text-white"
+                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                      }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
                     <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
@@ -309,25 +308,23 @@ export default function FootballInsightsDashboard() {
 
                 return (
                   <button
-                    key={primaryMatch.id}
+                    key={`ribbon-focus-${primaryMatch.id}`}
                     role="tab"
                     aria-selected={isSelected}
                     onClick={() => {
                       setSelectedMatchId(primaryMatch.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border ${
-                      isSelected
-                        ? "glass-crimson-pill text-white shadow-[0_0_12px_rgba(255,38,54,0.4)]"
-                        : "apple-tile border-[#FF2636]/40 text-white hover:border-[#FF2636]/80"
-                    }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border ${isSelected
+                      ? "glass-crimson-pill text-white shadow-[0_0_12px_rgba(255,38,54,0.4)]"
+                      : "apple-tile border-[#FF2636]/40 text-white hover:border-[#FF2636]/80"
+                      }`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full shrink-0 ${
-                        isLive
-                          ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
-                          : "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                      }`}
+                      className={`w-2 h-2 rounded-full shrink-0 ${isLive
+                        ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
+                        : "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                        }`}
                     />
                     <span className="tracking-tight text-white">
                       {primaryMatch.title}
@@ -346,18 +343,17 @@ export default function FootballInsightsDashboard() {
                 const isSelected = lastGame.id === selectedMatchId;
                 return (
                   <button
-                    key={lastGame.id}
+                    key={`ribbon-last-${lastGame.id}`}
                     role="tab"
                     aria-selected={isSelected}
                     onClick={() => {
                       setSelectedMatchId(lastGame.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
-                      isSelected
-                        ? "glass-crimson-pill text-white"
-                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                    }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${isSelected
+                      ? "glass-crimson-pill text-white"
+                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                      }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
                     <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider">

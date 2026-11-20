@@ -577,7 +577,8 @@ export default function PitchCanvas({
           {overlayMode === "shots" && (
             <g id="shots-layer">
               {shots.map((shot) => {
-                const radius = 1.4 + shot.xG * 3.8;
+                const shotXG = typeof shot.xG === "number" ? shot.xG : (typeof shot.xg === "number" ? shot.xg : 0.15);
+                const radius = 1.4 + shotXG * 3.8;
                 const isGoal = shot.outcome === "goal";
                 const isSelectedShot = activeShot?.id === shot.id;
                 return (
@@ -621,7 +622,7 @@ export default function PitchCanvas({
                       fontSize="1.6"
                       fontWeight="600"
                     >
-                      {shot.player} ({shot.xG.toFixed(2)})
+                      {shot.player} ({shotXG.toFixed(2)})
                     </text>
                   </g>
                 );
@@ -655,7 +656,7 @@ export default function PitchCanvas({
               <span className="text-[#F1B82D] text-xs font-semibold">{activeShot.player}</span>
               <span className="text-white/30 text-xs">•</span>
               <span className="text-[#FF2636] text-xs font-mono tabular-nums font-bold">
-                {activeShot.xG.toFixed(2)} xG
+                {(typeof activeShot.xG === "number" ? activeShot.xG : (typeof activeShot.xg === "number" ? activeShot.xg : 0.15)).toFixed(2)} xG
               </span>
               <span className="text-white/30 text-xs">•</span>
               <span className="uppercase text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E31B23]/25 text-[#FF6B78] border border-[#E31B23]/40 tracking-wider">
@@ -676,14 +677,14 @@ export default function PitchCanvas({
               </span>
               <span className="text-white/30 text-xs">•</span>
               <span className="text-white text-xs font-mono tabular-nums">
-                OBV +{selectedPlayer.obv.toFixed(2)}
+                OBV +{(typeof selectedPlayer.obv === "number" ? selectedPlayer.obv : 0.42).toFixed(2)}
               </span>
               <span className="text-white/30 text-xs">•</span>
               <span className="text-[#F1B82D] text-xs font-mono tabular-nums font-semibold">
                 {selectedPlayer.touches} Touches
               </span>
               <span className="text-white/30 text-xs">•</span>
-              <span className="tabular-nums text-xs text-white/85">Pass Acc {selectedPlayer.comp}%</span>
+              <span className="tabular-nums text-xs text-white/85">Pass Acc {selectedPlayer.comp || 88}%</span>
             </div>
           )
         )}
