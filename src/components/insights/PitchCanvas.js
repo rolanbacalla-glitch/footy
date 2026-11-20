@@ -772,38 +772,42 @@ export default function PitchCanvas({
           </div>
         </div>
 
-        {/* Dynamic Focus Telemetry Pill */}
+        {/* Dynamic Focus Telemetry Card / Pill */}
         {overlayMode === "shots" && activeShot ? (
-          <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap bg-[#141414] border border-white/[0.08]">
-            <span className="text-[#F1B82D] font-semibold">{activeShot.player}</span>
-            <span className="text-white/30">•</span>
-            <span className="text-[#FF2636] font-mono tabular-nums font-semibold">
-              {activeShot.xG.toFixed(2)} xG
-            </span>
-            <span className="text-white/30">•</span>
-            <span className="uppercase text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#E31B23]/20 text-[#FF6B78] border border-[#E31B23]/40">
-              {activeShot.outcome}
-            </span>
+          <div className="apple-glass-hud flex flex-col justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-[16px] text-white self-start sm:self-auto bg-[#141414]/95 border border-white/[0.12] shadow-[0_4px_16px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-[#F1B82D] text-xs font-semibold">{activeShot.player}</span>
+              <span className="text-white/30 text-xs">•</span>
+              <span className="text-[#FF2636] text-xs font-mono tabular-nums font-bold">
+                {activeShot.xG.toFixed(2)} xG
+              </span>
+              <span className="text-white/30 text-xs">•</span>
+              <span className="uppercase text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E31B23]/25 text-[#FF6B78] border border-[#E31B23]/40 tracking-wider">
+                {activeShot.outcome}
+              </span>
+            </div>
             {activeShot.desc && (
-              <span className="text-[#8E8E93] text-[11px]">{activeShot.desc}</span>
+              <span className="text-[#EBEBF5]/75 text-[11px] font-normal mt-1 leading-snug">
+                {activeShot.desc}
+              </span>
             )}
           </div>
         ) : (
           selectedPlayer && (
-            <div className="apple-glass-hud flex items-center gap-2 px-3 py-1 rounded-full text-white self-start sm:self-auto flex-wrap bg-[#141414] border border-white/[0.08]">
-              <span className="text-[#FF2636] font-bold">
+            <div className="apple-glass-hud flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-[16px] text-white self-start sm:self-auto flex-wrap bg-[#141414]/95 border border-white/[0.12] shadow-[0_4px_16px_rgba(0,0,0,0.5)]">
+              <span className="text-[#FF2636] text-xs font-bold">
                 #{selectedPlayer.number} {selectedPlayer.name}
               </span>
-              <span className="text-white/30">•</span>
-              <span className="text-white font-mono tabular-nums">
+              <span className="text-white/30 text-xs">•</span>
+              <span className="text-white text-xs font-mono tabular-nums">
                 OBV +{selectedPlayer.obv.toFixed(2)}
               </span>
-              <span className="text-white/30">•</span>
-              <span className="text-[#F1B82D] font-mono tabular-nums">
+              <span className="text-white/30 text-xs">•</span>
+              <span className="text-[#F1B82D] text-xs font-mono tabular-nums font-semibold">
                 {selectedPlayer.touches} Touches
               </span>
-              <span className="text-white/30">•</span>
-              <span className="tabular-nums text-white/85">Pass Acc {selectedPlayer.comp}%</span>
+              <span className="text-white/30 text-xs">•</span>
+              <span className="tabular-nums text-xs text-white/85">Pass Acc {selectedPlayer.comp}%</span>
             </div>
           )
         )}
