@@ -15,12 +15,26 @@ import {
 
 export default function MomentumChart({
   activeMatch,
+  selectedClub,
   overlayMode,
   setOverlayMode,
   selectedPlayer,
   setSelectedPlayer,
 }) {
-  const momentumPoints = activeMatch?.momentumPoints || [];
+  const clubName = selectedClub?.name || activeMatch?.clubName || activeMatch?.homeTeam || "Club";
+  const stadiumName = selectedClub?.stadium || activeMatch?.venue || "Stadium";
+  const managerSurname = (selectedClub?.manager || activeMatch?.selectedManager || "Head Coach").split(" ").slice(-1)[0];
+  const momentumPoints = activeMatch?.momentumPoints?.length
+    ? activeMatch.momentumPoints
+    : [
+        { min: 0, val: 28 },
+        { min: 15, val: 65, event: `${selectedClub?.shortName || "Home"} High-Press Blitz` },
+        { min: 30, val: 78, event: "Half-Space Overload" },
+        { min: 45, val: 40, event: "HT Tactical Reset" },
+        { min: 60, val: 85, event: "Box Breakthrough", isGoal: true },
+        { min: 75, val: 60, event: `${managerSurname} Midfield Control` },
+        { min: 90, val: 74, event: "Full-Time Control" },
+      ];
   const startingXI = activeMatch?.startingXI || [];
   const passLinks = activeMatch?.passLinks || [];
   const metrics = activeMatch?.metrics || {
@@ -229,7 +243,7 @@ export default function MomentumChart({
         <div className="relative w-full h-28 bg-[var(--apple-bg-base)]/90 rounded-[14px] border border-white/[0.08] p-2 flex items-center justify-center overflow-hidden">
           <svg
             role="img"
-            aria-label={`Match momentum chart for ${activeMatch?.title || "Liverpool FC"}`}
+            aria-label={`Match momentum chart for ${activeMatch?.title || clubName}`}
             viewBox="0 0 300 100"
             className="w-full h-full"
           >
@@ -349,8 +363,8 @@ export default function MomentumChart({
                 {metrics.fieldTilt}%
               </span>
             </div>
-            <span className="text-[10px] text-white/95 font-medium block drop-shadow-sm">
-              Anfield Territorial Domination
+            <span className="text-[10px] text-white/95 font-medium block drop-shadow-sm truncate">
+              {stadiumName} Territorial Domination
             </span>
           </div>
 
@@ -365,8 +379,8 @@ export default function MomentumChart({
               </span>
               <span className="text-[10px] text-[#8E8E93]">passes/act</span>
             </div>
-            <span className="text-[10px] text-[#8E8E93] mt-0.5 block">
-              Iraola High Press Index
+            <span className="text-[10px] text-[#8E8E93] mt-0.5 block truncate">
+              {managerSurname} High Press Index
             </span>
           </div>
 

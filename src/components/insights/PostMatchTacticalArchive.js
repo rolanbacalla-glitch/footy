@@ -14,18 +14,32 @@ import {
 } from "lucide-react";
 
 // Real-coordinate shot map & tactical assignment breakdown for post-match analysis
-export default function PostMatchTacticalArchive({ match }) {
+export default function PostMatchTacticalArchive({ match, selectedClub }) {
   const [activeShot, setActiveShot] = useState(null);
   const [filterOutcome, setFilterOutcome] = useState("all"); // 'all' | 'goal' | 'saved' | 'missed'
 
-  // Default to provided match shots or sample tactical dataset
-  const shots = match?.shots || [
-    { id: 101, x: 88, y: 34, xG: 0.62, outcome: "goal", player: "Alexander Isak", min: "24'", desc: "Right-footed low drive into bottom left corner following Wirtz reverse pass." },
-    { id: 102, x: 84, y: 46, xG: 0.38, outcome: "saved", player: "Florian Wirtz", min: "39'", desc: "Curled shot towards far top post tipped over crossbar." },
-    { id: 103, x: 92, y: 38, xG: 0.54, outcome: "goal", player: "Bradley Barcola", min: "61'", desc: "First-time tap-in at back post from Frimpong drilled cross." },
-    { id: 104, x: 78, y: 28, xG: 0.08, outcome: "missed", player: "Dominik Szoboszlai", min: "73'", desc: "Long-range blast from outside 18-yard box whistling over the crossbar." },
-    { id: 105, x: 90, y: 32, xG: 0.45, outcome: "saved", player: "Alexander Isak", min: "82'", desc: "1v1 breakaway shot smothered by opposition keeper." },
-  ];
+  const clubName = selectedClub?.name || match?.clubName || match?.homeTeam || "Club";
+  const strikerName = match?.startingXI?.[9]?.name || selectedClub?.captain || "Centre Forward";
+  const playmakerName = match?.startingXI?.[7]?.name || "Playmaker";
+  const wingerName = match?.startingXI?.[8]?.name || "Right Winger";
+  const midName = match?.startingXI?.[5]?.name || "Central Midfielder";
+
+  // Default to provided match shots or club-specific tactical dataset
+  const rawShots = match?.shots?.length
+    ? match.shots
+    : [
+        { id: 101, x: 88, y: 34, xG: 0.62, outcome: "goal", player: strikerName, min: "24'", desc: `Right-footed low drive into the bottom corner following ${playmakerName}'s reverse pass.` },
+        { id: 102, x: 84, y: 46, xG: 0.38, outcome: "saved", player: playmakerName, min: "39'", desc: "Curled shot towards far top post tipped over crossbar." },
+        { id: 103, x: 92, y: 38, xG: 0.54, outcome: "goal", player: wingerName, min: "61'", desc: "First-time finish at the back post from a drilled low cross." },
+        { id: 104, x: 78, y: 28, xG: 0.08, outcome: "missed", player: midName, min: "73'", desc: "Long-range effort from outside the 18-yard box whistling over the crossbar." },
+        { id: 105, x: 90, y: 32, xG: 0.45, outcome: "saved", player: strikerName, min: "82'", desc: "1v1 breakaway effort smothered by the opposition keeper." },
+      ];
+  const shots = rawShots.map((s, idx) => ({
+    ...s,
+    id: s.id ?? `shot-${idx}`,
+    xG: typeof s.xG === "number" ? s.xG : (typeof s.xg === "number" ? s.xg : 0.25),
+    min: s.min || s.minute || "45'",
+  }));
 
   const filteredShots = filterOutcome === "all"
     ? shots
@@ -47,7 +61,7 @@ export default function PostMatchTacticalArchive({ match }) {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold tracking-tight text-white">
-                Post-Match Shot & xG Map
+                {clubName} Post-Match Shot &amp; xG Map
               </h3>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 {totalGoals} Goals • {totalXg.toFixed(2)} xG

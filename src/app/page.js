@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Header from "../components/insights/Header";
 import LiveScoreboard from "../components/insights/LiveScoreboard";
 import { isLineupConfirmed } from "../components/insights/PreMatchPanel";
@@ -63,16 +62,6 @@ export default function FootballInsightsDashboard() {
     }
   });
 
-  const setSelectedClubId = (clubId) => {
-    const validId = String(clubId || "364");
-    setSelectedClubIdState(validId);
-    try {
-      localStorage.setItem("football_selected_club", validId);
-    } catch {
-      // Storage unavailable
-    }
-  };
-
   const selectedClub = PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
 
   const [selectedMatchId, setSelectedMatchId] = useState(MATCH_LIBRARY[0].id);
@@ -80,7 +69,25 @@ export default function FootballInsightsDashboard() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [matchdayPhase, setMatchdayPhase] = useState("BUILD_UP");
   const [liveSchedule, setLiveSchedule] = useState({ upcoming: [], recent: [] });
+  const [clubContextMatch, setClubContextMatch] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  const setSelectedClubId = (clubId) => {
+    const validId = String(clubId || "364");
+    setSelectedClubIdState(validId);
+    setSelectedPlayer(null);
+    setClubContextMatch(null);
+    if (validId === "364") {
+      setSelectedMatchId(MATCH_LIBRARY[0].id);
+    } else {
+      setSelectedMatchId("");
+    }
+    try {
+      localStorage.setItem("football_selected_club", validId);
+    } catch {
+      // Storage unavailable
+    }
+  };
 
   // Hydrate real fixture schedule for the active club from ESPN live endpoint
   useEffect(() => {
@@ -89,10 +96,18 @@ export default function FootballInsightsDashboard() {
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled && data && data.isLive) {
+          const up = data.upcoming || [];
+          const rec = data.recent || [];
           setLiveSchedule({
-            upcoming: data.upcoming || [],
-            recent: data.recent || [],
+            upcoming: up,
+            recent: rec,
           });
+          if (selectedClubId !== "364") {
+            const firstMatch = up[0] || rec[0];
+            if (firstMatch) {
+              setSelectedMatchId((prev) => (prev && prev.startsWith("espn-") ? prev : firstMatch.id));
+            }
+          }
         }
       })
       .catch((err) => console.error("Error fetching live schedule:", err));
@@ -101,6 +116,27 @@ export default function FootballInsightsDashboard() {
       cancelled = true;
     };
   }, [selectedClubId]);
+
+  // Hydrate full live club tactical context (real ESPN starting XI, form, H2H, standings, squad)
+  useEffect(() => {
+    let cancelled = false;
+    const eventQuery = selectedMatchId && selectedMatchId.startsWith("espn-")
+      ? `&eventId=${encodeURIComponent(selectedMatchId)}`
+      : "";
+
+    fetch(`/api/club-context?teamId=${selectedClubId}${eventQuery}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data && !data.error) {
+          setClubContextMatch(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching club tactical context:", err));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedClubId, selectedMatchId]);
 
   // Restore & persist active tab across reloads, browser hibernation, and navigation
   useEffect(() => {
@@ -132,89 +168,133 @@ export default function FootballInsightsDashboard() {
     }
   };
 
-  // Build dynamic activeMatch: if chosen club is Liverpool, use detailed MATCH_LIBRARY tactical dossier;
-  // for any other Premier League club, build authoritative tactical match container from live schedule
+  // Build dynamic activeMatch:
+  // - If Liverpool ("364") and a curatorial MATCH_LIBRARY item is selected, enrich it with club metadata.
+  // - Otherwise use live clubContextMatch from /api/club-context (or synchronous fallback while loading).
   const activeMatch = (() => {
-    if (selectedClubId === "364") {
-      return MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
+    if (selectedClubId === "364" && !String(selectedMatchId).startsWith("espn-")) {
+      const libMatch = MATCH_LIBRARY.find((m) => m.id === selectedMatchId) || MATCH_LIBRARY[0];
+      return {
+        ...libMatch,
+        teamId: "364",
+        clubName: selectedClub.name,
+        clubShort: selectedClub.shortName,
+        city: selectedClub.city,
+        capacity: selectedClub.capacity,
+        mainStand: selectedClub.mainStand,
+        anthem: selectedClub.anthem,
+        lat: selectedClub.lat,
+        lon: selectedClub.lon,
+        selectedManager: selectedClub.manager,
+        selectedFormation: selectedClub.formation,
+        selectedStyle: selectedClub.tacticalStyle,
+        selectedCaptain: selectedClub.captain,
+        fullSquad: clubContextMatch?.fullSquad || [],
+        standings: clubContextMatch?.standings || null,
+      };
     }
 
-    // Dynamic match container for selected non-Liverpool Premier League club
+    if (clubContextMatch && String(clubContextMatch.teamId) === String(selectedClubId)) {
+      return clubContextMatch;
+    }
+
+    // Immediate synchronous fallback while /api/club-context completes initial fetch
     const nextFixture = liveSchedule.upcoming[0];
     const recentFixture = liveSchedule.recent[0];
     const targetFixture =
-      (selectedMatchId.startsWith("espn-")
+      (selectedMatchId && selectedMatchId.startsWith("espn-")
         ? liveSchedule.upcoming.concat(liveSchedule.recent).find((f) => f.id === selectedMatchId)
         : null) || nextFixture || recentFixture;
 
-    const oppName = targetFixture?.opponent || "Opponent";
-    const oppInfo = Object.values(PREMIER_LEAGUE_MANAGERS).find((c) => c.name.toLowerCase() === oppName.toLowerCase()) || {
-      name: oppName,
-      formation: "4-2-3-1",
-      tacticalStyle: "Premier League System",
-    };
+    const oppName = targetFixture?.opponent || "Premier League Opponent";
+    const oppInfo =
+      Object.values(PREMIER_LEAGUE_MANAGERS).find(
+        (c) => c.name.toLowerCase() === oppName.toLowerCase()
+      ) || PREMIER_LEAGUE_MANAGERS["360"];
 
     const isHome = targetFixture?.isHome ?? true;
+    const homeInfo = isHome ? selectedClub : oppInfo;
+    const awayInfo = isHome ? oppInfo : selectedClub;
     const formattedDate = targetFixture?.date
       ? new Date(targetFixture.date).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      : "22 Nov 2026 • 16:30";
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Upcoming Matchday";
 
     return {
       id: targetFixture?.id || `club-${selectedClubId}`,
-      type: targetFixture?.isUpcoming ? "MATCHDAY" : "RECENT",
-      isMatchday: Boolean(targetFixture?.isUpcoming),
-      title: `${selectedClub.name} vs ${oppName}`,
+      teamId: selectedClubId,
+      clubName: selectedClub.name,
+      clubShort: selectedClub.shortName,
+      type: targetFixture?.isUpcoming !== false ? "MATCHDAY" : "RECENT",
+      isMatchday: targetFixture?.isUpcoming !== false,
+      title: `${homeInfo.name} vs ${awayInfo.name}`,
       opponent: oppName,
       competition: targetFixture?.competition || "Premier League",
       date: formattedDate,
-      venue: targetFixture?.venue || selectedClub.stadium,
+      venue: targetFixture?.venue || homeInfo.stadium,
+      city: homeInfo.city,
+      capacity: homeInfo.capacity,
+      mainStand: homeInfo.mainStand,
+      anthem: homeInfo.anthem,
+      lat: homeInfo.lat,
+      lon: homeInfo.lon,
       score: targetFixture?.isUpcoming ? null : targetFixture?.statusText,
-      homeTeam: isHome ? selectedClub.name : oppName,
-      awayTeam: isHome ? oppName : selectedClub.name,
-      statusText: targetFixture?.statusText || "UPCOMING FIXTURE",
+      homeTeam: homeInfo.name,
+      awayTeam: awayInfo.name,
+      homeShort: homeInfo.shortName,
+      awayShort: awayInfo.shortName,
+      homeManager: `${homeInfo.manager} • ${homeInfo.formation}`,
+      awayManager: `${awayInfo.manager} • ${awayInfo.formation}`,
+      selectedManager: selectedClub.manager,
+      selectedFormation: selectedClub.formation,
+      selectedStyle: selectedClub.tacticalStyle,
+      selectedCaptain: selectedClub.captain,
+      statusText: targetFixture?.statusText || "MATCHDAY PREVIEW",
       isLiveOrNext: true,
       expectedShape: `${selectedClub.formation} (${selectedClub.manager} System)`,
       keyTacticalBattle: `${selectedClub.captain} orchestrating ${selectedClub.formation} build-up against ${oppInfo.name}`,
+      heatmapLabels: {
+        right: `Right Half-Space Overload (${selectedClub.shortName})`,
+        left: `Left Cutback Channel (${selectedClub.shortName})`,
+      },
       metrics: {
-        teamXg: 2.12,
+        teamXg: 2.18,
         opponentXg: 1.05,
         fieldTilt: 64.5,
-        ppda: 7.8,
-        counterPressRegains: 21,
+        ppda: 7.4,
+        counterPressRegains: 22,
       },
       startingXI: [
-        { id: "gk", name: "Starting Goalkeeper", number: 1, pos: "GK", x: 12, y: 50, touches: 48 },
-        { id: "rb", name: "Right Back", number: 2, pos: "RB", x: 28, y: 82, touches: 64 },
-        { id: "rcb", name: "Right Centre Back", number: 5, pos: "CB", x: 26, y: 62, touches: 78 },
-        { id: "lcb", name: selectedClub.captain, number: 4, pos: "CB", x: 26, y: 38, touches: 88 },
-        { id: "lb", name: "Left Back", number: 3, pos: "LB", x: 28, y: 18, touches: 70 },
-        { id: "cdm", name: "Holding Midfielder", number: 6, pos: "DM", x: 42, y: 50, touches: 82 },
-        { id: "rcm", name: "Box-to-Box Midfielder", number: 8, pos: "CM", x: 54, y: 65, touches: 74 },
-        { id: "lcm", name: "Playmaker", number: 10, pos: "CM", x: 54, y: 35, touches: 80 },
-        { id: "rw", name: "Right Winger", number: 7, pos: "RW", x: 74, y: 80, touches: 58 },
-        { id: "cf", name: "Centre Forward", number: 9, pos: "ST", x: 82, y: 50, touches: 52 },
-        { id: "lw", name: "Left Winger", number: 11, pos: "LW", x: 74, y: 20, touches: 62 },
+        { id: "gk", name: `${selectedClub.shortName} Goalkeeper`, number: 1, pos: "GK", x: 11, y: 34, touches: 44, obv: 0.31, comp: 89 },
+        { id: "rb", name: `${selectedClub.shortName} Right-Back`, number: 2, pos: "RB", x: 28, y: 56, touches: 68, obv: 0.42, comp: 88 },
+        { id: "rcb", name: `${selectedClub.shortName} Stopper`, number: 5, pos: "RCB", x: 24, y: 42, touches: 76, obv: 0.48, comp: 93 },
+        { id: "lcb", name: selectedClub.captain, number: 4, pos: "LCB", x: 24, y: 26, touches: 84, obv: 0.64, comp: 94 },
+        { id: "lb", name: `${selectedClub.shortName} Left-Back`, number: 3, pos: "LB", x: 28, y: 12, touches: 70, obv: 0.44, comp: 87 },
+        { id: "rdm", name: `${selectedClub.shortName} Pivot`, number: 6, pos: "RDM", x: 44, y: 43, touches: 78, obv: 0.52, comp: 91 },
+        { id: "ldm", name: `${selectedClub.shortName} Controller`, number: 8, pos: "LDM", x: 44, y: 25, touches: 74, obv: 0.55, comp: 90 },
+        { id: "cam", name: `${selectedClub.shortName} Playmaker`, number: 10, pos: "CAM", x: 64, y: 34, touches: 66, obv: 0.68, comp: 86 },
+        { id: "rw", name: `${selectedClub.shortName} Right Wing`, number: 7, pos: "RW", x: 76, y: 54, touches: 56, obv: 0.59, comp: 82 },
+        { id: "st", name: `${selectedClub.shortName} Striker`, number: 9, pos: "ST", x: 85, y: 34, touches: 46, obv: 0.72, comp: 80 },
+        { id: "lw", name: `${selectedClub.shortName} Left Wing`, number: 11, pos: "LW", x: 76, y: 14, touches: 58, obv: 0.57, comp: 83 },
       ],
       passLinks: [
         { from: "lcb", to: "rcb", count: 28 },
         { from: "lcb", to: "lb", count: 22 },
         { from: "rcb", to: "rb", count: 20 },
-        { from: "lcb", to: "cdm", count: 24 },
-        { from: "cdm", to: "lcm", count: 26 },
-        { from: "cdm", to: "rcm", count: 22 },
-        { from: "lcm", to: "lw", count: 18 },
-        { from: "rcm", to: "rw", count: 19 },
-        { from: "lcm", to: "cf", count: 14 },
+        { from: "lcb", to: "ldm", count: 24 },
+        { from: "rdm", to: "ldm", count: 26 },
+        { from: "rdm", to: "cam", count: 22 },
+        { from: "cam", to: "lw", count: 18 },
+        { from: "cam", to: "rw", count: 19 },
+        { from: "cam", to: "st", count: 15 },
       ],
       shots: [
-        { id: "s1", x: 86, y: 48, outcome: "goal", xg: 0.38, xG: 0.38, minute: "24'", player: "Centre Forward" },
-        { id: "s2", x: 78, y: 36, outcome: "saved", xg: 0.14, xG: 0.14, minute: "38'", player: "Playmaker" },
-        { id: "s3", x: 82, y: 62, outcome: "blocked", xg: 0.09, xG: 0.09, minute: "55'", player: "Right Winger" },
+        { id: "s1", x: 89, y: 34, outcome: "goal", xg: 0.42, xG: 0.42, min: "24'", player: selectedClub.captain },
+        { id: "s2", x: 82, y: 42, outcome: "saved", xg: 0.24, xG: 0.24, min: "51'", player: `${selectedClub.shortName} Playmaker` },
       ],
     };
   })();
@@ -280,10 +360,11 @@ export default function FootballInsightsDashboard() {
                       setSelectedMatchId(nextFx.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${isSelected
-                      ? "glass-crimson-pill text-white"
-                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                      }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
+                      isSelected
+                        ? "glass-crimson-pill text-white"
+                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                    }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
                     <span className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
@@ -303,7 +384,7 @@ export default function FootballInsightsDashboard() {
               {(() => {
                 const primaryMatch = activeMatch;
                 if (!primaryMatch) return null;
-                const isSelected = primaryMatch.id === selectedMatchId;
+                const isSelected = primaryMatch.id === selectedMatchId || !selectedMatchId;
                 const isLive = primaryMatch.type === "LIVE" || primaryMatch.isLive;
 
                 return (
@@ -315,16 +396,18 @@ export default function FootballInsightsDashboard() {
                       setSelectedMatchId(primaryMatch.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border ${isSelected
-                      ? "glass-crimson-pill text-white shadow-[0_0_12px_rgba(255,38,54,0.4)]"
-                      : "apple-tile border-[#FF2636]/40 text-white hover:border-[#FF2636]/80"
-                      }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer border ${
+                      isSelected
+                        ? "glass-crimson-pill text-white shadow-[0_0_12px_rgba(255,38,54,0.4)]"
+                        : "apple-tile border-[#FF2636]/40 text-white hover:border-[#FF2636]/80"
+                    }`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full shrink-0 ${isLive
-                        ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
-                        : "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-                        }`}
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        isLive
+                          ? "bg-[#FF2636] animate-pulse shadow-[0_0_10px_#FF2636]"
+                          : "bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+                      }`}
                     />
                     <span className="tracking-tight text-white">
                       {primaryMatch.title}
@@ -350,10 +433,11 @@ export default function FootballInsightsDashboard() {
                       setSelectedMatchId(lastGame.id);
                       setSelectedPlayer(null);
                     }}
-                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${isSelected
-                      ? "glass-crimson-pill text-white"
-                      : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
-                      }`}
+                    className={`min-h-[38px] pressable flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer border ${
+                      isSelected
+                        ? "glass-crimson-pill text-white"
+                        : "apple-tile border-white/[0.08] text-[#8E8E93] hover:text-white"
+                    }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
                     <span className="text-[10px] uppercase font-bold text-white/50 tracking-wider">
@@ -385,14 +469,13 @@ export default function FootballInsightsDashboard() {
         {/* Tab 1: Boot Room Live (Tactical Visualisation + Momentum Split) */}
         {activeTab === "boot-room" && (
           <div className="w-full flex flex-col gap-3.5 min-h-0">
-            {/* Live Match Scoreboard View */}
-            {(activeMatch?.type === "LIVE" || activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday) && (
-              <LiveScoreboard
-                key={activeMatch.id}
-                activeMatch={activeMatch}
-                onPhaseChange={setMatchdayPhase}
-              />
-            )}
+            {/* Live Match Scoreboard View — Rendered for both Matchday Pre-Match & Recent Completed Matches */}
+            <LiveScoreboard
+              key={`${selectedClubId}-${activeMatch.id}`}
+              activeMatch={activeMatch}
+              selectedClub={selectedClub}
+              onPhaseChange={setMatchdayPhase}
+            />
 
             {/* Tactical Pitch Canvas & Match Momentum */}
             <div className="w-full flex flex-col lg:flex-row items-start gap-4">
@@ -400,6 +483,7 @@ export default function FootballInsightsDashboard() {
               <div className="flex-1 lg:w-2/3 w-full flex flex-col overflow-hidden">
                 <PitchCanvas
                   activeMatch={activeMatch}
+                  selectedClub={selectedClub}
                   overlayMode={overlayMode}
                   selectedPlayer={selectedPlayer}
                   setSelectedPlayer={setSelectedPlayer}
@@ -417,6 +501,7 @@ export default function FootballInsightsDashboard() {
               <div className="lg:w-1/3 w-full flex flex-col gap-4">
                 <MomentumChart
                   activeMatch={activeMatch}
+                  selectedClub={selectedClub}
                   overlayMode={overlayMode}
                   setOverlayMode={setOverlayMode}
                   selectedPlayer={selectedPlayer}
@@ -448,18 +533,28 @@ export default function FootballInsightsDashboard() {
         {/* Tab 3: Match Archives */}
         {(activeTab === "match-archives" || activeTab === "time-machine") && (
           <div className="flex flex-col gap-4">
-            <PostMatchTacticalArchive match={activeMatch} />
-            <TimeMachineView />
+            <PostMatchTacticalArchive match={activeMatch} selectedClub={selectedClub} />
+            <TimeMachineView
+              selectedClub={selectedClub}
+              recentMatches={liveSchedule.recent}
+              activeMatch={activeMatch}
+            />
           </div>
         )}
 
         {/* Tab 4: Transfer Scout Simulator */}
-        {activeTab === "transfer-scout" && <TransferScoutView />}
+        {activeTab === "transfer-scout" && (
+          <TransferScoutView
+            selectedClub={selectedClub}
+            activeMatch={activeMatch}
+          />
+        )}
       </div>
 
       {/* Slide-over Tactical Player Dossier Drawer */}
       <PlayerDossierDrawer
         player={selectedPlayer}
+        selectedClub={selectedClub}
         isOpen={Boolean(selectedPlayer)}
         onClose={() => setSelectedPlayer(null)}
       />

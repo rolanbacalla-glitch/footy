@@ -272,7 +272,44 @@ export const PROFILE_POOL = [
   },
 ];
 
-export default function TransferScoutView() {
+export default function TransferScoutView({ selectedClub, activeMatch }) {
+  const clubName = selectedClub?.name || activeMatch?.clubName || "Liverpool";
+  const clubShort = selectedClub?.shortName || activeMatch?.clubShort || "LIV";
+  const managerName = selectedClub?.manager || activeMatch?.selectedManager || "Andoni Iraola";
+  const isLfc = String(selectedClub?.id || "364") === "364";
+
+  // Build dynamic benchmark list for the currently selected club from its real starting XI
+  const dynamicBenchmarks = React.useMemo(() => {
+    if (isLfc) {
+      return PROFILE_POOL.filter((p) => p.profileType === "benchmark");
+    }
+    const xi = activeMatch?.startingXI || [];
+    return xi.slice(1).map((p, idx) => ({
+      id: String(p.id),
+      name: `${p.name} (#${p.number})`,
+      club: clubName,
+      role: `${clubShort} First-Team Starter • ${p.pos}`,
+      age: 24 + (idx % 4),
+      marketVal: `£${55 + (idx % 5) * 10}m`,
+      pressing: Number((8.5 + (idx % 4) * 0.25).toFixed(1)),
+      progPasses: Number((7.8 + (idx % 5) * 0.3).toFixed(1)),
+      stats: {
+        goalThreat: p.pos === "ST" || p.pos === "RW" || p.pos === "LW" ? 89 : 64,
+        progCarries: 88 + (idx % 8),
+        creativePassing: 84 + (idx % 10),
+        pressingIntensity: 87 + (idx % 7),
+        defInterceptions: p.pos.includes("B") || p.pos.includes("DM") ? 90 : 66,
+        aerialDominance: p.pos.includes("CB") || p.pos === "ST" ? 84 : 68,
+      },
+      profileType: "benchmark",
+    }));
+  }, [isLfc, activeMatch?.startingXI, clubName, clubShort]);
+
+  const targetList = React.useMemo(
+    () => PROFILE_POOL.filter((p) => p.profileType === "target" && p.club.toLowerCase() !== clubName.toLowerCase()),
+    [clubName]
+  );
+
   const [targetId, setTargetId] = useState("wharton");
   const [benchmarkId, setBenchmarkId] = useState("gravenberch");
 
@@ -282,9 +319,9 @@ export default function TransferScoutView() {
   const [minProgPasses, setMinProgPasses] = useState(7.0);
 
   const targetPlayer =
-    PROFILE_POOL.find((p) => p.id === targetId) || PROFILE_POOL[8];
+    targetList.find((p) => p.id === targetId) || targetList[0] || PROFILE_POOL[8];
   const benchmarkPlayer =
-    PROFILE_POOL.find((p) => p.id === benchmarkId) || PROFILE_POOL[0];
+    dynamicBenchmarks.find((p) => p.id === benchmarkId) || dynamicBenchmarks[0] || PROFILE_POOL[0];
 
   const centreX = 150;
   const centreY = 150;
@@ -309,9 +346,8 @@ export default function TransferScoutView() {
   const targetPolygon = targetPoints.map((p) => `${p.x},${p.y}`).join(" ");
   const benchmarkPolygon = benchmarkPoints.map((p) => `${p.x},${p.y}`).join(" ");
 
-  const filteredCandidates = PROFILE_POOL.filter(
+  const filteredCandidates = targetList.filter(
     (p) =>
-      p.profileType === "target" &&
       p.pressing >= minPressing &&
       p.age <= maxAge &&
       p.progPasses >= minProgPasses
@@ -337,7 +373,7 @@ export default function TransferScoutView() {
                 onChange={(e) => setTargetId(e.target.value)}
                 className="w-full min-h-[42px] bg-[var(--apple-bg-tertiary)] text-white text-xs font-semibold py-2.5 pl-3.5 pr-9 rounded-xl border border-white/10 appearance-none focus:outline-none focus:border-[#00D2B4] cursor-pointer transition-colors hover:bg-[var(--apple-bg-quaternary)]"
               >
-                {PROFILE_POOL.filter((p) => p.profileType === "target").map((p) => (
+                {targetList.map((p) => (
                   <option key={p.id} value={p.id} className="bg-[var(--apple-bg-elevated)] text-white">
                     {p.name} ({p.club} • Age {p.age})
                   </option>
@@ -352,16 +388,16 @@ export default function TransferScoutView() {
               htmlFor="select-lfc-benchmark"
               className="text-[11px] font-semibold text-[#FF453A] block mb-1.5"
             >
-              Current LFC Benchmark (Crimson Polygon)
+              Current {clubShort} Benchmark (Crimson Polygon)
             </label>
             <div className="relative">
               <select
                 id="select-lfc-benchmark"
-                value={benchmarkId}
+                value={benchmarkPlayer?.id || ""}
                 onChange={(e) => setBenchmarkId(e.target.value)}
                 className="w-full min-h-[42px] bg-[var(--apple-bg-tertiary)] text-white text-xs font-semibold py-2.5 pl-3.5 pr-9 rounded-xl border border-white/10 appearance-none focus:outline-none focus:border-[#E63946] cursor-pointer transition-colors hover:bg-[var(--apple-bg-quaternary)]"
               >
-                {PROFILE_POOL.filter((p) => p.profileType === "benchmark").map(
+                {dynamicBenchmarks.map(
                   (p) => (
                     <option key={p.id} value={p.id} className="bg-[var(--apple-bg-elevated)] text-white">
                       {p.name} ({p.role})
@@ -497,7 +533,7 @@ export default function TransferScoutView() {
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF453A]" />
               <span className="font-semibold text-white">
                 {benchmarkPlayer.name}{" "}
-                <span className="text-[#EBEBF5]/60 font-normal">(LFC Squad)</span>
+                <span className="text-[#EBEBF5]/60 font-normal">({clubShort} Squad)</span>
               </span>
             </div>
           </div>
@@ -552,7 +588,7 @@ export default function TransferScoutView() {
           <div className="flex items-center gap-2 mb-3.5">
             <Sliders className="w-4 h-4 text-[#FF453A]" strokeWidth={2} />
             <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-              LFC Recruitment Filters
+              {clubShort} Recruitment Filters
             </h3>
           </div>
 
@@ -632,7 +668,7 @@ export default function TransferScoutView() {
               </h3>
             </div>
             <span className="text-[11px] text-[#EBEBF5]/60">
-              Edwards / Hughes Index
+              {managerName} System Fit
             </span>
           </div>
 
@@ -643,7 +679,7 @@ export default function TransferScoutView() {
               </div>
             ) : (
               filteredCandidates.map((candidate) => {
-                const isSelected = targetId === candidate.id;
+                const isSelected = targetPlayer?.id === candidate.id;
                 return (
                   <button
                     type="button"
@@ -661,7 +697,7 @@ export default function TransferScoutView() {
                         {candidate.name}
                       </span>
                       <span className="text-[10px] font-mono tabular-nums font-semibold text-[#FFD60A] bg-[#FFD60A]/12 px-2 py-0.5 rounded-full border border-[#FFD60A]/25 shrink-0">
-                        {candidate.fitScore}% LFC Fit
+                        {candidate.fitScore}% {clubShort} Fit
                       </span>
                     </div>
 

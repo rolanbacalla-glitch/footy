@@ -5,12 +5,21 @@ import { Sparkles, RotateCcw, Compass, Layers } from "lucide-react";
 
 export default function PitchCanvas({
   activeMatch,
+  selectedClub,
   overlayMode,
   selectedPlayer,
   setSelectedPlayer,
   lineupStatus = null, // "predicted" | "confirmed" | null (matchday only)
 }) {
   const isPredicted = lineupStatus === "predicted";
+  const clubName = selectedClub?.name || activeMatch?.clubName || activeMatch?.homeTeam || "Club";
+  const standLabel = (selectedClub?.mainStand || activeMatch?.mainStand || `${selectedClub?.stadium || "STADIUM"} STAND`).toUpperCase();
+  const rightWingSurname = (activeMatch?.startingXI?.[8]?.name || selectedClub?.captain || "Right Wing").split(" ").slice(-1)[0];
+  const rightBackSurname = (activeMatch?.startingXI?.[1]?.name || "Full-Back").split(" ").slice(-1)[0];
+  const leftWingSurname = (activeMatch?.startingXI?.[10]?.name || "Left Wing").split(" ").slice(-1)[0];
+  const leftBackSurname = (activeMatch?.startingXI?.[4]?.name || "Full-Back").split(" ").slice(-1)[0];
+  const heatRightLabel = activeMatch?.heatmapLabels?.right || `Half-Space Overload (${rightWingSurname} & ${rightBackSurname})`;
+  const heatLeftLabel = activeMatch?.heatmapLabels?.left || `Cutback Channel (${leftWingSurname} & ${leftBackSurname})`;
   const [hoveredPlayer, setHoveredPlayer] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
@@ -140,7 +149,7 @@ export default function PitchCanvas({
       <div className="relative z-10 flex-1 w-full flex items-center justify-center overflow-hidden py-1">
         <svg
           role="img"
-          aria-label={`Anfield tactical pitch showing ${modeLabel} for ${activeMatch?.title || "Liverpool FC"}`}
+          aria-label={`Tactical pitch showing ${modeLabel} for ${activeMatch?.title || clubName}`}
           viewBox="0 0 105 68"
           className="w-full h-auto max-h-[580px] object-contain drop-shadow-[0_12px_32px_rgba(0,0,0,0.65)]"
         >
@@ -306,7 +315,7 @@ export default function PitchCanvas({
             fontWeight="600"
             letterSpacing="0.10"
           >
-            ANFIELD ROAD STAND
+            {standLabel}
           </text>
 
           {/* ═══════ OVERLAY 1: TACTICAL PASS NETWORK (CALM & FOCUSED) ═══════ */}
@@ -558,7 +567,7 @@ export default function PitchCanvas({
                 fontSize="2.1"
                 fontWeight="700"
               >
-                Half-Space Overload (Frimpong &amp; Barcola)
+                {heatRightLabel}
               </text>
               <text
                 x="76"
@@ -568,7 +577,7 @@ export default function PitchCanvas({
                 fontSize="2.1"
                 fontWeight="700"
               >
-                Cutback Channel (Wirtz &amp; Kerkez)
+                {heatLeftLabel}
               </text>
             </g>
           )}

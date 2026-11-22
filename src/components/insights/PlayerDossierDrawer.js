@@ -346,9 +346,13 @@ function renderRadar(radarData = []) {
   );
 }
 
-export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
+export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onClose }) {
   const [liveData, setLiveData] = React.useState(null);
   const [isClosing, setIsClosing] = React.useState(false);
+  const clubName = selectedClub?.name || "Premier League Club";
+  const managerName = selectedClub?.manager || "Head Coach";
+  const tacticalStyle = selectedClub?.tacticalStyle || "High-intensity tactical system";
+  const formation = selectedClub?.formation || "4-2-3-1";
 
   const handleClose = React.useCallback(() => {
     setIsClosing(true);
@@ -393,15 +397,15 @@ export default function PlayerDossierDrawer({ player, isOpen, onClose }) {
 
   const profile = PLAYER_PROFILES[player.id] || {
     fullName: player.name,
-    role: `Tactical ${player.pos || "Specialist"}`,
-    instructions: "Standard tactical discipline in Iraola's vertical counter-press system.",
+    role: `${clubName} Tactical ${player.pos || "Specialist"}`,
+    instructions: `Execute ${managerName}'s ${formation} positional triggers (${tacticalStyle.toLowerCase()}).`,
     fitness: 94,
     minutesSeason: 880,
     cards: 1,
     metrics: [
-      { label: "On-Ball Value (OBV)", value: `+${(player.obv || 0.5).toFixed(2)}`, benchmark: "High", pct: 88 },
-      { label: "Pass Completion", value: `${player.comp || 87.5}%`, benchmark: "Solid", pct: 86 },
-      { label: "Touches /90", value: `${player.touches || 60}`, benchmark: "Active", pct: 82 },
+      { label: "On-Ball Value (OBV)", value: `+${(player.obv || 0.5).toFixed(2)}`, benchmark: "High Impact", pct: 88 },
+      { label: "Pass Completion", value: `${player.comp || 87.5}%`, benchmark: "Premier League Standard", pct: 86 },
+      { label: "Touches /90", value: `${player.touches || 60}`, benchmark: "Active Involvement", pct: 82 },
     ],
     radar: [
       { axis: "Pressing", val: 88 },

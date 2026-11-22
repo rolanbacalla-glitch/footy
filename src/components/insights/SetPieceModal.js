@@ -2,20 +2,30 @@
 
 import React, { useState } from "react";
 import { X, CornerDownRight, ShieldAlert, Target } from "lucide-react";
+import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 
-export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
+export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedClub }) {
   const [activeSide, setActiveSide] = useState("left"); // 'left' | 'right' corner
   const [deliveryType, setDeliveryType] = useState("inswinger"); // 'inswinger' | 'outswinger'
 
   if (!isOpen) return null;
 
-  const homeTeam = activeMatch?.homeTeam || "Liverpool";
-  const awayTeam = activeMatch?.awayTeam || "Man United";
+  const club = selectedClub || getTeamManagerInfo(activeMatch?.teamId || "364") || getTeamManagerInfo("364");
+  const homeTeam = activeMatch?.homeTeam || club.name;
+  const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Opponent";
 
-  // TacticAI-inspired tactical models for LFC 2026/27 corner setups (Monochrome + LFC Red)
+  const xi = activeMatch?.startingXI || [];
+  const primaryAerial = xi[3] || { name: club.captain, number: 4 };
+  const secondaryAerial = xi[2] || { name: `${club.shortName} Centre-Back`, number: 5 };
+  const poacher = xi[9] || { name: `${club.shortName} Striker`, number: 9 };
+  const edgeCreator = xi[7] || { name: `${club.shortName} Playmaker`, number: 10 };
+
+  const shortLast = (fullName = "") => fullName.split(" ").slice(-1)[0] || fullName;
+
   const receiverProbabilities = [
     {
-      player: "Virgil van Dijk (#4)",
+      player: `${primaryAerial.name} (#${primaryAerial.number})`,
+      shortLabel: shortLast(primaryAerial.name),
       targetZone: "Near Post Flick / 6-Yard Box",
       probability: 38,
       shotQualityXg: 0.28,
@@ -23,7 +33,8 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       colour: "#FF2636",
     },
     {
-      player: "Jérémy Jacquet (#5)",
+      player: `${secondaryAerial.name} (#${secondaryAerial.number})`,
+      shortLabel: shortLast(secondaryAerial.name),
       targetZone: "Central Penalty Spot",
       probability: 29,
       shotQualityXg: 0.22,
@@ -31,7 +42,8 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       colour: "#E5E5EA",
     },
     {
-      player: "Alexander Isak (#9)",
+      player: `${poacher.name} (#${poacher.number})`,
+      shortLabel: shortLast(poacher.name),
       targetZone: "Back Post / Blindside Run",
       probability: 21,
       shotQualityXg: 0.35,
@@ -39,7 +51,8 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
       colour: "#C7C7CC",
     },
     {
-      player: "Florian Wirtz (#7)",
+      player: `${edgeCreator.name} (#${edgeCreator.number})`,
+      shortLabel: shortLast(edgeCreator.name),
       targetZone: "Edge of Box (D-Arc)",
       probability: 12,
       shotQualityXg: 0.14,
@@ -65,14 +78,14 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="tacticai-title" className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  Set-Piece Dynamics
+                  {club.name} Set-Piece Dynamics
                 </h2>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/20 uppercase tracking-wider">
                   DeepMind TacticAI Engine
                 </span>
               </div>
               <p className="text-xs text-[#8E8E93] mt-0.5">
-                Predictive Corner Trajectory & Receiver Distribution • {homeTeam} vs {awayTeam}
+                Predictive Corner Trajectory &amp; Receiver Distribution • {homeTeam} vs {awayTeam}
               </p>
             </div>
           </div>
@@ -144,29 +157,23 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
           </div>
         </div>
 
-        {/* Tactical Pitch Box Visualization (SVG Top-Down 18-Yard Box View) */}
+        {/* Tactical Pitch Box Visualization */}
         <div className="relative w-full h-44 sm:h-52 bg-[#090A0E] rounded-2xl border border-white/10 p-3 overflow-hidden mb-4 shadow-inner">
           <svg viewBox="0 0 320 160" className="w-full h-full" aria-hidden="true">
-            {/* Pitch Grass Grid Lines */}
             <rect x="0" y="0" width="320" height="160" fill="#0C0E14" />
-            {/* Goal Line & Goal Box */}
             <line x1="0" y1="150" x2="320" y2="150" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" />
             <rect x="110" y="146" width="100" height="4" fill="#FFFFFF" fillOpacity="0.8" />
             <rect x="70" y="80" width="180" height="70" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
-            {/* 6-Yard Box */}
             <rect x="115" y="125" width="90" height="25" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
-            {/* Penalty Spot & Arc */}
             <circle cx="160" cy="105" r="2" fill="#FFFFFF" />
             <path d="M 130 80 A 30 30 0 0 1 190 80" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
 
-            {/* Corner Arc Origin */}
             {activeSide === "left" ? (
               <path d="M 0 135 A 15 15 0 0 1 15 150" fill="none" stroke="#FFFFFF" strokeWidth="2" />
             ) : (
               <path d="M 320 135 A 15 15 0 0 0 305 150" fill="none" stroke="#FFFFFF" strokeWidth="2" />
             )}
 
-            {/* Corner Flight Path Curved Arc (Luminous White Arc) */}
             {activeSide === "left" ? (
               <path
                 d={
@@ -195,22 +202,25 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
               />
             )}
 
-            {/* Player Target Hotspots */}
+            {/* Dynamic Player Target Hotspots */}
             <g className="animate-pulse">
-              {/* Van Dijk: Near post (LFC Red Highlight) */}
               <circle cx="138" cy="128" r="9" fill="#FF2636" fillOpacity="0.4" />
               <circle cx="138" cy="128" r="4.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="1" />
-              <text x="138" y="120" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Van Dijk</text>
+              <text x="138" y="120" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
+                {receiverProbabilities[0].shortLabel}
+              </text>
 
-              {/* Jacquet: Central spot (Luminous White) */}
               <circle cx="160" cy="105" r="8" fill="#FFFFFF" fillOpacity="0.25" />
               <circle cx="160" cy="105" r="4" fill="#FFFFFF" stroke="#8E8E93" strokeWidth="1" />
-              <text x="160" y="98" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Jacquet</text>
+              <text x="160" y="98" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
+                {receiverProbabilities[1].shortLabel}
+              </text>
 
-              {/* Isak: Far post (Silver Grey) */}
               <circle cx="184" cy="130" r="7.5" fill="#C7C7CC" fillOpacity="0.25" />
               <circle cx="184" cy="130" r="4" fill="#C7C7CC" stroke="#8E8E93" strokeWidth="1" />
-              <text x="184" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">Isak</text>
+              <text x="184" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
+                {receiverProbabilities[2].shortLabel}
+              </text>
             </g>
           </svg>
           <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] text-white/80 border border-white/10 font-mono">
@@ -232,7 +242,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
             {receiverProbabilities.map((r, i) => (
               <div key={i} className="apple-tile p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-white">{r.player}</span>
+                  <span className="text-xs font-semibold text-white truncate">{r.player}</span>
                   <span className="text-xs font-bold font-mono" style={{ color: r.colour }}>
                     {r.probability}%
                   </span>
@@ -262,7 +272,10 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch }) {
             <span className="text-[10px] font-mono text-white/70">Hybrid 60/40 Scheme</span>
           </div>
           <p className="text-[11px] text-[#8E8E93] leading-relaxed">
-            <strong className="text-white">{awayTeam}</strong> deploys a 5-man zonal spine with man-to-man coverage on Van Dijk. Our inswinging near-post delivery creates natural separation for <strong>Jérémy Jacquet (#5)</strong> and far-post back-runners.
+            <strong className="text-white">{awayTeam}</strong> deploys a 5-man zonal spine with man-to-man coverage on{" "}
+            <strong className="text-white">{primaryAerial.name}</strong>. {club.name}&apos;s inswinging near-post delivery under{" "}
+            <strong className="text-white">{club.manager}</strong> creates natural separation for{" "}
+            <strong className="text-white">{secondaryAerial.name}</strong> and far-post back-runners.
           </p>
         </div>
       </div>

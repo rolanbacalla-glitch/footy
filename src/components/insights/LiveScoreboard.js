@@ -1,24 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import PreMatchPanel, { getMatchdayPhase, isLineupConfirmed } from "./PreMatchPanel";
+import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 import {
-  Shield,
   Clock,
   Flame,
-  Activity,
   Zap,
   Volume2,
   ChevronDown,
   ChevronUp,
-  Radio,
-  Calendar,
-  AlertCircle,
-  Sparkles,
 } from "lucide-react";
 
-export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
+export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChange }) {
   const [seconds, setSeconds] = useState(42);
   const [countdownSeconds, setCountdownSeconds] = useState(16155); // ~4 hours 29 mins 15 secs
   const [previewOffset, setPreviewOffset] = useState(null);
@@ -27,6 +21,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
   const [liveFactData, setLiveFactData] = useState(null);
 
+  const club = selectedClub || getTeamManagerInfo(activeMatch?.teamId || "364") || getTeamManagerInfo("364");
   const isLive = activeMatch?.type === "LIVE" || activeMatch?.isLive;
   const isMatchdayPreMatch =
     activeMatch?.type === "MATCHDAY" ||
@@ -34,21 +29,20 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
     (activeMatch?.isMatchday && !activeMatch?.isLive);
   const isFinished = activeMatch?.type === "RECENT";
 
-  // Adaptive Live Fact-Checking Polling
-  // 15s during live in-play; 60s during pre-match countdown; 5m for finished/archive matches
+  // Adaptive Live Fact-Checking Polling scoped to the selected club
   useEffect(() => {
     let isMounted = true;
-    async function checkLiveFacts() {
-      // Pause network requests if the user has minimized or switched tabs
-      if (typeof document !== "undefined" && document.hidden) return;
+    const teamId = club?.id || activeMatch?.teamId || "364";
 
+    async function checkLiveFacts() {
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
-        const res = await fetch("/api/live-fixtures");
+        const res = await fetch(`/api/live-fixtures?teamId=${encodeURIComponent(teamId)}`);
         if (res.ok) {
           const json = await res.json();
           if (isMounted) setLiveFactData(json);
         }
-      } catch (e) {
+      } catch {
         // Silent fallback
       }
     }
@@ -58,7 +52,6 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
     const pollIntervalMs = isLive ? 15000 : isMatchdayPreMatch ? 60000 : 300000;
     const interval = setInterval(checkLiveFacts, pollIntervalMs);
 
-    // Refresh immediately when tab regains focus
     const handleVisibilityChange = () => {
       if (typeof document !== "undefined" && !document.hidden) checkLiveFacts();
     };
@@ -73,7 +66,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
         document.removeEventListener("visibilitychange", handleVisibilityChange);
       }
     };
-  }, [isLive, isMatchdayPreMatch]);
+  }, [isLive, isMatchdayPreMatch, club?.id, activeMatch?.teamId]);
 
   // Match clock seconds ticker for live match
   useEffect(() => {
@@ -117,14 +110,39 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
     setPreviewOffset(null);
   };
 
+  const homeTeam = activeMatch?.homeTeam || club.name;
+  const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Opponent";
+  const homeInfo = getTeamManagerInfo(homeTeam) || club;
+  const awayInfo = getTeamManagerInfo(awayTeam) || {
+    name: awayTeam,
+    shortName: (awayTeam || "OPP").slice(0, 3).toUpperCase(),
+    manager: "Head Coach",
+    formation: "4-2-3-1",
+    stadium: "Premier League Stadium",
+    city: "England",
+    capacity: "45,000",
+    mainStand: "Main Stand",
+    anthem: "Club Anthem",
+  };
+
+  const venueName = activeMatch?.venue || homeInfo.stadium || club.stadium;
+  const venueCity = activeMatch?.city || homeInfo.city || club.city;
+  const venueCapacity = activeMatch?.capacity || homeInfo.capacity || club.capacity;
+  const venueMainStand = activeMatch?.mainStand || homeInfo.mainStand || club.mainStand;
+  const venueAnthem = activeMatch?.anthem || homeInfo.anthem || club.anthem;
+
   const PHASE_ATMOSPHERE = {
-    BUILD_UP: "Matchday build-up • Turnstiles open 14:30",
-    GATES: "Turnstiles open • Fans arriving",
-    LINEUPS: "Team news is in",
-    WARMUPS: "Warm-ups underway",
-    TUNNEL: "Teams in the tunnel • YNWA",
+    BUILD_UP: `Matchday build-up • ${venueName} turnstiles open 14:30`,
+    GATES: `Turnstiles open • Supporters arriving at ${venueName}`,
+    LINEUPS: "Official Premier League team news is in",
+    WARMUPS: `Warm-ups underway at ${venueName}`,
+    TUNNEL: `Teams in the tunnel • ${venueAnthem}`,
     KICKOFF: "Kick-off",
   };
+
+  const strikerName = activeMatch?.startingXI?.[9]?.name || club.captain;
+  const playmakerName = activeMatch?.startingXI?.[7]?.name || club.captain;
+  const wingerName = activeMatch?.startingXI?.[8]?.name || club.captain;
 
   // Timeline events: in-play match incidents OR pre-match matchday itinerary
   const preMatchNotes = isMatchdayPreMatch && activeMatch?.preMatch?.milestones
@@ -133,19 +151,16 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
   const incidents = preMatchNotes || activeMatch?.incidents || (
     isMatchdayPreMatch
       ? [
-          { min: "15:30", type: "news", text: "Official starting lineups submitted & confirmed to Premier League", team: "info" },
-          { min: "15:55", type: "warmup", text: "Liverpool & Man United squads emerge onto Anfield turf for warm-up drills", team: "info" },
-          { min: "16:15", type: "atmosphere", text: "The Kop stand fills to capacity as heritage flags and banners are unfurled", team: "home" },
-          { min: "16:25", type: "hymn", text: "'You'll Never Walk Alone' sung in unison across all 4 stands; teams line up in tunnel", team: "home" },
-          { min: "16:30", type: "kickoff", text: "Scheduled Kick-Off • Live match data, xG, and pass networks will start streaming", team: "info" },
+          { min: "15:15", type: "news", text: "Official starting line-ups submitted & confirmed to the Premier League", team: "info" },
+          { min: "15:45", type: "warmup", text: `${homeTeam} & ${awayTeam} squads emerge onto the ${venueName} pitch for warm-up drills`, team: "info" },
+          { min: "16:15", type: "atmosphere", text: `${venueMainStand} fills to ${venueCapacity} capacity as club banners are unfurled`, team: "home" },
+          { min: "16:25", type: "hymn", text: `'${venueAnthem}' rings out across ${venueName}; captains line up in the tunnel`, team: "home" },
+          { min: "16:30", type: "kickoff", text: "Scheduled Kick-Off • Live match telemetry, xG, and pass networks stream live", team: "info" },
         ]
       : [
-          { min: "67'", type: "chance", text: "Alexander Isak strikes crossbar from Florian Wirtz through-ball", team: "home" },
-          { min: "58'", type: "goal", text: "GOAL! Florian Wirtz finishes clinical cutback from Bradley Barcola (2-1)", team: "home" },
-          { min: "41'", type: "goal", text: "GOAL! Bruno Fernandes converts penalty into bottom corner (1-1)", team: "away" },
-          { min: "34'", type: "card", text: "Milos Kerkez receives yellow card for tactical foul on Diallo", team: "home" },
-          { min: "28'", type: "goal", text: "GOAL! Alexander Isak breaks deadlock with low drive past Onana (1-0)", team: "home" },
-          { min: "19'", type: "card", text: "Casemiro cautioned for late challenge on Dominik Szoboszlai", team: "away" },
+          { min: "74'", type: "chance", text: `${strikerName} forces a fingertip save after ${playmakerName}'s through-ball`, team: "home" },
+          { min: "61'", type: "goal", text: `GOAL! ${playmakerName} finishes clinical cutback from ${wingerName}`, team: "home" },
+          { min: "24'", type: "goal", text: `GOAL! ${strikerName} opens the scoring with a composed finish inside the box`, team: "home" },
         ]
   );
 
@@ -157,38 +172,50 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
     return () => clearInterval(timer);
   }, [incidents.length]);
 
-  const homeScore = isMatchdayPreMatch ? 0 : (activeMatch?.homeScore ?? (isLive ? 2 : activeMatch?.score?.split("-")[0]?.trim() || 0));
-  const awayScore = isMatchdayPreMatch ? 0 : (activeMatch?.awayScore ?? (isLive ? 1 : activeMatch?.score?.split("-")[1]?.trim() || 0));
+  const homeScore = isMatchdayPreMatch
+    ? 0
+    : (activeMatch?.homeScore ?? (isLive ? 2 : activeMatch?.score?.split("-")[0]?.trim() || 0));
+  const awayScore = isMatchdayPreMatch
+    ? 0
+    : (activeMatch?.awayScore ?? (isLive ? 1 : activeMatch?.score?.split("-")[1]?.trim() || 0));
 
-  const homeTeam = activeMatch?.homeTeam || "Liverpool";
-  const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Man United";
+  const homeScorers = isMatchdayPreMatch
+    ? []
+    : (activeMatch?.homeScorers?.length
+        ? activeMatch.homeScorers
+        : [{ player: strikerName, min: "24'" }, { player: playmakerName, min: "61'" }].slice(0, Number(homeScore) || 0));
 
-  const homeScorers = isMatchdayPreMatch ? [] : (activeMatch?.homeScorers || [
-    { player: "A. Isak", min: "28'" },
-    { player: "F. Wirtz", min: "58'" },
-  ]);
+  const awayScorers = isMatchdayPreMatch
+    ? []
+    : (activeMatch?.awayScorers?.length
+        ? activeMatch.awayScorers
+        : [{ player: awayInfo.captain || "Visitor", min: "52'" }].slice(0, Number(awayScore) || 0));
 
-  const awayScorers = isMatchdayPreMatch ? [] : (activeMatch?.awayScorers || [
-    { player: "B. Fernandes", min: "41' (P)" },
-  ]);
-
-  const possession = activeMatch?.liveStats?.possession || [64, 36];
-  const shots = activeMatch?.liveStats?.shots || [14, 5];
-  const shotsOnTarget = activeMatch?.liveStats?.shotsOnTarget || [7, 2];
-  const xG = activeMatch?.liveStats?.xg || [activeMatch?.metrics?.teamXg || 2.14, activeMatch?.metrics?.opponentXg || 0.88];
-  const corners = activeMatch?.liveStats?.corners || [6, 2];
+  const possession = activeMatch?.liveStats?.possession || [58, 42];
+  const shots = activeMatch?.liveStats?.shots || [15, 8];
+  const shotsOnTarget = activeMatch?.liveStats?.shotsOnTarget || [6, 3];
+  const xG = activeMatch?.liveStats?.xg || [activeMatch?.metrics?.teamXg || 2.18, activeMatch?.metrics?.opponentXg || 1.04];
+  const corners = activeMatch?.liveStats?.corners || [6, 3];
 
   const currentMinute = activeMatch?.minute || 68;
   const kickoffTime = activeMatch?.kickoffTime || "16:30 GMT";
 
+  const selectedRank = liveFactData?.standings?.selected?.rank || activeMatch?.standings?.selected?.rank;
+  const selectedPts = liveFactData?.standings?.selected?.points || activeMatch?.standings?.selected?.points;
+  const oppRank = liveFactData?.standings?.opponent?.rank || activeMatch?.standings?.opponent?.rank;
+  const oppPts = liveFactData?.standings?.opponent?.points || activeMatch?.standings?.opponent?.points;
+
   return (
     <div className="w-full relative rounded-[22px] overflow-hidden apple-card border border-white/[0.12] bg-[#0A0D12]/90 shadow-[0_12px_40px_rgba(0,0,0,0.65)] select-none">
-      {/* Dynamic Ambient Crimson & Emerald Stadium Floodlight Glow */}
+      {/* Dynamic Ambient Stadium Floodlight Glow */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden z-0"
       >
-        <div className="absolute -top-16 left-12 w-96 h-48 bg-[#E31B23]/18 rounded-full blur-[70px]" />
+        <div
+          className="absolute -top-16 left-12 w-96 h-48 rounded-full blur-[70px] opacity-20"
+          style={{ backgroundColor: club.primaryColor || "#E31B23" }}
+        />
         <div className="absolute -top-16 right-12 w-80 h-48 bg-white/5 rounded-full blur-[80px]" />
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-black/60" />
       </div>
@@ -227,21 +254,25 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
             )}
 
             <span className="font-semibold text-white/90 tracking-[-0.01em]">
-              {activeMatch?.competition || "Premier League • Matchday 12"}
+              {activeMatch?.competition || "Premier League"}
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-[#8E8E93] text-[11px] hidden sm:inline">
-              Anfield, Liverpool • Att: 61,276 (Sold Out)
+              {venueName}, {venueCity} • Att: {venueCapacity} (Capacity)
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-[11px]">
-            {liveFactData?.standings?.lfc && (
+            {selectedRank && (
               <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8E8E93]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                <span className="text-white font-semibold">4th</span> ({liveFactData.standings.lfc.points} pts)
-                <span className="text-white/30">vs</span>
-                <span className="text-white/80 font-medium">18th</span> ({liveFactData.standings.mufc?.points || 8} pts)
+                <span className="text-white font-semibold">{club.shortName} #{selectedRank}</span> ({selectedPts} pts)
+                {oppRank && (
+                  <>
+                    <span className="text-white/30">vs</span>
+                    <span className="text-white/80 font-medium">#{oppRank}</span> ({oppPts} pts)
+                  </>
+                )}
               </span>
             )}
 
@@ -249,7 +280,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
               <Volume2 className="w-3.5 h-3.5 text-[#FF2636] animate-pulse" />
               <span className="hidden md:inline">Atmosphere:</span>
               <strong className="text-white font-medium">
-                {isMatchdayPreMatch ? PHASE_ATMOSPHERE[phase.id] : "104 dB (The Kop Singing)"}
+                {isMatchdayPreMatch ? PHASE_ATMOSPHERE[phase.id] : `102 dB (${venueMainStand})`}
               </strong>
             </span>
 
@@ -264,7 +295,13 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
               aria-label={expandedStats ? "Collapse pre-match analysis" : "Expand pre-match analysis"}
             >
               <span className="text-[10px] font-semibold uppercase tracking-wider">
-                {expandedStats ? "Hide Pre-Match Hub" : "Pre-Match Hub"}
+                {isMatchdayPreMatch
+                  ? expandedStats
+                    ? "Hide Pre-Match Hub"
+                    : "Pre-Match Hub"
+                  : expandedStats
+                    ? "Hide Match Telemetry"
+                    : "Match Telemetry"}
               </span>
               {expandedStats ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
@@ -273,7 +310,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
 
         {/* ── Main Scoreboard Visual Display ── */}
         <div className="grid grid-cols-1 md:grid-cols-7 items-center gap-4 py-4 sm:py-5">
-          {/* Home Team (Liverpool FC) */}
+          {/* Home Team */}
           <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-3 sm:gap-4 order-1">
             <div className="text-left md:text-right">
               <div className="flex items-center md:justify-end gap-1.5">
@@ -285,14 +322,14 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                 </h2>
               </div>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                Andoni Iraola • 4-2-3-1
+                {homeInfo.manager} • {homeInfo.formation}
               </p>
 
               {/* Status / Scorers */}
               {isMatchdayPreMatch ? (
                 <div className="flex items-center md:justify-end gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
                   <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-white" : "border border-white/60 border-dashed"} animate-pulse`} />
-                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Line-ups at 15:15"}</span>
+                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Official line-ups at T-75m"}</span>
                 </div>
               ) : (
                 homeScorers.length > 0 && (
@@ -330,12 +367,12 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
             ) : (
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF2636] mt-2 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
-                Attacking The Kop
+                Attacking {venueMainStand}
               </span>
             )}
           </div>
 
-          {/* Away Team (Manchester United) */}
+          {/* Away Team */}
           <div className="md:col-span-3 flex items-center justify-start gap-3 sm:gap-4 order-3">
             <div className="text-left">
               <div className="flex items-center gap-1.5">
@@ -347,14 +384,14 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                 </span>
               </div>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                Mauricio Pochettino • 4-2-3-1
+                {awayInfo.manager} • {awayInfo.formation}
               </p>
 
               {/* Status / Scorers */}
               {isMatchdayPreMatch ? (
                 <div className="flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
                   <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-white" : "border border-white/60 border-dashed"} animate-pulse`} />
-                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Line-ups at 15:15"}</span>
+                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Official line-ups at T-75m"}</span>
                 </div>
               ) : (
                 awayScorers.length > 0 && (
@@ -379,6 +416,7 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
             {isMatchdayPreMatch ? (
               <PreMatchPanel
                 activeMatch={activeMatch}
+                selectedClub={club}
                 phase={phase}
                 countdownSeconds={countdownSeconds}
                 onPreviewPhase={handlePreviewPhase}
@@ -386,21 +424,21 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                 onResetPreview={handleResetPreview}
               />
             ) : (
-              /* Live In-Play Match Telemetry */
+              /* Live / Full-Time Match Telemetry */
               <div className="space-y-3">
                 {/* Possession Duel Gauge */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <span className="text-white flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-                      Liverpool <strong className="font-mono text-sm ml-1 text-white">{possession[0]}%</strong>
+                      {homeTeam} <strong className="font-mono text-sm ml-1 text-white">{possession[0]}%</strong>
                     </span>
                     <span className="text-[10px] uppercase font-bold text-[#8E8E93] tracking-widest">
-                      Live Match Possession
+                      Match Possession
                     </span>
                     <span className="text-white/80 flex items-center gap-1.5">
                       <strong className="font-mono text-sm mr-1 text-white">{possession[1]}%</strong>
-                      Man United
+                      {awayTeam}
                       <span className="w-2 h-2 rounded-full bg-white/40" />
                     </span>
                   </div>
@@ -422,12 +460,12 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                   <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Live xG
+                      Expected Goals (xG)
                     </span>
                     <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-[#FF2636] font-mono">{xG[0].toFixed(2)}</span>
+                      <span className="font-bold text-sm text-[#FF2636] font-mono">{Number(xG[0] || 1.8).toFixed(2)}</span>
                       <span className="text-[10px] text-white/30">-</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">{xG[1].toFixed(2)}</span>
+                      <span className="font-bold text-sm text-[#8E8E93] font-mono">{Number(xG[1] || 1.0).toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -459,8 +497,8 @@ export default function LiveScoreboard({ activeMatch, onPhaseChange }) {
                     </span>
                     <div className="flex items-center justify-center gap-1 mt-0.5">
                       <Flame className="w-3.5 h-3.5 text-[#FF2636]" />
-                      <span className="font-bold text-sm text-white font-mono">72.4%</span>
-                      <span className="text-[10px] text-[#FF4D5A] font-semibold">LFC</span>
+                      <span className="font-bold text-sm text-white font-mono">{activeMatch?.metrics?.fieldTilt || 65.4}%</span>
+                      <span className="text-[10px] text-[#FF4D5A] font-semibold">{club.shortName}</span>
                     </div>
                   </div>
                 </div>

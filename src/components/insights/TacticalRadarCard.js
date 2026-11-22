@@ -1,37 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
-import { Radar, Swords, Shield, Zap, Target, Gauge } from "lucide-react";
+import React from "react";
+import { Swords } from "lucide-react";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 
-export default function TacticalRadarCard({ activeMatch }) {
-  const [comparisonMode, setComparisonMode] = useState("manager"); // 'manager' | 'territory'
-
-  const homeManager = "Andoni Iraola (4-2-3-1)";
-  const awayTeamIdentifier = activeMatch?.opponent || activeMatch?.awayTeam || "Manchester United";
+export default function TacticalRadarCard({ activeMatch, selectedClub }) {
+  const club = selectedClub || getTeamManagerInfo(activeMatch?.teamId || "364") || getTeamManagerInfo("364");
+  const homeManager = `${club.manager} (${club.formation})`;
+  const awayTeamIdentifier =
+    (activeMatch?.homeTeam === club.name ? activeMatch?.awayTeam : activeMatch?.homeTeam) ||
+    activeMatch?.opponent ||
+    "Opponent";
   const oppInfo = getTeamManagerInfo(awayTeamIdentifier);
   const awayManager = oppInfo
     ? `${oppInfo.manager} (${oppInfo.formation})`
-    : "Opposition Setup";
+    : `${awayTeamIdentifier} Setup`;
+
+  const ppdaVal = activeMatch?.metrics?.ppda || 7.1;
+  const tiltVal = activeMatch?.metrics?.fieldTilt || 65.4;
+  const regainsVal = activeMatch?.metrics?.counterPressRegains || 24;
 
   // Tactical Radar Dimensions (Scale: 0 to 100)
-  // LFC (Iraola 4-2-3-1) vs Opponent (e.g., Pochettino 4-2-3-1)
   const dimensions = [
-    { label: "Vertical Press", lfc: 94, opp: 72, lfcVal: "6.4 PPDA", oppVal: "10.2 PPDA" },
-    { label: "Direct Progression", lfc: 88, opp: 65, lfcVal: "3.4 m/s", oppVal: "2.1 m/s" },
-    { label: "High Regains", lfc: 91, opp: 68, lfcVal: "27 / 90", oppVal: "16 / 90" },
-    { label: "Field Tilt Dominance", lfc: 85, opp: 52, lfcVal: "70.2%", oppVal: "48.5%" },
-    { label: "Set-Piece xG Net", lfc: 78, opp: 60, lfcVal: "+0.45 xG", oppVal: "+0.08 xG" },
+    { label: "Vertical Press", lfc: 92, opp: 71, lfcVal: `${ppdaVal} PPDA`, oppVal: "10.4 PPDA" },
+    { label: "Direct Progression", lfc: 87, opp: 66, lfcVal: "3.3 m/s", oppVal: "2.2 m/s" },
+    { label: "High Regains", lfc: 90, opp: 68, lfcVal: `${regainsVal} / 90`, oppVal: "16 / 90" },
+    { label: "Field Tilt Dominance", lfc: 84, opp: 54, lfcVal: `${tiltVal}%`, oppVal: `${(100 - tiltVal).toFixed(1)}%` },
+    { label: "Set-Piece xG Net", lfc: 79, opp: 61, lfcVal: "+0.38 xG", oppVal: "+0.09 xG" },
   ];
 
-  // SVG Radar Chart (Center: 100, 100, Radius: 70)
+  // SVG Radar Chart (Center: 100, 100, Radius: 68)
   const numPoints = dimensions.length;
   const centerX = 100;
   const centerY = 100;
   const radius = 68;
 
   const getCoordinates = (index, value) => {
-    const angle = (Math.PI * 2 / numPoints) * index - Math.PI / 2;
+    const angle = ((Math.PI * 2) / numPoints) * index - Math.PI / 2;
     const r = (value / 100) * radius;
     const x = centerX + r * Math.cos(angle);
     const y = centerY + r * Math.sin(angle);
@@ -66,11 +71,11 @@ export default function TacticalRadarCard({ activeMatch }) {
         <div className="flex items-center gap-2.5 text-[10px]">
           <span className="flex items-center gap-1 text-white font-medium">
             <span className="w-2 h-2 rounded-full bg-[#FF2636] shadow-[0_0_6px_#FF2636]" />
-            LFC
+            {club.shortName}
           </span>
           <span className="flex items-center gap-1 text-white/70">
             <span className="w-2 h-2 rounded-full bg-white/70 shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
-            Opp
+            {oppInfo?.shortName || "OPP"}
           </span>
         </div>
       </div>
@@ -80,13 +85,14 @@ export default function TacticalRadarCard({ activeMatch }) {
         {/* Radar SVG Visualisation (5 Cols) */}
         <div className="sm:col-span-5 flex items-center justify-center">
           <svg viewBox="0 0 200 200" className="w-44 h-44 drop-shadow-md" aria-label="Tactical Radar Chart">
-            {/* Radar Background Polygons (Concentric Rings: 25%, 50%, 75%, 100%) */}
             {[0.25, 0.5, 0.75, 1].map((scale, ringIdx) => {
-              const ringPoints = dimensions.map((_, i) => {
-                const angle = (Math.PI * 2 / numPoints) * i - Math.PI / 2;
-                const r = scale * radius;
-                return `${centerX + r * Math.cos(angle)},${centerY + r * Math.sin(angle)}`;
-              }).join(" ");
+              const ringPoints = dimensions
+                .map((_, i) => {
+                  const angle = ((Math.PI * 2) / numPoints) * i - Math.PI / 2;
+                  const r = scale * radius;
+                  return `${centerX + r * Math.cos(angle)},${centerY + r * Math.sin(angle)}`;
+                })
+                .join(" ");
               return (
                 <polygon
                   key={ringIdx}
@@ -98,9 +104,8 @@ export default function TacticalRadarCard({ activeMatch }) {
               );
             })}
 
-            {/* Spoke Lines */}
             {dimensions.map((_, i) => {
-              const angle = (Math.PI * 2 / numPoints) * i - Math.PI / 2;
+              const angle = ((Math.PI * 2) / numPoints) * i - Math.PI / 2;
               const x2 = centerX + radius * Math.cos(angle);
               const y2 = centerY + radius * Math.sin(angle);
               return (
@@ -116,7 +121,6 @@ export default function TacticalRadarCard({ activeMatch }) {
               );
             })}
 
-            {/* Opposition Polygon (Subdued Precision Steel / Silver Glass) */}
             <path
               d={oppPath}
               fill="rgba(255, 255, 255, 0.10)"
@@ -126,7 +130,6 @@ export default function TacticalRadarCard({ activeMatch }) {
               strokeLinejoin="round"
             />
 
-            {/* LFC Polygon (Electric Anfield Crimson) */}
             <path
               d={lfcPath}
               fill="rgba(255, 38, 54, 0.28)"
@@ -135,9 +138,8 @@ export default function TacticalRadarCard({ activeMatch }) {
               strokeLinejoin="round"
             />
 
-            {/* Spoke Vertex Dots */}
             {lfcPoints.map((p, i) => (
-              <circle key={`lfc-${i}`} cx={p.x} cy={p.y} r="2.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="0.6" />
+              <circle key={`club-${i}`} cx={p.x} cy={p.y} r="2.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="0.6" />
             ))}
             {oppPoints.map((p, i) => (
               <circle key={`opp-${i}`} cx={p.x} cy={p.y} r="2" fill="#FFFFFF" fillOpacity="0.6" stroke="#8E8E93" strokeWidth="0.5" />

@@ -66,8 +66,8 @@ export default function FixturesCalendarModal({ isOpen, onClose, fixtures = [], 
           <div className="flex items-center gap-1.5 bg-white/[0.04] p-1 rounded-xl border border-white/[0.06]">
             {[
               { id: "all", label: `All (${fixtures.length})` },
-              { id: "home", label: "Anfield Home" },
-              { id: "away", label: "Away" },
+              { id: "home", label: "Home Fixtures" },
+              { id: "away", label: "Away Fixtures" },
             ].map((tab) => (
               <button
                 key={tab.id}
