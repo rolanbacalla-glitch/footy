@@ -5,7 +5,6 @@ import TacticalRadarCard from "./TacticalRadarCard";
 import SetPieceModal from "./SetPieceModal";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 import {
-  Activity,
   ChevronDown,
   ChevronUp,
   CloudRain,
@@ -187,9 +186,9 @@ function useKickoffWeather(kickoffHour, lat, lon, city, fallback) {
 
 // ─── Small presentational helpers ────────────────────────────────────────────
 const RESULT_STYLES = {
-  W: "bg-[#30D158]/20 text-[#30D158] border-[#30D158]/40",
-  D: "bg-white/10 text-white/70 border-white/20",
-  L: "bg-[#FF453A]/20 text-[#FF6961] border-[#FF453A]/40",
+  W: "bg-[#D2F865]/15 text-[#D2F865] border-[#D2F865]/30",
+  D: "bg-white/10 text-white/70 border-white/15",
+  L: "bg-[#F26E7C]/15 text-[#F26E7C] border-[#F26E7C]/30",
 };
 
 function FormPills({ results }) {
@@ -240,16 +239,16 @@ function trendLabel(series) {
 }
 
 const NEWS_STYLES = {
-  out: { label: "Out", cls: "bg-[#FF453A]/20 text-[#FF6961] border-[#FF453A]/35" },
-  doubt: { label: "Doubt", cls: "bg-white/10 text-white/90 border-white/20" },
-  booking: { label: "1 off ban", cls: "bg-white/10 text-white/70 border-white/15" },
+  out: { label: "Out", cls: "bg-[#F26E7C]/18 text-[#F26E7C] border-[#F26E7C]/35" },
+  doubt: { label: "Doubt", cls: "bg-[#F4BA5B]/15 text-[#F4BA5B] border-[#F4BA5B]/30" },
+  booking: { label: "1 off ban", cls: "bg-white/10 text-white/75 border-white/15" },
 };
 
 function Card({ icon: Icon, title, children, className = "" }) {
   return (
-    <div className={`apple-tile rounded-xl border border-white/[0.06] p-3 flex flex-col gap-2 min-w-0 ${className}`}>
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
-        <Icon className="w-3.5 h-3.5 text-[#FF2636]" strokeWidth={2} />
+    <div className={`glass-tile p-4 flex flex-col gap-2.5 min-w-0 ${className}`}>
+      <div className="flex items-center gap-2 text-xs font-medium text-[#8A8D96]">
+        <Icon className="w-3.5 h-3.5 text-[#D2F865]" strokeWidth={2} />
         {title}
       </div>
       {children}
@@ -344,64 +343,58 @@ export default function PreMatchPanel({
   };
 
   return (
-    <div className="space-y-3">
-      {/* Win probability + data status */}
-      <div className="apple-tile rounded-xl border border-white/[0.06] p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
-            <Target className="w-3.5 h-3.5 text-[#FF2636]" />
-            Win Probability
-            <span className="normal-case tracking-normal font-medium text-white/40 ml-1">
-              • Forecast xG {pm.projectedXg?.[0] ?? 2.18} – {pm.projectedXg?.[1] ?? 1.05}
+    <div className="space-y-4">
+      {/* Win probability + forecast xG */}
+      <div className="glass-tile p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div className="flex items-center gap-2 text-xs font-medium text-white">
+            <Target className="w-3.5 h-3.5 text-[#D2F865]" />
+            <span>Win Probability</span>
+            <span className="text-[#8A8D96] font-normal">
+              · Forecast xG {pm.projectedXg?.[0] ?? 2.18} – {pm.projectedXg?.[1] ?? 1.05}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[10px]">
-            <span className="flex items-center gap-1 text-[#F1B82D]">
-              <Activity className="w-3 h-3 animate-pulse" />
-              Live telemetry synced for {club.name}
-            </span>
-          </div>
+          <span className="text-[11px] text-[#8A8D96]">
+            {pm.winProbabilitySource || "Elo rating blended with live Premier League table"}
+          </span>
         </div>
-        <div className="flex h-7 w-full rounded-lg overflow-hidden border border-white/10 text-[11px] font-bold">
-          <div style={{ width: `${wp.home}%` }} className="bg-gradient-to-r from-[#800A1A] to-[#E31B23] flex items-center px-2 text-white truncate">
+        <div className="flex h-7 w-full rounded-full overflow-hidden border border-white/[0.08] text-xs font-semibold">
+          <div style={{ width: `${wp.home}%` }} className="bg-[#D2F865] flex items-center px-3 text-[#0E100C] truncate tabular-nums">
             {homeTeam} {wp.home}%
           </div>
-          <div style={{ width: `${wp.draw}%` }} className="bg-white/15 flex items-center justify-center text-white/80">
+          <div style={{ width: `${wp.draw}%` }} className="bg-white/12 flex items-center justify-center text-white/80 tabular-nums">
             Draw {wp.draw}%
           </div>
-          <div style={{ width: `${wp.away}%` }} className="bg-white/[0.06] flex items-center justify-end px-2 text-white/80">
+          <div style={{ width: `${wp.away}%` }} className="bg-[#637AE0]/50 flex items-center justify-end px-3 text-white tabular-nums">
             {wp.away}%
           </div>
         </div>
-        <p className="text-[10px] text-white/40 mt-1.5">
-          {awayTeam} {wp.away}% • {pm.winProbabilitySource || "Elo rating blended with live Premier League table & market odds"}
-        </p>
       </div>
 
       {/* Tactical Counter-Press Radar Comparison */}
       <TacticalRadarCard activeMatch={activeMatch} selectedClub={club} />
 
       {/* Tier 1: form, team news, key duel */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Card icon={TimerReset} title="Form & xG trend (last 6)">
           {[
-            { team: homeTeam, form: homeForm, series: homeSeries, trend: homeTrend, colour: "#FF2636" },
-            { team: awayTeam, form: awayForm, series: awaySeries, trend: awayTrend, colour: "#C7C7CC" },
+            { team: homeTeam, form: homeForm, series: homeSeries, trend: homeTrend, colour: "#D2F865" },
+            { team: awayTeam, form: awayForm, series: awaySeries, trend: awayTrend, colour: "#8BA3F5" },
           ].map((row) => (
             <div key={row.team} className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <span className="text-[11px] font-semibold text-white block truncate">{row.team}</span>
+                <span className="text-xs font-medium text-white block truncate mb-1">{row.team}</span>
                 <FormPills results={row.form} />
               </div>
               <div className="flex flex-col items-end shrink-0">
                 {row.series.length > 1 && <XgSparkline series={row.series} colour={row.colour} />}
-                <span className={`text-[10px] font-semibold ${row.trend.cls}`}>
+                <span className={`text-[10px] font-medium ${row.trend.cls}`}>
                   {row.trend.arrow} {row.trend.text}
                 </span>
               </div>
             </div>
           ))}
-          <p className="text-[9px] text-white/35">Solid line: xG for • dashed line: xG against • most recent on the right</p>
+          <p className="text-[10px] text-[#6F727C]">Solid: xG for · dashed: xG against</p>
         </Card>
 
         <Card icon={HeartPulse} title="Team news & availability">
@@ -419,18 +412,18 @@ export default function PreMatchPanel({
                 : [{ name: `${awayTeam} Squad`, status: "booking", detail: "1 caution away from suspension" }],
             },
           ].map((group) => (
-            <div key={group.team} className="space-y-1">
-              <span className="text-[10px] font-semibold text-white/60">{group.team}</span>
+            <div key={group.team} className="space-y-1.5">
+              <span className="text-[11px] font-medium text-[#8A8D96]">{group.team}</span>
               {group.items.map((p, idx) => {
                 const st = NEWS_STYLES[p.status] || NEWS_STYLES.doubt;
                 return (
-                  <div key={`${p.name}-${idx}`} className="flex items-start gap-1.5 text-[11px]">
-                    <span className={`shrink-0 px-1.5 py-[1px] rounded border text-[9px] font-bold uppercase ${st.cls}`}>
+                  <div key={`${p.name}-${idx}`} className="flex items-start gap-2 text-xs">
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold ${st.cls}`}>
                       {st.label}
                     </span>
                     <span className="min-w-0">
-                      <strong className="text-white font-semibold">{p.name}</strong>
-                      <span className="text-white/50"> • {p.detail}</span>
+                      <strong className="text-white font-medium">{p.name}</strong>
+                      <span className="text-[#8A8D96]"> · {p.detail}</span>
                     </span>
                   </div>
                 );
@@ -442,20 +435,20 @@ export default function PreMatchPanel({
         <Card icon={Swords} title="Key duel">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
             <div className="text-left min-w-0">
-              <span className="text-[10px] font-mono text-[#FF4D5A] font-bold">#{defaultKeyDuel.home.number}</span>
-              <span className="block text-[12px] font-bold text-white truncate">{defaultKeyDuel.home.name}</span>
-              <span className="block text-lg font-black font-mono text-[#FF2636] leading-none mt-1">{defaultKeyDuel.home.stat}</span>
-              <span className="block text-[9px] text-white/45">{defaultKeyDuel.home.label}</span>
+              <span className="text-[11px] font-mono text-[#D2F865] font-semibold">#{defaultKeyDuel.home.number}</span>
+              <span className="block text-xs font-semibold text-white truncate">{defaultKeyDuel.home.name}</span>
+              <span className="block font-display text-xl font-light text-[#D2F865] leading-none mt-1.5 tabular-nums">{defaultKeyDuel.home.stat}</span>
+              <span className="block text-[10px] text-[#8A8D96] mt-0.5">{defaultKeyDuel.home.label}</span>
             </div>
-            <span className="text-[10px] font-bold text-white/30">VS</span>
+            <span className="text-[10px] font-medium text-white/30">vs</span>
             <div className="text-right min-w-0">
-              <span className="text-[10px] font-mono text-white/60 font-bold">#{defaultKeyDuel.away.number}</span>
-              <span className="block text-[12px] font-bold text-white truncate">{defaultKeyDuel.away.name}</span>
-              <span className="block text-lg font-black font-mono text-white/80 leading-none mt-1">{defaultKeyDuel.away.stat}</span>
-              <span className="block text-[9px] text-white/45">{defaultKeyDuel.away.label}</span>
+              <span className="text-[11px] font-mono text-[#8BA3F5] font-semibold">#{defaultKeyDuel.away.number}</span>
+              <span className="block text-xs font-semibold text-white truncate">{defaultKeyDuel.away.name}</span>
+              <span className="block font-display text-xl font-light text-white leading-none mt-1.5 tabular-nums">{defaultKeyDuel.away.stat}</span>
+              <span className="block text-[10px] text-[#8A8D96] mt-0.5">{defaultKeyDuel.away.label}</span>
             </div>
           </div>
-          <p className="text-[11px] text-white/70 leading-snug">{defaultKeyDuel.takeaway}</p>
+          <p className="text-xs text-[#B7BAC3] leading-relaxed">{defaultKeyDuel.takeaway}</p>
         </Card>
       </div>
 
@@ -464,64 +457,64 @@ export default function PreMatchPanel({
         type="button"
         onClick={() => setShowDetails(!showDetails)}
         aria-expanded={showDetails}
-        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-[11px] font-semibold text-white/70 hover:text-white cursor-pointer transition-colors"
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-[#B7BAC3] hover:text-white cursor-pointer transition-colors"
       >
         {showDetails ? "Hide match context" : "More match context: recent results, tactics, set pieces, rest, officials, conditions"}
         {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
       </button>
 
       {showDetails && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <Card icon={History} title="Recent Results & H2H">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-white/70">
-                {club.shortName}: <strong className="text-[#30D158]">{h2hSummary.W}W</strong>{" "}
-                <strong className="text-white/70">{h2hSummary.D}D</strong>{" "}
-                <strong className="text-[#FF6961]">{h2hSummary.L}L</strong>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-[#B7BAC3] tabular-nums">
+                {club.shortName}: <strong className="text-[#D2F865]">{h2hSummary.W}W</strong>{" "}
+                <strong className="text-white/75">{h2hSummary.D}D</strong>{" "}
+                <strong className="text-[#F26E7C]">{h2hSummary.L}L</strong>
               </span>
               <button
                 type="button"
                 onClick={() => setH2hHomeVenueOnly(!h2hHomeVenueOnly)}
                 aria-pressed={h2hHomeVenueOnly}
-                className={`text-[10px] px-2 py-0.5 rounded-full border cursor-pointer ${
+                className={`text-[11px] px-2.5 py-1 rounded-full border cursor-pointer transition-colors ${
                   h2hHomeVenueOnly
-                    ? "bg-[#E31B23]/25 border-[#E31B23]/40 text-white"
-                    : "border-white/15 text-white/60 hover:text-white"
+                    ? "bg-[#D2F865]/15 border-[#D2F865]/35 text-[#D2F865]"
+                    : "border-white/12 text-[#8A8D96] hover:text-white"
                 }`}
               >
                 At {venueName} only
               </button>
             </div>
             {h2h.map((m, idx) => (
-              <div key={`${m.date}-${idx}`} className="flex items-center justify-between text-[11px] gap-2">
-                <span className="text-white/45 shrink-0 w-[76px] truncate">{m.date}</span>
+              <div key={`${m.date}-${idx}`} className="flex items-center justify-between text-xs gap-2">
+                <span className="text-[#6F727C] shrink-0 w-[76px] truncate">{m.date}</span>
                 <span className="text-white/90 truncate flex-1">{m.fixture}</span>
-                <span className={`shrink-0 px-1.5 rounded border text-[10px] font-bold ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>{m.score}</span>
+                <span className={`shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold tabular-nums ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>{m.score}</span>
               </div>
             ))}
           </Card>
 
           <Card icon={Swords} title="Tactical mismatch">
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-black font-mono text-[#00DAC3]">{pm.tactical?.ppda ?? activeMatch?.metrics?.ppda ?? 7.1}</span>
-              <span className="text-[10px] text-white/50">{club.shortName} PPDA (lower = more pressing)</span>
+              <span className="font-display text-2xl font-light font-mono text-[#D2F865] tabular-nums">{pm.tactical?.ppda ?? activeMatch?.metrics?.ppda ?? 7.1}</span>
+              <span className="text-[11px] text-[#8A8D96]">{club.shortName} PPDA (lower = more pressing)</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-black font-mono text-white/80">{pm.tactical?.opponentTurnovers ?? 13}</span>
-              <span className="text-[10px] text-white/50">{awayTeam} turnovers per game under high press</span>
+              <span className="font-display text-2xl font-light font-mono text-white/90 tabular-nums">{pm.tactical?.opponentTurnovers ?? 13}</span>
+              <span className="text-[11px] text-[#8A8D96]">{awayTeam} turnovers per game under high press</span>
             </div>
-            <p className="text-[11px] text-white/70 leading-snug">
+            <p className="text-xs text-[#B7BAC3] leading-relaxed">
               {pm.tactical?.takeaway || `${club.name} deploy ${club.manager}'s ${club.formation} (${club.tacticalStyle.toLowerCase()}) to disrupt ${awayTeam}'s build-up.`}
             </p>
           </Card>
 
           <Card icon={Flag} title="Set pieces (xG per game)">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">TacticAI Dynamics</span>
+              <span className="text-[11px] text-[#8A8D96] font-medium">Set-piece model</span>
               <button
                 type="button"
                 onClick={() => setIsSetPieceOpen(true)}
-                className="text-[10px] px-2 py-0.5 rounded-full border border-[#00DAC3]/40 bg-[#00DAC3]/15 text-[#00DAC3] font-semibold cursor-pointer hover:bg-[#00DAC3]/25 flex items-center gap-1 transition-colors"
+                className="text-[11px] px-2.5 py-1 rounded-full border border-[#D2F865]/35 bg-[#D2F865]/12 text-[#D2F865] font-medium cursor-pointer hover:bg-[#D2F865]/22 flex items-center gap-1 transition-colors"
               >
                 <CornerDownRight className="w-3 h-3" />
                 Inspect Routines
@@ -531,17 +524,17 @@ export default function PreMatchPanel({
               { team: homeTeam, d: pm.setPieces?.home || { for: 0.36, against: 0.22 } },
               { team: awayTeam, d: pm.setPieces?.away || { for: 0.28, against: 0.31 } },
             ].map((row) => (
-              <div key={row.team} className="flex items-center justify-between text-[11px]">
-                <span className="text-white/80">{row.team}</span>
-                <span className="font-mono">
-                  <span className="text-[#30D158]">{row.d?.for?.toFixed(2)}</span>
-                  <span className="text-white/30"> for • </span>
-                  <span className="text-[#FF6961]">{row.d?.against?.toFixed(2)}</span>
-                  <span className="text-white/30"> against</span>
+              <div key={row.team} className="flex items-center justify-between text-xs">
+                <span className="text-white/85">{row.team}</span>
+                <span className="font-mono tabular-nums">
+                  <span className="text-[#D2F865]">{row.d?.for?.toFixed(2)}</span>
+                  <span className="text-white/35"> for · </span>
+                  <span className="text-[#F26E7C]">{row.d?.against?.toFixed(2)}</span>
+                  <span className="text-white/35"> against</span>
                 </span>
               </div>
             ))}
-            <p className="text-[11px] text-white/70 leading-snug">
+            <p className="text-xs text-[#B7BAC3] leading-relaxed">
               {pm.setPieces?.takeaway || `${club.name} generate high-value aerial deliveries targeting ${club.captain} inside the six-yard box.`}
             </p>
           </Card>
@@ -551,51 +544,51 @@ export default function PreMatchPanel({
               { team: homeTeam, d: pm.rest?.home || { days: 6, last: "Previous PL Match" } },
               { team: awayTeam, d: pm.rest?.away || { days: 5, last: "Previous PL Match" } },
             ].map((row) => (
-              <div key={row.team} className="flex items-center justify-between text-[11px] gap-2">
-                <span className="text-white/80">{row.team}</span>
-                <span className="text-right">
-                  <strong className={row.d?.days <= 3 ? "text-[#FF9F0A]" : "text-white"}>{row.d?.days} days</strong>
-                  <span className="text-white/45"> • {row.d?.last}</span>
+              <div key={row.team} className="flex items-center justify-between text-xs gap-2">
+                <span className="text-white/85">{row.team}</span>
+                <span className="text-right tabular-nums">
+                  <strong className={row.d?.days <= 3 ? "text-[#F4BA5B]" : "text-white"}>{row.d?.days} days</strong>
+                  <span className="text-[#6F727C]"> · {row.d?.last}</span>
                 </span>
               </div>
             ))}
-            <p className="text-[11px] text-[#FF9F0A]/90 leading-snug">
+            <p className="text-xs text-[#F4BA5B]/90 leading-relaxed">
               {pm.rest?.flag || `${club.name} arrive with full tactical recovery ahead of kick-off at ${venueName}.`}
             </p>
           </Card>
 
           <Card icon={Flag} title="Match officials">
-            <div className="text-[11px] space-y-0.5">
-              <div className="flex justify-between"><span className="text-white/50">Referee</span><strong className="text-white">{pm.officials?.referee || "Michael Oliver"}</strong></div>
-              <div className="flex justify-between"><span className="text-white/50">VAR</span><span className="text-white/85">{pm.officials?.var || "Stuart Attwell"}</span></div>
-              <div className="flex justify-between"><span className="text-white/50">Cards per game</span><span className="font-mono text-[#FFD60A]">{pm.officials?.cardsPerGame || "3.8"}</span></div>
-              <div className="flex justify-between"><span className="text-white/50">Penalties per game</span><span className="font-mono text-white/85">{pm.officials?.pensPerGame || "0.21"}</span></div>
+            <div className="text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-[#8A8D96]">Referee</span><strong className="text-white font-medium">{pm.officials?.referee || "Michael Oliver"}</strong></div>
+              <div className="flex justify-between"><span className="text-[#8A8D96]">VAR</span><span className="text-white/85">{pm.officials?.var || "Stuart Attwell"}</span></div>
+              <div className="flex justify-between"><span className="text-[#8A8D96]">Cards per game</span><span className="font-mono text-[#F4BA5B] tabular-nums">{pm.officials?.cardsPerGame || "3.8"}</span></div>
+              <div className="flex justify-between"><span className="text-[#8A8D96]">Penalties per game</span><span className="font-mono text-white/85 tabular-nums">{pm.officials?.pensPerGame || "0.21"}</span></div>
             </div>
           </Card>
 
           <Card icon={CloudRain} title="Conditions at kick-off">
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-black font-mono text-white">{weather.tempC}°C</span>
-              <span className="text-[11px] text-white/70">{weather.summary}</span>
+              <span className="font-display text-2xl font-light font-mono text-white tabular-nums">{weather.tempC}°C</span>
+              <span className="text-xs text-[#B7BAC3]">{weather.summary}</span>
             </div>
-            <div className="text-[11px] text-white/60">
-              Rain {weather.rainPct}% • Wind {weather.windKmh} km/h
+            <div className="text-xs text-[#8A8D96] tabular-nums">
+              Rain {weather.rainPct}% · Wind {weather.windKmh} km/h
             </div>
-            <div className="text-[11px] text-white/60">
-              {pm.pitch || `${venueName} • Hybrid grass`} • <span className="text-white/85">{pm.attendance || `${venueCapacity} • Capacity`}</span>
+            <div className="text-xs text-[#8A8D96]">
+              {pm.pitch || `${venueName} · Hybrid grass`} · <span className="text-white/85">{pm.attendance || `${venueCapacity} · Capacity`}</span>
             </div>
-            <p className="text-[9px] text-white/35">{weather.source}</p>
+            <p className="text-[10px] text-[#6F727C]">{weather.source}</p>
           </Card>
         </div>
       )}
 
       {/* Matchday schedule timeline */}
-      <div className="apple-tile rounded-xl border border-white/[0.06] p-3 transition-all duration-300">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]">
+      <div className="glass-tile p-4 transition-all duration-300">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <span className="text-xs font-medium text-white">
             {venueName} Matchday Schedule
             {!confirmed && (
-              <span className="normal-case tracking-normal text-white/80 ml-2 font-medium">
+              <span className="text-[#8A8D96] ml-2 font-normal tabular-nums">
                 Line-ups in {Math.floor(lineupsInMins / 60)}h {lineupsInMins % 60}m
               </span>
             )}
@@ -604,16 +597,16 @@ export default function PreMatchPanel({
             <button
               type="button"
               onClick={onResetPreview}
-              className="text-[10px] px-2.5 py-0.5 rounded-full border border-[#FF2636]/40 bg-[#FF2636]/15 text-white font-semibold cursor-pointer hover:bg-[#FF2636]/25 transition flex items-center gap-1.5"
+              className="text-[11px] px-3 py-1 rounded-full border border-[#D2F865]/35 bg-[#D2F865]/12 text-[#D2F865] font-medium cursor-pointer hover:bg-[#D2F865]/22 transition-colors flex items-center gap-1.5"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
-              Previewing {currentPhaseDetails.label} • Return to live clock
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D2F865]" />
+              Previewing {currentPhaseDetails.label} · Return to live clock
             </button>
           ) : (
-            <span className="text-[10px] text-white/40">Select a stage below to preview schedule details</span>
+            <span className="text-[11px] text-[#6F727C]">Select a stage below to preview schedule details</span>
           )}
         </div>
-        <ol className="grid grid-cols-5 gap-1.5">
+        <ol className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {dynamicPhases.slice(1).map((step) => {
             const done = countdownSeconds < step.at;
             const current = phase.id === step.id;
@@ -623,42 +616,42 @@ export default function PreMatchPanel({
                   type="button"
                   onClick={() => onPreviewPhase(step.at)}
                   aria-current={current ? "step" : undefined}
-                  className={`w-full text-left cursor-pointer group p-1.5 rounded-lg transition-all ${
+                  className={`w-full text-left cursor-pointer group p-2 rounded-xl transition-all ${
                     current
-                      ? "bg-white/[0.08] ring-1 ring-[#FF2636]/50 shadow-sm"
+                      ? "bg-[#D2F865]/[0.08] ring-1 ring-[#D2F865]/40"
                       : "hover:bg-white/[0.04]"
                   }`}
                 >
                   <div
-                    className={`h-1 rounded-full mb-1.5 transition-all ${
+                    className={`h-1 rounded-full mb-2 transition-all ${
                       current
-                        ? "bg-[#FF2636] shadow-[0_0_10px_#FF2636]"
+                        ? "bg-[#D2F865] shadow-[0_0_10px_rgba(210,248,101,0.55)]"
                         : done
-                        ? "bg-white/60"
+                        ? "bg-white/50"
                         : "bg-white/10 group-hover:bg-white/25"
                     }`}
                   />
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {done && !current ? (
-                      <Check className="w-3 h-3 text-white/80 shrink-0" />
+                      <Check className="w-3 h-3 text-[#D2F865] shrink-0" />
                     ) : (
                       <span
                         className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                          current ? "bg-[#FF2636] animate-pulse" : "bg-white/25"
+                          current ? "bg-[#D2F865]" : "bg-white/25"
                         }`}
                       />
                     )}
                     <span
-                      className={`font-mono text-[11px] font-bold ${
-                        current ? "text-white" : done ? "text-white/45" : "text-white/80"
+                      className={`font-mono text-xs font-semibold tabular-nums ${
+                        current ? "text-[#D2F865]" : done ? "text-white/50" : "text-white/85"
                       }`}
                     >
                       {step.clock}
                     </span>
                   </div>
                   <span
-                    className={`block text-[10px] leading-tight mt-0.5 font-medium truncate ${
-                      current ? "text-white font-semibold" : done ? "text-white/40" : "text-white/60"
+                    className={`block text-[11px] leading-tight mt-0.5 font-medium truncate ${
+                      current ? "text-white" : done ? "text-[#6F727C]" : "text-[#8A8D96]"
                     }`}
                   >
                     {step.label}
@@ -671,39 +664,39 @@ export default function PreMatchPanel({
 
         {/* Selected Stage Detail Card */}
         {currentPhaseDetails && currentPhaseDetails.id !== "BUILD_UP" && (
-          <div className="mt-3 pt-3 border-t border-white/[0.08] rounded-lg bg-black/30 p-3 ring-1 ring-white/[0.05] animate-fadeIn">
+          <div className="mt-3 pt-3 border-t border-white/[0.07] rounded-xl bg-[#0D0E11]/70 p-3.5 border border-white/[0.06]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#FF2636]/20 text-[#FF4D5A] border border-[#FF2636]/30">
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#D2F865] text-[#0E100C] tabular-nums">
                   {currentPhaseDetails.clock || "LIVE"}
                 </span>
-                <span className="text-xs font-bold text-white tracking-tight">
+                <span className="text-xs font-semibold text-white tracking-tight">
                   {currentPhaseDetails.headline}
                 </span>
               </div>
-              <span className="text-[10px] font-medium text-white/50">
+              <span className="text-[11px] font-medium text-[#8A8D96]">
                 {isPreviewing ? "Stage Simulation Active" : "Upcoming Milestone"}
               </span>
             </div>
 
-            <p className="text-[11px] text-white/75 mt-1.5 leading-relaxed">
+            <p className="text-xs text-[#B7BAC3] mt-2 leading-relaxed">
               {currentPhaseDetails.summary}
             </p>
 
             {currentPhaseDetails.details && currentPhaseDetails.details.length > 0 && (
               <ul className="mt-2.5 space-y-1.5">
                 {currentPhaseDetails.details.map((detail, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-[10px] text-white/65">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636]/80 mt-1 shrink-0" />
+                  <li key={idx} className="flex items-start gap-2 text-xs text-[#8A8D96]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D2F865]/80 mt-1.5 shrink-0" />
                     <span>{detail}</span>
                   </li>
                 ))}
               </ul>
             )}
 
-            <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
-              <div className="text-[10px] text-white/40 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+              <div className="text-[11px] text-[#8A8D96] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D2F865]" />
                 <span>
                   Tactical sync:{" "}
                   {["LINEUPS", "WARMUPS", "TUNNEL", "KICKOFF"].includes(currentPhaseDetails.id)
@@ -720,7 +713,7 @@ export default function PreMatchPanel({
                       if (el) el.scrollIntoView({ behavior: "smooth" });
                     }
                   }}
-                  className="text-[10px] px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-white font-medium transition cursor-pointer border border-white/15"
+                  className="text-[11px] px-3 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-white font-medium transition-colors cursor-pointer border border-white/[0.10]"
                 >
                   {currentPhaseDetails.actionLabel}
                 </button>

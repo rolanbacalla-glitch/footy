@@ -30,7 +30,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       probability: 38,
       shotQualityXg: 0.28,
       role: "Primary Aerial Target",
-      colour: "#FF2636",
+      colour: "#D2F865",
     },
     {
       player: `${secondaryAerial.name} (#${secondaryAerial.number})`,
@@ -39,7 +39,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       probability: 29,
       shotQualityXg: 0.22,
       role: "Second-Ball Attacker",
-      colour: "#E5E5EA",
+      colour: "#8BA3F5",
     },
     {
       player: `${poacher.name} (#${poacher.number})`,
@@ -48,7 +48,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       probability: 21,
       shotQualityXg: 0.35,
       role: "Far-Post Poacher",
-      colour: "#C7C7CC",
+      colour: "#F4BA5B",
     },
     {
       player: `${edgeCreator.name} (#${edgeCreator.number})`,
@@ -57,7 +57,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       probability: 12,
       shotQualityXg: 0.14,
       role: "Cutback Volley & Recirculation",
-      colour: "#8E8E93",
+      colour: "#8A8D96",
     },
   ];
 
@@ -67,77 +67,74 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       aria-modal="true"
       aria-labelledby="tacticai-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md animate-fade-in"
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-2xl apple-card rounded-[24px] border border-white/15 p-5 sm:p-6 bg-[#0E0F12]/95 shadow-2xl max-h-[92vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/[0.08] pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#E31B23]/15 border border-[#E31B23]/30 flex items-center justify-center text-[#FF2636]">
+      <div
+        className="relative w-full max-w-2xl glass-card-deep p-5 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/[0.08] pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#D2F865]/15 border border-[#D2F865]/30 flex items-center justify-center text-[#D2F865]">
               <CornerDownRight className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 id="tacticai-title" className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  {club.name} Set-Piece Dynamics
-                </h2>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/20 uppercase tracking-wider">
-                  DeepMind TacticAI Engine
-                </span>
-              </div>
-              <p className="text-xs text-[#8E8E93] mt-0.5">
-                Predictive Corner Trajectory &amp; Receiver Distribution • {homeTeam} vs {awayTeam}
+              <h2 id="tacticai-title" className="font-display text-base sm:text-lg font-semibold text-white tracking-tight">
+                {club.name} Set-Piece Dynamics
+              </h2>
+              <p className="text-xs text-[#8A8D96] mt-0.5">
+                Predictive Corner Trajectory · {homeTeam} vs {awayTeam}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="w-8 h-8 rounded-full bg-white/10 border border-white/10 text-white/70 hover:text-white hover:bg-white/20 flex items-center justify-center cursor-pointer transition-colors"
+            className="w-8 h-8 rounded-full bg-white/[0.06] text-[#8A8D96] hover:text-white hover:bg-white/[0.12] flex items-center justify-center cursor-pointer transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Corner Selection Controls */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="apple-tile p-1.5 rounded-xl flex items-center justify-between">
-            <span className="text-[11px] text-[#8E8E93] font-medium pl-2">Delivery Side</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+          <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
+            <span className="text-xs text-[#8A8D96] pl-3">Delivery Side</span>
             <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => setActiveSide("left")}
-                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                   activeSide === "left"
-                    ? "bg-[#FF2636] text-white shadow-sm"
-                    : "text-white/60 hover:text-white"
+                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
+                    : "text-[#8A8D96] hover:text-white"
                 }`}
               >
-                Left Corner
+                Left
               </button>
               <button
                 type="button"
                 onClick={() => setActiveSide("right")}
-                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                   activeSide === "right"
-                    ? "bg-[#FF2636] text-white shadow-sm"
-                    : "text-white/60 hover:text-white"
+                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
+                    : "text-[#8A8D96] hover:text-white"
                 }`}
               >
-                Right Corner
+                Right
               </button>
             </div>
           </div>
 
-          <div className="apple-tile p-1.5 rounded-xl flex items-center justify-between">
-            <span className="text-[11px] text-[#8E8E93] font-medium pl-2">Trajectory</span>
+          <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
+            <span className="text-xs text-[#8A8D96] pl-3">Trajectory</span>
             <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => setDeliveryType("inswinger")}
-                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                   deliveryType === "inswinger"
-                    ? "bg-white text-black shadow-sm font-bold"
-                    : "text-white/60 hover:text-white"
+                    ? "bg-white text-[#0E100C] font-semibold"
+                    : "text-[#8A8D96] hover:text-white"
                 }`}
               >
                 Inswinger
@@ -145,10 +142,10 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
               <button
                 type="button"
                 onClick={() => setDeliveryType("outswinger")}
-                className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
                   deliveryType === "outswinger"
-                    ? "bg-white text-black shadow-sm font-bold"
-                    : "text-white/60 hover:text-white"
+                    ? "bg-white text-[#0E100C] font-semibold"
+                    : "text-[#8A8D96] hover:text-white"
                 }`}
               >
                 Outswinger
@@ -203,39 +200,39 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
             )}
 
             {/* Dynamic Player Target Hotspots */}
-            <g className="animate-pulse">
-              <circle cx="138" cy="128" r="9" fill="#FF2636" fillOpacity="0.4" />
-              <circle cx="138" cy="128" r="4.5" fill="#FF2636" stroke="#FFFFFF" strokeWidth="1" />
+            <g>
+              <circle cx="138" cy="128" r="9" fill="#D2F865" fillOpacity="0.32" />
+              <circle cx="138" cy="128" r="4.5" fill="#D2F865" stroke="#0E100C" strokeWidth="1" />
               <text x="138" y="120" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
                 {receiverProbabilities[0].shortLabel}
               </text>
 
-              <circle cx="160" cy="105" r="8" fill="#FFFFFF" fillOpacity="0.25" />
-              <circle cx="160" cy="105" r="4" fill="#FFFFFF" stroke="#8E8E93" strokeWidth="1" />
+              <circle cx="160" cy="105" r="8" fill="#8BA3F5" fillOpacity="0.28" />
+              <circle cx="160" cy="105" r="4" fill="#8BA3F5" stroke="#0E100C" strokeWidth="1" />
               <text x="160" y="98" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
                 {receiverProbabilities[1].shortLabel}
               </text>
 
-              <circle cx="184" cy="130" r="7.5" fill="#C7C7CC" fillOpacity="0.25" />
-              <circle cx="184" cy="130" r="4" fill="#C7C7CC" stroke="#8E8E93" strokeWidth="1" />
+              <circle cx="184" cy="130" r="7.5" fill="#F4BA5B" fillOpacity="0.28" />
+              <circle cx="184" cy="130" r="4" fill="#F4BA5B" stroke="#0E100C" strokeWidth="1" />
               <text x="184" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold">
                 {receiverProbabilities[2].shortLabel}
               </text>
             </g>
           </svg>
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] text-white/80 border border-white/10 font-mono">
-            {activeSide === "left" ? "Left Corner Delivery" : "Right Corner Delivery"} • {deliveryType.toUpperCase()}
+          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[10px] text-white/80 border border-white/10 font-mono">
+            {activeSide === "left" ? "Left Corner" : "Right Corner"} · {deliveryType}
           </div>
         </div>
 
-        {/* TacticAI Receiver Probabilities Leaderboard */}
+        {/* Receiver Probabilities Leaderboard */}
         <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-white/80">
+          <div className="flex items-center justify-between text-xs font-medium text-white/80">
             <span className="flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-[#FF2636]" />
+              <Target className="w-3.5 h-3.5 text-[#D2F865]" />
               Receiver First-Contact Probability Model
             </span>
-            <span className="text-[10px] text-[#8E8E93]">TacticAI Geometric GNN</span>
+            <span className="text-[11px] text-[#8A8D96]">Geometric GNN</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

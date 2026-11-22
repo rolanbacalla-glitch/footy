@@ -1,26 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
-import {
-  Trophy,
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-  TrendingUp,
-  Shield,
-  Activity,
-  ArrowUpRight,
-} from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
 
 export default function StandingsTable({ selectedClubId = "364", onSelectClub }) {
   const [standings, setStandings] = useState([]);
-  const [source, setSource] = useState("Connecting to live feed...");
-  const [isLive, setIsLive] = useState(false);
+  const [source, setSource] = useState("Live Premier League Feed");
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [zoneFilter, setZoneFilter] = useState("all"); // "all" | "europe" | "relegation"
+  const [search, setSearch] = useState("");
 
   const fetchStandings = useCallback(() => {
     setIsLoading(true);
@@ -30,7 +20,6 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
         if (data && data.standings) {
           setStandings(data.standings);
           setSource(data.source || "Live Standings Feed");
-          setIsLive(Boolean(data.isLive));
           setLastUpdated(data.lastUpdated);
         }
       })
@@ -58,224 +47,249 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
     };
   }, [fetchStandings]);
 
-  const displayedRows = isExpanded ? standings : standings.slice(0, 6);
-  const selectedTeamInfo = PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
-  const currentClubRank = standings.find((t) => String(t.id) === String(selectedClubId))?.rank || null;
+  const selectedTeamInfo =
+    PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
+  const selectedRow = standings.find((t) => String(t.id) === String(selectedClubId));
+
+  const filteredRows = standings.filter((team) => {
+    if (zoneFilter === "europe" && team.rank > 6) return false;
+    if (zoneFilter === "relegation" && team.rank < 15) return false;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      return (
+        team.name?.toLowerCase().includes(q) ||
+        team.manager?.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   return (
-    <div className="apple-tile rounded-2xl border border-white/[0.08] p-4 bg-[#0B0E14] text-white">
-      {/* Table Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/[0.06]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#E31B23]/15 border border-[#E31B23]/30 flex items-center justify-center">
-            <Trophy className="w-4 h-4 text-[#FF2636]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold tracking-tight text-white">
-                Premier League Live Standings
-              </h3>
-              {currentClubRank && (
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#FF2636]/20 text-[#FF4D5A] border border-[#FF2636]/30">
-                  {selectedTeamInfo.shortName} Pos: #{currentClubRank}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mt-0.5 text-[10px] text-white/50">
-              <span className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${isLive ? "bg-emerald-400" : "bg-amber-400"}`} />
-                {source}
+    <section
+      aria-label="Premier League standings"
+      className="glass-card-deep p-5 sm:p-6 space-y-5"
+    >
+      {/* Top Bar: Clean Title, Filters & Search */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/[0.06]">
+        <div>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <h2 className="font-display text-lg font-semibold text-white tracking-tight">
+              2026/27 Premier League Table
+            </h2>
+            {selectedRow && (
+              <span className="text-xs font-mono text-[#D2F865] tabular-nums">
+                {selectedTeamInfo.shortName} #{selectedRow.rank} · {selectedRow.points} pts
               </span>
-              <span>•</span>
-              <span>2026/27 Official Season</span>
-            </div>
+            )}
           </div>
+          <p className="text-xs text-[#8A8D96] mt-1">
+            {source}
+            {lastUpdated && (
+              <>
+                <span aria-hidden="true" className="mx-2 text-white/20">
+                  ·
+                </span>
+                <span className="font-mono tabular-nums">
+                  Updated{" "}
+                  {new Date(lastUpdated).toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </>
+            )}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Segmented Zone Filter */}
+          <div className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5">
+            {[
+              { id: "all", label: "All 20" },
+              { id: "europe", label: "Top 6" },
+              { id: "relegation", label: "Bottom 6" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setZoneFilter(tab.id)}
+                className={`min-h-[32px] px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                  zoneFilter === tab.id
+                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
+                    : "text-[#8A8D96] hover:text-white"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-[#8A8D96] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter club…"
+              className="h-9 pl-8 pr-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-white placeholder:text-[#5E616B] focus:outline-none focus:border-[#D2F865]/50 w-40"
+            />
+          </div>
+
           <button
             type="button"
             onClick={fetchStandings}
             disabled={isLoading}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition cursor-pointer disabled:opacity-50"
-            title="Refresh live table"
-            aria-label="Refresh live table"
+            aria-label="Refresh league standings"
+            className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[#D4D6DC] flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#FF2636]" : ""}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white transition flex items-center gap-1 cursor-pointer border border-white/10"
-          >
-            {isExpanded ? (
-              <>
-                <span>Top 6 View</span>
-                <ChevronUp className="w-3.5 h-3.5" />
-              </>
-            ) : (
-              <>
-                <span>Full 20 Teams</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </>
-            )}
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#D2F865]" : ""}`}
+            />
           </button>
         </div>
       </div>
 
-      {/* Qualification Line Legend */}
-      <div className="flex flex-wrap items-center gap-3 py-2 text-[10px] text-white/40 border-b border-white/[0.04]">
-        <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-blue-500" />
-          <span>Champions League (1-4)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-500" />
-          <span>Europa League (5)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Conference League (6)</span>
-        </div>
-        {isExpanded && (
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span>Relegation Zone (18-20)</span>
-          </div>
-        )}
-      </div>
-
-      {/* Standings Table Grid */}
-      <div className="overflow-x-auto mt-2">
-        <table className="w-full text-left border-collapse text-xs">
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06] text-[10px] font-semibold text-[#8E8E93] uppercase tracking-wider">
-              <th className="py-2 pl-2 w-8 text-center">Pos</th>
-              <th className="py-2 pl-2">Club &amp; Head Coach</th>
-              <th className="py-2 text-center w-10">P</th>
-              <th className="py-2 text-center w-8">W</th>
-              <th className="py-2 text-center w-8">D</th>
-              <th className="py-2 text-center w-8">L</th>
-              <th className="py-2 text-center w-12 font-mono">GD</th>
-              <th className="py-2 text-center w-12 font-mono font-bold text-white">PTS</th>
+            <tr className="border-b border-white/[0.06] text-[11px] font-medium text-[#8A8D96]">
+              <th className="py-3 pl-3 pr-2 w-12 text-center">Pos</th>
+              <th className="py-3 px-3">Club &amp; Head Coach</th>
+              <th className="py-3 px-2 text-right font-mono w-14">P</th>
+              <th className="py-3 px-2 text-right font-mono w-14">W</th>
+              <th className="py-3 px-2 text-right font-mono w-14">D</th>
+              <th className="py-3 px-2 text-right font-mono w-14">L</th>
+              <th className="py-3 px-2 text-right font-mono w-16">GD</th>
+              <th className="py-3 pl-2 pr-4 text-right font-mono text-white w-16">Pts</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
-            {displayedRows.map((team) => {
-              const rank = team.rank;
-              const isUcl = rank <= 4;
-              const isUel = rank === 5;
-              const isUecl = rank === 6;
-              const isRelegation = rank >= 18;
-              const isCurrentSelected = String(team.id) === String(selectedClubId);
-
-              return (
-                <tr
-                  key={team.id || team.name}
-                  onClick={() => {
-                    if (onSelectClub && team.id) {
-                      onSelectClub(String(team.id));
-                    }
-                  }}
-                  className={`transition-colors cursor-pointer ${
-                    isCurrentSelected
-                      ? "bg-[#FF2636]/15 font-semibold text-white shadow-inner"
-                      : "hover:bg-white/[0.04] text-white/85"
-                  }`}
-                >
-                  {/* Position with qualification badge stripe */}
-                  <td className="py-2.5 pl-2 text-center font-mono font-bold text-xs relative">
-                    <span
-                      className={`inline-block w-1 h-3.5 rounded-full absolute left-0.5 top-3 ${
-                        isUcl
-                          ? "bg-blue-500"
-                          : isUel
-                          ? "bg-amber-500"
-                          : isUecl
-                          ? "bg-emerald-500"
-                          : isRelegation
-                          ? "bg-rose-500"
-                          : "bg-transparent"
-                      }`}
-                    />
-                    {team.rank}
+            {isLoading && standings.length === 0 ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <tr key={`skel-${idx}`} className="animate-pulse">
+                  <td colSpan={8} className="py-3.5 px-3">
+                    <div className="h-4 bg-white/[0.05] rounded-lg w-full" />
                   </td>
+                </tr>
+              ))
+            ) : (
+              filteredRows.map((team) => {
+                const rank = team.rank;
+                const isSelected = String(team.id) === String(selectedClubId);
+                const zoneLabel =
+                  rank <= 4
+                    ? "UCL"
+                    : rank === 5
+                    ? "UEL"
+                    : rank === 6
+                    ? "UECL"
+                    : rank >= 18
+                    ? "REL"
+                    : null;
 
-                  {/* Club Name & Head Coach */}
-                  <td className="py-2.5 pl-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs ${isCurrentSelected ? "font-bold text-white" : "font-medium"}`}>
+                return (
+                  <tr
+                    key={team.id || team.name}
+                    onClick={() => onSelectClub && team.id && onSelectClub(String(team.id))}
+                    className={`transition-colors cursor-pointer ${
+                      isSelected
+                        ? "bg-[#D2F865]/[0.08] text-white"
+                        : "hover:bg-white/[0.03] text-[#D4D6DC]"
+                    }`}
+                  >
+                    <td className="py-3 pl-3 pr-2 text-center font-mono tabular-nums text-xs font-semibold">
+                      <span
+                        className={
+                          isSelected
+                            ? "text-[#D2F865]"
+                            : rank <= 4
+                            ? "text-[#8BA3F5]"
+                            : rank >= 18
+                            ? "text-[#F26E7C]"
+                            : "text-[#8A8D96]"
+                        }
+                      >
+                        {team.rank}
+                      </span>
+                    </td>
+
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className={`text-sm ${
+                            isSelected ? "font-semibold text-white" : "font-medium text-white/90"
+                          }`}
+                        >
                           {team.name}
                         </span>
-                        {isCurrentSelected && (
-                          <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-[#FF2636] text-white">
-                            Selected
+                        {zoneLabel && (
+                          <span className="text-[10px] font-mono text-[#6F727C]">
+                            {zoneLabel}
                           </span>
                         )}
                       </div>
                       {team.manager && (
-                        <div className="text-[10px] text-white/50 flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[#8E8E93]">{team.manager}</span>
+                        <div className="text-[11px] text-[#8A8D96] mt-0.5">
+                          {team.manager}
                           {team.formation && (
-                            <>
-                              <span>•</span>
-                              <span className="font-mono text-white/40">{team.formation}</span>
-                            </>
+                            <span className="font-mono text-[#6F727C]">
+                              {" "}
+                              · {team.formation}
+                            </span>
                           )}
                         </div>
                       )}
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Played, Won, Drawn, Lost */}
-                  <td className="py-2.5 text-center font-mono tabular-nums text-white/70">
-                    {team.played}
-                  </td>
-                  <td className="py-2.5 text-center font-mono tabular-nums text-emerald-400">
-                    {team.wins}
-                  </td>
-                  <td className="py-2.5 text-center font-mono tabular-nums text-white/50">
-                    {team.draws}
-                  </td>
-                  <td className="py-2.5 text-center font-mono tabular-nums text-rose-400/80">
-                    {team.losses}
-                  </td>
-
-                  {/* Goal Difference */}
-                  <td
-                    className={`py-2.5 text-center font-mono tabular-nums font-semibold ${
-                      team.goalDiff > 0
-                        ? "text-emerald-400"
-                        : team.goalDiff < 0
-                        ? "text-rose-400"
-                        : "text-white/40"
-                    }`}
-                  >
-                    {team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}
-                  </td>
-
-                  {/* Points */}
-                  <td className="py-2.5 text-center font-mono tabular-nums font-bold text-sm text-white">
-                    {team.points}
-                  </td>
-                </tr>
-              );
-            })}
+                    <td className="py-3 px-2 text-right font-mono tabular-nums text-xs text-[#8A8D96]">
+                      {team.played}
+                    </td>
+                    <td className="py-3 px-2 text-right font-mono tabular-nums text-xs text-[#A7E87A]">
+                      {team.wins}
+                    </td>
+                    <td className="py-3 px-2 text-right font-mono tabular-nums text-xs text-[#8A8D96]">
+                      {team.draws}
+                    </td>
+                    <td className="py-3 px-2 text-right font-mono tabular-nums text-xs text-[#F2858E]">
+                      {team.losses}
+                    </td>
+                    <td
+                      className={`py-3 px-2 text-right font-mono tabular-nums text-xs font-medium ${
+                        team.goalDiff > 0
+                          ? "text-[#A7E87A]"
+                          : team.goalDiff < 0
+                          ? "text-[#F2858E]"
+                          : "text-[#8A8D96]"
+                      }`}
+                    >
+                      {team.goalDiff > 0 ? `+${team.goalDiff}` : team.goalDiff}
+                    </td>
+                    <td className="py-3 pl-2 pr-4 text-right font-mono tabular-nums text-sm font-semibold text-white">
+                      {team.points}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Table Footer Insight / Navigation Link */}
-      <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-white/40">
-        <span>Click any row to switch active tactical intelligence</span>
-        {lastUpdated && (
-          <span className="font-mono text-[10px]">
-            Updated: {new Date(lastUpdated).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        )}
+      {/* Quiet Legend & Guidance */}
+      <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2 text-xs text-[#8A8D96]">
+        <span>Select any club row to switch active tactical intelligence</span>
+        <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-[#6F727C]">
+          <span>UCL 1–4</span>
+          <span>·</span>
+          <span>UEL 5</span>
+          <span>·</span>
+          <span>UECL 6</span>
+          <span>·</span>
+          <span>REL 18–20</span>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

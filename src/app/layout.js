@@ -1,9 +1,24 @@
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const appleSans = Inter({
-  variable: "--font-apple-sans",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -25,13 +40,16 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000",
+  themeColor: "#141518",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en-GB" className={`dark ${appleSans.variable}`}>
-      <body className="bg-[#000000] text-[#F5F5F7] antialiased selection:bg-[#FF453A]/35 selection:text-white">
+    <html
+      lang="en-GB"
+      className={`dark ${plusJakarta.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="bg-[#141518] text-[#F2F3F5] antialiased selection:bg-[#D2F865]/30 selection:text-[#D2F865]">
         {children}
       </body>
     </html>

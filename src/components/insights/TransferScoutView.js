@@ -1,26 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter, Sliders, ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
-// 6 Attributes for Liverpool Recruitment Radar
 export const RADAR_AXES = [
-  { key: "goalThreat", label: "Goal Threat (xG / Sh)" },
-  { key: "progCarries", label: "Progressive Carries" },
-  { key: "creativePassing", label: "Creative Passing (xA)" },
-  { key: "pressingIntensity", label: "Counter-Pressing (PAdj)" },
-  { key: "defInterceptions", label: "Defensive Interceptions" },
-  { key: "aerialDominance", label: "Aerial Win Rate %" },
+  { key: "goalThreat", label: "Goal Threat" },
+  { key: "progCarries", label: "Prog. Carries" },
+  { key: "creativePassing", label: "Creative Passing" },
+  { key: "pressingIntensity", label: "Counter-Press" },
+  { key: "defInterceptions", label: "Interceptions" },
+  { key: "aerialDominance", label: "Aerial Win %" },
 ];
 
-// Candidates and LFC Benchmarks (Current 2026/27 Squad under Head Coach Andoni Iraola)
 export const PROFILE_POOL = [
-  // Current Liverpool 2026/27 Squad Benchmarks
   {
     id: "wirtz",
     name: "Florian Wirtz (#7)",
     club: "Liverpool FC",
-    role: "LFC Record Signing • Playmaker / No.10",
+    role: "Playmaker / No.10",
     age: 23,
     marketVal: "£116m",
     pressing: 8.8,
@@ -39,7 +36,7 @@ export const PROFILE_POOL = [
     id: "isak",
     name: "Alexander Isak (#9)",
     club: "Liverpool FC",
-    role: "LFC Marquee Striker • Complete No.9",
+    role: "Complete No.9",
     age: 27,
     marketVal: "£125m",
     pressing: 8.4,
@@ -58,7 +55,7 @@ export const PROFILE_POOL = [
     id: "gravenberch",
     name: "Ryan Gravenberch (#38)",
     club: "Liverpool FC",
-    role: "LFC No.6 / Double Pivot Controller",
+    role: "Double Pivot Controller",
     age: 24,
     marketVal: "£85m",
     pressing: 9.1,
@@ -77,7 +74,7 @@ export const PROFILE_POOL = [
     id: "szoboszlai",
     name: "Dominik Szoboszlai (#8)",
     club: "Liverpool FC",
-    role: "LFC High-Press Attacking Midfielder",
+    role: "High-Press Attacking Mid",
     age: 26,
     marketVal: "£85m",
     pressing: 9.4,
@@ -96,7 +93,7 @@ export const PROFILE_POOL = [
     id: "frimpong",
     name: "Jeremie Frimpong (#30)",
     club: "Liverpool FC",
-    role: "LFC Dynamic Right Wing-Back",
+    role: "Right Wing-Back",
     age: 25,
     marketVal: "£55m",
     pressing: 8.7,
@@ -115,7 +112,7 @@ export const PROFILE_POOL = [
     id: "kerkez",
     name: "Milos Kerkez (#6)",
     club: "Liverpool FC",
-    role: "LFC High-Intensity Left-Back",
+    role: "High-Intensity Left-Back",
     age: 23,
     marketVal: "£50m",
     pressing: 9.1,
@@ -134,7 +131,7 @@ export const PROFILE_POOL = [
     id: "barcola",
     name: "Bradley Barcola (#29)",
     club: "Liverpool FC",
-    role: "LFC Marquee Winger (£123m Summer 2026 Signing)",
+    role: "Wide Forward",
     age: 24,
     marketVal: "£123m",
     pressing: 8.9,
@@ -153,7 +150,7 @@ export const PROFILE_POOL = [
     id: "jacquet",
     name: "Jérémy Jacquet (#5)",
     club: "Liverpool FC",
-    role: "LFC Ball-Playing Centre-Back (£60m Summer 2026 Signing)",
+    role: "Ball-Playing Centre-Back",
     age: 21,
     marketVal: "£60m",
     pressing: 8.7,
@@ -168,13 +165,11 @@ export const PROFILE_POOL = [
     },
     profileType: "benchmark",
   },
-
-  // Active 2026/27 External Transfer Targets (Iraola / Hughes Watchlist)
   {
     id: "wharton",
     name: "Adam Wharton",
     club: "Crystal Palace",
-    role: "Deep-Lying Playmaker / Press-Resistant No.6",
+    role: "Deep-Lying Playmaker / No.6",
     age: 22,
     marketVal: "£75m",
     pressing: 8.9,
@@ -194,7 +189,7 @@ export const PROFILE_POOL = [
     id: "baleba",
     name: "Carlos Baleba",
     club: "Brighton & Hove Albion",
-    role: "Ball-Winning Destroyer / Carrier",
+    role: "Ball-Winning Carrier",
     age: 22,
     marketVal: "£70m",
     pressing: 9.4,
@@ -214,7 +209,7 @@ export const PROFILE_POOL = [
     id: "semenyo",
     name: "Antoine Semenyo",
     club: "AFC Bournemouth",
-    role: "Two-Footed Direct Winger (Iraola System)",
+    role: "Two-Footed Direct Winger",
     age: 26,
     marketVal: "£55m",
     pressing: 8.8,
@@ -234,7 +229,7 @@ export const PROFILE_POOL = [
     id: "larsson",
     name: "Hugo Larsson",
     club: "Eintracht Frankfurt",
-    role: "Box-to-Box Tactical Engine",
+    role: "Box-to-Box Midfielder",
     age: 22,
     marketVal: "£48m",
     pressing: 9.2,
@@ -254,7 +249,7 @@ export const PROFILE_POOL = [
     id: "kudus",
     name: "Mohammed Kudus",
     club: "West Ham United",
-    role: "Inverted Right Winger / 1v1 Ball Carrier",
+    role: "Inverted Right Winger",
     age: 26,
     marketVal: "£75m",
     pressing: 8.1,
@@ -275,26 +270,25 @@ export const PROFILE_POOL = [
 export default function TransferScoutView({ selectedClub, activeMatch }) {
   const clubName = selectedClub?.name || activeMatch?.clubName || "Liverpool";
   const clubShort = selectedClub?.shortName || activeMatch?.clubShort || "LIV";
-  const managerName = selectedClub?.manager || activeMatch?.selectedManager || "Andoni Iraola";
+  const managerName =
+    selectedClub?.manager || activeMatch?.selectedManager || "Andoni Iraola";
   const isLfc = String(selectedClub?.id || "364") === "364";
 
-  // Build dynamic benchmark list for the currently selected club from its real starting XI
   const dynamicBenchmarks = React.useMemo(() => {
-    if (isLfc) {
-      return PROFILE_POOL.filter((p) => p.profileType === "benchmark");
-    }
+    if (isLfc) return PROFILE_POOL.filter((p) => p.profileType === "benchmark");
     const xi = activeMatch?.startingXI || [];
     return xi.slice(1).map((p, idx) => ({
       id: String(p.id),
       name: `${p.name} (#${p.number})`,
       club: clubName,
-      role: `${clubShort} First-Team Starter • ${p.pos}`,
+      role: `${clubShort} Starter · ${p.pos}`,
       age: 24 + (idx % 4),
       marketVal: `£${55 + (idx % 5) * 10}m`,
       pressing: Number((8.5 + (idx % 4) * 0.25).toFixed(1)),
       progPasses: Number((7.8 + (idx % 5) * 0.3).toFixed(1)),
       stats: {
-        goalThreat: p.pos === "ST" || p.pos === "RW" || p.pos === "LW" ? 89 : 64,
+        goalThreat:
+          p.pos === "ST" || p.pos === "RW" || p.pos === "LW" ? 89 : 64,
         progCarries: 88 + (idx % 8),
         creativePassing: 84 + (idx % 10),
         pressingIntensity: 87 + (idx % 7),
@@ -306,34 +300,42 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
   }, [isLfc, activeMatch?.startingXI, clubName, clubShort]);
 
   const targetList = React.useMemo(
-    () => PROFILE_POOL.filter((p) => p.profileType === "target" && p.club.toLowerCase() !== clubName.toLowerCase()),
+    () =>
+      PROFILE_POOL.filter(
+        (p) =>
+          p.profileType === "target" &&
+          p.club.toLowerCase() !== clubName.toLowerCase()
+      ),
     [clubName]
   );
 
   const [targetId, setTargetId] = useState("wharton");
   const [benchmarkId, setBenchmarkId] = useState("gravenberch");
-
-  // Interactive Recruitment Sliders
   const [minPressing, setMinPressing] = useState(7.5);
   const [maxAge, setMaxAge] = useState(26);
   const [minProgPasses, setMinProgPasses] = useState(7.0);
 
   const targetPlayer =
-    targetList.find((p) => p.id === targetId) || targetList[0] || PROFILE_POOL[8];
+    targetList.find((p) => p.id === targetId) ||
+    targetList[0] ||
+    PROFILE_POOL[8];
   const benchmarkPlayer =
-    dynamicBenchmarks.find((p) => p.id === benchmarkId) || dynamicBenchmarks[0] || PROFILE_POOL[0];
+    dynamicBenchmarks.find((p) => p.id === benchmarkId) ||
+    dynamicBenchmarks[0] ||
+    PROFILE_POOL[0];
 
   const centreX = 150;
   const centreY = 150;
-  const maxR = 105;
+  const maxR = 104;
   const totalAxes = RADAR_AXES.length;
 
   const getCoordinates = (value, index) => {
     const angle = ((Math.PI * 2) / totalAxes) * index - Math.PI / 2;
     const r = (value / 100) * maxR;
-    const x = centreX + r * Math.cos(angle);
-    const y = centreY + r * Math.sin(angle);
-    return { x, y, angle };
+    return {
+      x: centreX + r * Math.cos(angle),
+      y: centreY + r * Math.sin(angle),
+    };
   };
 
   const targetPoints = RADAR_AXES.map((axis, i) =>
@@ -344,7 +346,9 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
   );
 
   const targetPolygon = targetPoints.map((p) => `${p.x},${p.y}`).join(" ");
-  const benchmarkPolygon = benchmarkPoints.map((p) => `${p.x},${p.y}`).join(" ");
+  const benchmarkPolygon = benchmarkPoints
+    .map((p) => `${p.x},${p.y}`)
+    .join(" ");
 
   const filteredCandidates = targetList.filter(
     (p) =>
@@ -354,82 +358,87 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
   );
 
   return (
-    <div className="w-full min-h-0 flex-1 flex flex-col lg:flex-row gap-4 overflow-y-auto pr-0.5">
-      {/* 2/3 Left Column: Dual Comparison & 6-Axis Radar Canvas */}
-      <div className="flex-1 lg:w-2/3 space-y-3.5 min-w-0">
-        {/* Dropdown Selector Header */}
-        <div className="apple-card shrink-0 rounded-[20px] p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="w-full sm:w-1/2">
+    <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+      {/* Left 8 Cols: Comparison Selectors & 6-Axis Radar */}
+      <div className="xl:col-span-8 space-y-5 min-w-0">
+        <div className="glass-card p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
             <label
               htmlFor="select-scout-target"
-              className="text-[11px] font-semibold text-[#00DAC3] block mb-1.5"
+              className="text-xs font-medium text-[#D2F865] block mb-2"
             >
-              Active Scout Target (Mint Polygon)
+              Scout Target
             </label>
             <div className="relative">
               <select
                 id="select-scout-target"
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
-                className="w-full min-h-[42px] bg-[var(--apple-bg-tertiary)] text-white text-xs font-semibold py-2.5 pl-3.5 pr-9 rounded-xl border border-white/10 appearance-none focus:outline-none focus:border-[#00D2B4] cursor-pointer transition-colors hover:bg-[var(--apple-bg-quaternary)]"
+                className="w-full min-h-[44px] bg-[#14151A] text-white text-xs font-medium py-2.5 pl-4 pr-9 rounded-full border border-white/[0.09] appearance-none focus:outline-none focus:border-[#D2F865]/60 cursor-pointer"
               >
                 {targetList.map((p) => (
-                  <option key={p.id} value={p.id} className="bg-[var(--apple-bg-elevated)] text-white">
-                    {p.name} ({p.club} • Age {p.age})
+                  <option key={p.id} value={p.id} className="bg-[#14151A]">
+                    {p.name} ({p.club} · Age {p.age})
                   </option>
                 ))}
               </select>
-              <ChevronDown className="w-4 h-4 text-[#EBEBF5]/65 absolute right-3 top-3 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-[#8A8D96] absolute right-3.5 top-3.5 pointer-events-none" />
             </div>
           </div>
 
-          <div className="w-full sm:w-1/2">
+          <div>
             <label
-              htmlFor="select-lfc-benchmark"
-              className="text-[11px] font-semibold text-[#FF453A] block mb-1.5"
+              htmlFor="select-club-benchmark"
+              className="text-xs font-medium text-[#8BA3F5] block mb-2"
             >
-              Current {clubShort} Benchmark (Crimson Polygon)
+              {clubShort} Squad Benchmark
             </label>
             <div className="relative">
               <select
-                id="select-lfc-benchmark"
+                id="select-club-benchmark"
                 value={benchmarkPlayer?.id || ""}
                 onChange={(e) => setBenchmarkId(e.target.value)}
-                className="w-full min-h-[42px] bg-[var(--apple-bg-tertiary)] text-white text-xs font-semibold py-2.5 pl-3.5 pr-9 rounded-xl border border-white/10 appearance-none focus:outline-none focus:border-[#E63946] cursor-pointer transition-colors hover:bg-[var(--apple-bg-quaternary)]"
+                className="w-full min-h-[44px] bg-[#14151A] text-white text-xs font-medium py-2.5 pl-4 pr-9 rounded-full border border-white/[0.09] appearance-none focus:outline-none focus:border-[#8BA3F5]/60 cursor-pointer"
               >
-                {dynamicBenchmarks.map(
-                  (p) => (
-                    <option key={p.id} value={p.id} className="bg-[var(--apple-bg-elevated)] text-white">
-                      {p.name} ({p.role})
-                    </option>
-                  )
-                )}
+                {dynamicBenchmarks.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-[#14151A]">
+                    {p.name} ({p.role})
+                  </option>
+                ))}
               </select>
-              <ChevronDown className="w-4 h-4 text-[#EBEBF5]/65 absolute right-3 top-3 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-[#8A8D96] absolute right-3.5 top-3.5 pointer-events-none" />
             </div>
           </div>
         </div>
 
-        {/* Radar Graphic Canvas */}
-        <div className="apple-card rounded-[20px] p-4 flex-1 flex flex-col items-center justify-center relative min-h-[360px]">
-          <div className="w-full flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#FFD60A]" strokeWidth={2} />
-              <span className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-                6-Axis Tactical Percentile Radar Matrix
+        {/* Radar Visualisation Card */}
+        <div className="glass-card-deep p-6 flex flex-col items-center">
+          <div className="w-full flex items-center justify-between gap-2 pb-4 border-b border-white/[0.06] mb-4">
+            <div>
+              <h2 className="font-display text-base font-semibold text-white">
+                6-Axis Tactical Percentile Radar
+              </h2>
+              <p className="text-xs text-[#8A8D96] mt-0.5">
+                Head-to-head profile overlay (0–100 percentile scale)
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="flex items-center gap-1.5 text-white">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#D2F865]" />
+                {targetPlayer.name}
+              </span>
+              <span className="flex items-center gap-1.5 text-[#B7BAC3]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#637AE0]" />
+                {benchmarkPlayer.name.split(" (")[0]}
               </span>
             </div>
-            <span className="text-[11px] text-[#EBEBF5]/60 hidden sm:inline">
-              Percentile Scale (0–100)
-            </span>
           </div>
 
-          {/* Inline SVG Radar Wheel */}
           <svg
             role="img"
-            aria-label={`Six-axis recruitment comparison radar between ${targetPlayer.name} and ${benchmarkPlayer.name}`}
+            aria-label={`Six-axis recruitment comparison between ${targetPlayer.name} and ${benchmarkPlayer.name}`}
             viewBox="0 0 300 300"
-            className="w-full max-w-[420px] max-h-[370px]"
+            className="w-full max-w-[380px] max-h-[340px]"
           >
             {[20, 40, 60, 80, 100].map((level) => (
               <polygon
@@ -439,7 +448,7 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
                   return `${p.x},${p.y}`;
                 }).join(" ")}
                 fill="none"
-                stroke="rgba(235,235,245,0.14)"
+                stroke="rgba(255,255,255,0.09)"
                 strokeWidth="0.9"
                 strokeDasharray={level === 60 ? "2.5, 2.5" : undefined}
               />
@@ -454,53 +463,52 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
                   y1={centreY}
                   x2={p.x}
                   y2={p.y}
-                  stroke="rgba(235,235,245,0.12)"
+                  stroke="rgba(255,255,255,0.08)"
                   strokeWidth="0.9"
                 />
               );
             })}
 
-            {/* Benchmark Polygon (Apple Dark Red) */}
+            {/* Benchmark Polygon (Indigo Slate) */}
             <polygon
               points={benchmarkPolygon}
-              fill="#FF453A"
+              fill="#637AE0"
               fillOpacity="0.22"
-              stroke="#FF453A"
-              strokeWidth="2"
+              stroke="#8BA3F5"
+              strokeWidth="1.8"
             />
             {benchmarkPoints.map((p, i) => (
               <circle
                 key={i}
                 cx={p.x}
                 cy={p.y}
-                r="3.1"
-                fill="#FF453A"
-                stroke="#121212"
+                r="2.8"
+                fill="#8BA3F5"
+                stroke="#0B0C0F"
                 strokeWidth="1"
               />
             ))}
 
-            {/* Target Polygon (Apple Dark Mint) */}
+            {/* Target Polygon (Electric Lime) */}
             <polygon
               points={targetPolygon}
-              fill="#00DAC3"
-              fillOpacity="0.26"
-              stroke="#00DAC3"
-              strokeWidth="2.2"
+              fill="#D2F865"
+              fillOpacity="0.24"
+              stroke="#D2F865"
+              strokeWidth="2.1"
             />
             {targetPoints.map((p, i) => (
               <circle
                 key={i}
                 cx={p.x}
                 cy={p.y}
-                r="3.4"
-                fill="#00DAC3"
-                stroke="#121212"
+                r="3.2"
+                fill="#D2F865"
+                stroke="#0B0C0F"
                 strokeWidth="1"
               />
             ))}
 
-            {/* Axis Labels */}
             {RADAR_AXES.map((axis, i) => {
               const p = getCoordinates(118, i);
               return (
@@ -509,9 +517,9 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
                   x={p.x}
                   y={p.y + 3}
                   textAnchor="middle"
-                  fill="#F5F5F7"
+                  fill="#B7BAC3"
                   fontSize="7.4"
-                  fontWeight="600"
+                  fontWeight="500"
                   className="select-none"
                 >
                   {axis.label}
@@ -520,55 +528,32 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
             })}
           </svg>
 
-          {/* Bottom Legend */}
-          <div className="flex flex-wrap items-center justify-center gap-5 text-xs mt-1">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00DAC3]" />
-              <span className="font-semibold text-white">
-                {targetPlayer.name}{" "}
-                <span className="text-[#EBEBF5]/60 font-normal">(Target)</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF453A]" />
-              <span className="font-semibold text-white">
-                {benchmarkPlayer.name}{" "}
-                <span className="text-[#EBEBF5]/60 font-normal">({clubShort} Squad)</span>
-              </span>
-            </div>
-          </div>
-
-          {/* 6-Axis Head-to-Head Attribute Delta Grid */}
-          <div className="w-full mt-4 pt-3.5 border-t border-white/[0.08] grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {/* Attribute Delta Grid */}
+          <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-3 gap-3">
             {RADAR_AXES.map((axis) => {
               const targetVal = targetPlayer.stats[axis.key];
               const benchVal = benchmarkPlayer.stats[axis.key];
               const delta = targetVal - benchVal;
               return (
-                <div
-                  key={axis.key}
-                  className="apple-tile px-3 py-2.5 rounded-[14px] flex flex-col justify-between"
-                >
-                  <span className="text-[11px] text-[#EBEBF5]/68 font-medium truncate">
+                <div key={axis.key} className="glass-tile px-3.5 py-3">
+                  <div className="text-[11px] text-[#8A8D96] truncate">
                     {axis.label}
-                  </span>
+                  </div>
                   <div className="flex items-baseline justify-between mt-1.5">
-                    <div className="text-xs font-mono tabular-nums">
-                      <span className="text-[#00DAC3] font-semibold">
+                    <span className="font-mono text-xs tabular-nums">
+                      <span className="text-[#D2F865] font-semibold">
                         {targetVal}
                       </span>
-                      <span className="text-[#EBEBF5]/45 mx-1">vs</span>
-                      <span className="text-[#FF453A] font-semibold">
-                        {benchVal}
-                      </span>
-                    </div>
+                      <span className="text-white/30 mx-1">/</span>
+                      <span className="text-[#8BA3F5]">{benchVal}</span>
+                    </span>
                     <span
-                      className={`text-[10px] font-mono tabular-nums font-semibold px-2 py-0.5 rounded-full ${
+                      className={`font-mono text-[11px] font-medium tabular-nums ${
                         delta > 0
-                          ? "bg-[#30D158]/16 text-[#30D158]"
+                          ? "text-[#A7E87A]"
                           : delta < 0
-                            ? "bg-[#FF453A]/16 text-[#FF6961]"
-                            : "bg-white/10 text-[#EBEBF5]/70"
+                          ? "text-[#F2858E]"
+                          : "text-[#8A8D96]"
                       }`}
                     >
                       {delta > 0 ? `+${delta}` : delta}
@@ -581,24 +566,20 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
         </div>
       </div>
 
-      {/* 1/3 Right Column: Edwards/Hughes Tactical Sliders & Filtered Shortlist */}
-      <div className="lg:w-1/3 space-y-3.5 min-w-0">
-        {/* Tactical Trait Sliders */}
-        <div className="apple-card rounded-[20px] p-4">
-          <div className="flex items-center gap-2 mb-3.5">
-            <Sliders className="w-4 h-4 text-[#FF453A]" strokeWidth={2} />
-            <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-              {clubShort} Recruitment Filters
-            </h3>
-          </div>
+      {/* Right 4 Cols: Recruitment Filters & Qualified Shortlist */}
+      <div className="xl:col-span-4 space-y-5">
+        <div className="glass-card p-5 space-y-4">
+          <h3 className="font-display text-sm font-semibold text-white">
+            {clubShort} Recruitment Filters
+          </h3>
 
           <div className="space-y-4 text-xs">
             <div>
-              <div className="flex justify-between font-medium mb-2">
-                <label htmlFor="slider-pressing" className="text-[#EBEBF5]/75">
-                  Counter-Pressing Rate (PAdj)
+              <div className="flex justify-between mb-2">
+                <label htmlFor="slider-pressing" className="text-[#B7BAC3]">
+                  Counter-Pressing (PAdj)
                 </label>
-                <span className="text-[#00DAC3] font-mono tabular-nums font-semibold">
+                <span className="font-mono text-[#D2F865] tabular-nums">
                   &gt; {minPressing.toFixed(1)}/90
                 </span>
               </div>
@@ -615,11 +596,11 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
             </div>
 
             <div>
-              <div className="flex justify-between font-medium mb-2">
-                <label htmlFor="slider-max-age" className="text-[#EBEBF5]/75">
-                  Max Age Ceiling (FSG Profile)
+              <div className="flex justify-between mb-2">
+                <label htmlFor="slider-max-age" className="text-[#B7BAC3]">
+                  Max Age Ceiling
                 </label>
-                <span className="text-[#FFD60A] font-mono tabular-nums font-semibold">
+                <span className="font-mono text-white tabular-nums">
                   &le; {maxAge} yrs
                 </span>
               </div>
@@ -636,11 +617,11 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
             </div>
 
             <div>
-              <div className="flex justify-between font-medium mb-2">
-                <label htmlFor="slider-prog-passes" className="text-[#EBEBF5]/75">
-                  Prog. Passes / 90
+              <div className="flex justify-between mb-2">
+                <label htmlFor="slider-prog-passes" className="text-[#B7BAC3]">
+                  Progressive Passes / 90
                 </label>
-                <span className="text-[#00DAC3] font-mono tabular-nums font-semibold">
+                <span className="font-mono text-[#D2F865] tabular-nums">
                   &gt; {minProgPasses.toFixed(1)}
                 </span>
               </div>
@@ -658,24 +639,20 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
           </div>
         </div>
 
-        {/* Filtered Shortlist Table */}
-        <div className="apple-card rounded-[20px] p-4 flex-1 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#00DAC3]" strokeWidth={2} />
-              <h3 className="text-[13px] font-semibold text-white tracking-[-0.01em]">
-                Qualified Targets ({filteredCandidates.length})
-              </h3>
-            </div>
-            <span className="text-[11px] text-[#EBEBF5]/60">
-              {managerName} System Fit
+        <div className="glass-card p-5 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-sm font-semibold text-white">
+              Shortlist ({filteredCandidates.length})
+            </h3>
+            <span className="text-[11px] text-[#8A8D96]">
+              {managerName} profile
             </span>
           </div>
 
-          <div className="space-y-2 overflow-y-auto flex-1">
+          <div className="space-y-2.5">
             {filteredCandidates.length === 0 ? (
-              <div className="apple-tile p-6 rounded-[14px] text-center text-xs text-[#EBEBF5]/68">
-                No scouted targets meet these pressing thresholds. Try easing the sliders.
+              <div className="glass-tile p-5 text-center text-xs text-[#8A8D96]">
+                No candidates match these thresholds. Ease the sliders above.
               </div>
             ) : (
               filteredCandidates.map((candidate) => {
@@ -686,34 +663,28 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
                     key={candidate.id}
                     onClick={() => setTargetId(candidate.id)}
                     aria-pressed={isSelected}
-                    className={`w-full text-left p-3 rounded-[14px] pressable border cursor-pointer ${
+                    className={`w-full text-left p-3.5 rounded-[18px] border transition-all cursor-pointer ${
                       isSelected
-                        ? "apple-tile border-[#00D2B4]/80 shadow-[inset_0_1px_1px_rgba(0,210,180,0.3),0_4px_16px_rgba(0,210,180,0.15)]"
-                        : "apple-tile border-white/[0.08] hover:border-white/20"
+                        ? "bg-[#22261D]/90 border-[#D2F865]/45"
+                        : "glass-tile hover:border-white/15"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-xs font-semibold text-white">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium text-white">
                         {candidate.name}
                       </span>
-                      <span className="text-[10px] font-mono tabular-nums font-semibold text-[#FFD60A] bg-[#FFD60A]/12 px-2 py-0.5 rounded-full border border-[#FFD60A]/25 shrink-0">
-                        {candidate.fitScore}% {clubShort} Fit
+                      <span className="font-mono text-xs font-semibold text-[#D2F865] tabular-nums">
+                        {candidate.fitScore}% fit
                       </span>
                     </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-[#EBEBF5]/68 mb-1.5">
+                    <div className="flex items-center justify-between text-xs text-[#8A8D96] mt-1">
                       <span>{candidate.club}</span>
-                      <span className="text-white font-mono tabular-nums font-semibold">
+                      <span className="font-mono text-white tabular-nums">
                         {candidate.marketVal}
                       </span>
                     </div>
-
-                    <div className="flex items-center gap-2 text-[10px] text-[#00DAC3] font-mono tabular-nums">
-                      <span>Press {candidate.pressing}/90</span>
-                      <span className="text-[#EBEBF5]/35">•</span>
-                      <span>Prog {candidate.progPasses}/90</span>
-                      <span className="text-[#EBEBF5]/35">•</span>
-                      <span>Age {candidate.age}</span>
+                    <div className="text-[11px] font-mono text-[#6F727C] mt-1.5 tabular-nums">
+                      Press {candidate.pressing}/90 · Prog {candidate.progPasses}/90 · Age {candidate.age}
                     </div>
                   </button>
                 );

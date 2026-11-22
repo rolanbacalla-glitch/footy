@@ -304,8 +304,8 @@ function renderRadar(radarData = []) {
 
       <polygon
         points={pointsString}
-        fill="rgba(255, 38, 54, 0.28)"
-        stroke="#FF2636"
+        fill="rgba(210, 248, 101, 0.24)"
+        stroke="#D2F865"
         strokeWidth="1.6"
         className="transition-all duration-300"
       />
@@ -319,7 +319,7 @@ function renderRadar(radarData = []) {
             cy={y}
             r="2.5"
             fill="#FFFFFF"
-            stroke="#FF2636"
+            stroke="#D2F865"
             strokeWidth="1.2"
           />
         );
@@ -333,9 +333,9 @@ function renderRadar(radarData = []) {
             x={x}
             y={y + 3}
             textAnchor="middle"
-            fill="#8E8E93"
+            fill="#8A8D96"
             fontSize="7"
-            fontWeight="600"
+            fontWeight="500"
             className="tracking-tight select-none"
           >
             {item.axis}
@@ -432,24 +432,20 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
     >
       {/* Native App Slide-Over Sheet: Slide in from right (100% -> 0) */}
       <div
-        className={`relative w-full max-w-md h-full bg-[#0D1117] border-l border-white/[0.1] shadow-2xl overflow-y-auto p-5 flex flex-col justify-between ${
+        className={`relative w-full max-w-md h-full bg-[#111216]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl overflow-y-auto p-6 flex flex-col justify-between ${
           isClosing ? "animate-slide-out-right" : "animate-slide-in-right"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div>
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#FF2636] animate-pulse" />
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#8E8E93]">
-                Tactical Player Dossier
-              </span>
-            </div>
+          <div className="flex items-center justify-between pb-4 border-b border-white/[0.07]">
+            <span className="text-xs font-medium text-[#8A8D96]">
+              Player Dossier · 2026/27 Season
+            </span>
             <button
               type="button"
               onClick={handleClose}
-              className="p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-[#8A8D96] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Close dossier"
             >
               <X className="w-4 h-4" />
@@ -457,111 +453,95 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
           </div>
 
           <div>
-            {/* Live Data Attribution Tag */}
-            <div className="mt-2.5 flex items-center justify-between text-[10px] px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06]">
-              <span className="flex items-center gap-1.5 text-white/60">
-                <span className={`w-1.5 h-1.5 rounded-full ${liveData?.isLive ? "bg-emerald-400" : "bg-amber-400"}`} />
-                {liveData?.isLive ? "Live ESPN Verified Athlete Feed" : "Tactical Model Benchmark"}
-              </span>
-              <span className="font-mono text-white/40">2026/27 Season</span>
-            </div>
-
-            {/* Player Hero Section */}
-            <div className="mt-3 flex items-start justify-between gap-3">
+            <div className="mt-4 flex items-start justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-black font-mono text-[#FF2636]">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-mono text-lg font-semibold text-[#D2F865] tabular-nums">
                     #{player.number}
                   </span>
-                  <h3 className="text-lg font-bold text-white tracking-tight">
+                  <h3 className="font-display text-lg font-semibold text-white tracking-tight">
                     {profile.fullName}
                   </h3>
                 </div>
-                <p className="text-xs font-semibold text-[#8E8E93] mt-0.5">
-                  {profile.role} • <span className="text-white/80">{player.pos}</span>
+                <p className="text-xs text-[#8A8D96] mt-0.5">
+                  {profile.role} · <span className="text-[#D4D6DC]">{player.pos}</span>
                 </p>
               </div>
 
-              <div className="flex flex-col items-end">
-                <span className="text-[10px] text-[#8E8E93] uppercase tracking-wider font-semibold">
-                  Fitness Index
-                </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <HeartPulse className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="font-mono font-bold text-sm text-white">
+              <div className="text-right shrink-0">
+                <span className="text-[11px] text-[#8A8D96] block">Fitness</span>
+                <div className="flex items-center justify-end gap-1 mt-0.5">
+                  <HeartPulse className="w-3.5 h-3.5 text-[#D2F865]" />
+                  <span className="font-mono font-semibold text-sm text-white tabular-nums">
                     {profile.fitness}%
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Tactical Instructions */}
-            <div className="apple-tile rounded-xl border border-white/[0.08] p-3.5 mt-4 bg-white/[0.02]">
-              <div className="flex items-center gap-2 text-xs font-semibold text-white/90">
-                <Zap className="w-3.5 h-3.5 text-[#FF2636]" />
-                <span>Head Coach Tactical Instruction</span>
+            <div className="glass-tile p-4 mt-5">
+              <div className="flex items-center gap-2 text-xs font-medium text-white">
+                <Zap className="w-3.5 h-3.5 text-[#D2F865]" />
+                <span>Tactical Instruction</span>
               </div>
-              <p className="text-xs text-white/70 mt-1.5 leading-relaxed">
+              <p className="text-xs text-[#B7BAC3] mt-1.5 leading-relaxed">
                 {profile.instructions}
               </p>
             </div>
 
-            {/* Radar */}
-            <div className="mt-5 apple-tile rounded-xl border border-white/[0.08] p-4 text-center bg-white/[0.01]">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-2">
-                Per-90 Tactical Profile (FBref Model vs League)
+            <div className="mt-4 glass-tile p-4 text-center">
+              <span className="text-[11px] text-[#8A8D96] block mb-2">
+                Per-90 Tactical Profile · {liveData?.isLive ? "Live ESPN Synced" : "Benchmark Model"}
               </span>
               {renderRadar(profile.radar)}
             </div>
 
-            {/* KPIs */}
-            <div className="mt-4 space-y-2.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block">
+            <div className="mt-5 space-y-2">
+              <span className="text-xs font-medium text-[#8A8D96] block">
                 Key Performance Indicators
               </span>
               {profile.metrics.map((m, idx) => (
                 <div
                   key={idx}
-                  className="apple-tile rounded-lg border border-white/[0.06] p-2.5 flex items-center justify-between"
+                  className="glass-tile px-3.5 py-2.5 flex items-center justify-between"
                 >
                   <div>
-                    <span className="text-xs text-white/80 font-medium block">
+                    <span className="text-xs text-white font-medium block">
                       {m.label}
                     </span>
-                    <span className="text-[10px] text-[#8E8E93]">
+                    <span className="text-[11px] text-[#8A8D96]">
                       {m.benchmark}
                     </span>
                   </div>
-                  <span className="font-mono font-bold text-sm text-white">
+                  <span className="font-mono font-semibold text-sm text-[#D2F865] tabular-nums">
                     {m.value}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Workload */}
             <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+              <div className="glass-tile p-2.5">
+                <span className="text-[10px] text-[#8A8D96] block">
                   {displayStarts ? `${displayStarts} Starts` : "Minutes"}
                 </span>
-                <span className="font-mono font-bold text-xs text-white mt-0.5 block">
+                <span className="font-mono font-semibold text-xs text-white mt-0.5 block tabular-nums">
                   {displayMinutes}&apos;
                 </span>
               </div>
-              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+              <div className="glass-tile p-2.5">
+                <span className="text-[10px] text-[#8A8D96] block">
                   OBV Metric
                 </span>
-                <span className="font-mono font-bold text-xs text-emerald-400 mt-0.5 block">
+                <span className="font-mono font-semibold text-xs text-[#D2F865] mt-0.5 block tabular-nums">
                   +{(player.obv || 0.65).toFixed(2)}
                 </span>
               </div>
-              <div className="apple-tile rounded-lg border border-white/[0.06] p-2">
-                <span className="text-[9px] uppercase tracking-wider text-[#8E8E93] block">
+              <div className="glass-tile p-2.5">
+                <span className="text-[10px] text-[#8A8D96] block">
                   Discipline
                 </span>
-                <span className="font-mono font-bold text-xs text-white mt-0.5 block">
+                <span className="font-mono font-semibold text-xs text-white mt-0.5 block tabular-nums">
                   {displayYellows} {displayYellows === 1 ? "Caution" : "Cautions"}
                 </span>
               </div>
@@ -569,11 +549,11 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/[0.08] mt-6">
+        <div className="pt-4 border-t border-white/[0.07] mt-6">
           <button
             type="button"
             onClick={handleClose}
-            className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold tracking-tight transition cursor-pointer border border-white/15"
+            className="w-full py-2.5 rounded-full bg-white/[0.07] hover:bg-white/[0.12] text-white text-xs font-medium transition-colors cursor-pointer"
           >
             Return to Pitch Canvas
           </button>
