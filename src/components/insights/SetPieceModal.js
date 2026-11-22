@@ -70,7 +70,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl glass-card-deep p-5 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-2xl glass-card-deep p-5 sm:p-6 shadow-2xl max-h-[88dvh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 mb-4 border-b border-white/[0.08] pb-4">

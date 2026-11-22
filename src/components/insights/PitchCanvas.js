@@ -189,8 +189,8 @@ export default function PitchCanvas({
           </div>
         </div>
 
-        {/* Right: Contextual Overlay Switcher (Directly adjacent to Pitch Canvas) */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        {/* Right: Fixed 4-Tab Visualisation Switcher (Zero Layout Shift) */}
+        <div className="flex items-center shrink-0">
           <div
             role="tablist"
             aria-label="Visualisation mode"
@@ -206,9 +206,9 @@ export default function PitchCanvas({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setOverlayMode && setOverlayMode(m.id)}
-                  className={`min-h-[34px] px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  className={`min-h-[34px] px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                     isActive
-                      ? "bg-[#D2F865] text-[#0E100C] font-semibold shadow-sm"
+                      ? "bg-[#D2F865] text-[#0E100C] shadow-sm"
                       : "text-[#8A8D96] hover:text-white"
                   }`}
                 >
@@ -218,34 +218,6 @@ export default function PitchCanvas({
               );
             })}
           </div>
-
-          {overlayMode === "pass" && (
-            <button
-              type="button"
-              onClick={() => setShowChannels((prev) => !prev)}
-              aria-pressed={showChannels}
-              title="Toggle five tactical vertical corridors"
-              className={`min-h-[36px] px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 border transition-colors cursor-pointer whitespace-nowrap ${
-                showChannels
-                  ? "bg-white/10 text-white border-white/20"
-                  : "bg-transparent text-[#8A8D96] border-white/[0.08] hover:text-white"
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Corridors</span>
-            </button>
-          )}
-
-          {selectedPlayer && overlayMode !== "hub" && (
-            <button
-              type="button"
-              onClick={() => setSelectedPlayer(null)}
-              className="min-h-[36px] px-3 py-1.5 rounded-full text-xs font-semibold lime-pill flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Focus
-            </button>
-          )}
         </div>
       </div>
 
@@ -716,7 +688,7 @@ export default function PitchCanvas({
             </svg>
           </div>
 
-          {/* ─── Quiet Bottom Legend & Active Focus Readout ─── */}
+          {/* ─── Quiet Bottom Legend, Pitch Controls & Active Focus Readout ─── */}
           <div className="pt-3.5 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#8A8D96]">
             {overlayMode === "shots" ? (
               <div className="flex flex-wrap items-center gap-4">
@@ -734,45 +706,71 @@ export default function PitchCanvas({
                 </span>
               </div>
             ) : (
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                {overlayMode === "pass" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowChannels((prev) => !prev)}
+                    aria-pressed={showChannels}
+                    title="Toggle five tactical vertical corridors"
+                    className={`min-h-[30px] px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5 border transition-colors cursor-pointer whitespace-nowrap ${
+                      showChannels
+                        ? "bg-[#D2F865]/15 text-[#D2F865] border-[#D2F865]/35"
+                        : "bg-white/[0.03] text-[#9A9DA6] border-white/[0.09] hover:text-white hover:border-white/[0.16]"
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Corridors</span>
+                  </button>
+                )}
                 <span>Click any player node for full dossier</span>
-                <span aria-hidden="true" className="hidden sm:inline text-white/20">
+                <span aria-hidden="true" className="hidden md:inline text-white/20">
                   ·
                 </span>
-                <span>Node diameter reflects touch volume</span>
+                <span className="hidden md:inline">Node diameter reflects touch volume</span>
               </div>
             )}
 
-            {overlayMode === "shots" && activeShot ? (
-              <div className="flex items-center gap-2 text-xs text-white font-medium tabular-nums">
-                <span className="text-[#D2F865]">{activeShot.player}</span>
-                <span className="text-white/25">·</span>
-                <span className="font-mono">
-                  {(
-                    typeof activeShot.xG === "number"
-                      ? activeShot.xG
-                      : typeof activeShot.xg === "number"
-                      ? activeShot.xg
-                      : 0.15
-                  ).toFixed(2)}{" "}
-                  xG
-                </span>
-                <span className="text-white/25">·</span>
-                <span className="capitalize text-[#8A8D96]">{activeShot.outcome}</span>
-              </div>
-            ) : selectedPlayer ? (
-              <div className="flex items-center gap-2 text-xs text-white font-medium tabular-nums">
-                <span className="text-[#D2F865]">
-                  #{selectedPlayer.number} {selectedPlayer.name}
-                </span>
-                <span className="text-white/25">·</span>
-                <span className="font-mono">
-                  OBV +{(typeof selectedPlayer.obv === "number" ? selectedPlayer.obv : 0.42).toFixed(2)}
-                </span>
-                <span className="text-white/25">·</span>
-                <span>{selectedPlayer.touches} touches</span>
-              </div>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {overlayMode === "shots" && activeShot ? (
+                <div className="flex items-center gap-2 text-xs text-white font-medium tabular-nums">
+                  <span className="text-[#D2F865]">{activeShot.player}</span>
+                  <span className="text-white/25">·</span>
+                  <span className="font-mono">
+                    {(
+                      typeof activeShot.xG === "number"
+                        ? activeShot.xG
+                        : typeof activeShot.xg === "number"
+                        ? activeShot.xg
+                        : 0.15
+                    ).toFixed(2)}{" "}
+                    xG
+                  </span>
+                  <span className="text-white/25">·</span>
+                  <span className="capitalize text-[#8A8D96]">{activeShot.outcome}</span>
+                </div>
+              ) : selectedPlayer ? (
+                <div className="flex items-center gap-2 text-xs text-white font-medium tabular-nums">
+                  <span className="text-[#D2F865]">
+                    #{selectedPlayer.number} {selectedPlayer.name}
+                  </span>
+                  <span className="text-white/25">·</span>
+                  <span className="font-mono">
+                    OBV +{(typeof selectedPlayer.obv === "number" ? selectedPlayer.obv : 0.42).toFixed(2)}
+                  </span>
+                  <span className="text-white/25">·</span>
+                  <span>{selectedPlayer.touches} touches</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlayer(null)}
+                    className="ml-1 min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-white/[0.08] hover:bg-[#D2F865] text-white hover:text-[#0E100C] flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, X, Tv, MapPin, Clock, ArrowUpRight } from "lucide-react";
 
 export default function FixturesCalendarModal({
@@ -11,6 +11,20 @@ export default function FixturesCalendarModal({
   clubName = "Liverpool",
 }) {
   const [filter, setFilter] = useState("all");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -25,15 +39,15 @@ export default function FixturesCalendarModal({
       role="dialog"
       aria-modal="true"
       aria-label="Full season fixtures schedule"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="glass-card-deep relative w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+        className="glass-card-deep relative w-full max-w-2xl max-h-[85dvh] min-h-0 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-white/[0.07]">
+        <div className="shrink-0 flex items-center justify-between p-5 sm:p-6 border-b border-white/[0.07]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[#D2F865]/15 border border-[#D2F865]/30 flex items-center justify-center text-[#D2F865]">
               <Calendar className="w-4 h-4" />
@@ -59,7 +73,7 @@ export default function FixturesCalendarModal({
         </div>
 
         {/* Filter Bar */}
-        <div className="px-5 sm:px-6 py-3 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+        <div className="shrink-0 px-5 sm:px-6 py-3 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
           <div className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5">
             {[
               { id: "all", label: `All (${fixtures.length})` },
@@ -87,7 +101,7 @@ export default function FixturesCalendarModal({
         </div>
 
         {/* Fixtures List */}
-        <div className="overflow-y-auto p-5 sm:p-6 space-y-2.5 flex-1">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-2.5">
           {filteredFixtures.length === 0 ? (
             <div className="py-10 text-center text-sm text-[#8A8D96]">
               No fixtures found for this filter.
@@ -167,7 +181,7 @@ export default function FixturesCalendarModal({
         </div>
 
         {/* Footer */}
-        <div className="px-5 sm:px-6 py-4 border-t border-white/[0.07] flex items-center justify-between text-xs text-[#6F727C]">
+        <div className="shrink-0 px-5 sm:px-6 py-4 border-t border-white/[0.07] flex items-center justify-between text-xs text-[#6F727C]">
           <span>Fixture dates subject to UK broadcast scheduling</span>
           <button
             type="button"
