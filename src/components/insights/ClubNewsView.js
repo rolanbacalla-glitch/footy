@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { RefreshCw, ArrowUpRight, AlertCircle } from "lucide-react";
 import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
+import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 const REFRESH_INTERVAL_MS = 3 * 60 * 1000;
 
@@ -204,31 +205,14 @@ export default function ClubNewsView({ selectedClubId = "364" }) {
         {/* Streamlined Filter Toolbar */}
         <div className="glass-card p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div
-              role="tablist"
-              aria-label="Filter news by source"
-              className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5 overflow-x-auto max-w-full"
-            >
-              {FEED_TABS.map((tab) => {
-                const isActive = selectedFeed === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setSelectedFeed(tab.id)}
-                    className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-all ${
-                      isActive
-                        ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                        : "text-[#8A8D96] hover:text-white"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
+            <SlidingSegmentedTabs
+              tabs={FEED_TABS}
+              value={selectedFeed}
+              onChange={setSelectedFeed}
+              layoutId="news-feed-pill"
+              ariaLabel="Filter news by source"
+              size="md"
+            />
 
             <button
               type="button"
@@ -246,25 +230,15 @@ export default function ClubNewsView({ selectedClubId = "364" }) {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-              {TOPIC_FILTERS.map((topic) => {
-                const isSelected = selectedTopic === topic.id;
-                return (
-                  <button
-                    key={topic.id}
-                    type="button"
-                    onClick={() => setSelectedTopic(topic.id)}
-                    className={`min-h-[30px] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                      isSelected
-                        ? "bg-white/12 text-white"
-                        : "text-[#8A8D96] hover:text-white hover:bg-white/[0.04]"
-                    }`}
-                  >
-                    {topic.label}
-                  </button>
-                );
-              })}
-            </div>
+            <SlidingSegmentedTabs
+              tabs={TOPIC_FILTERS}
+              value={selectedTopic}
+              onChange={setSelectedTopic}
+              layoutId="news-topic-pill"
+              ariaLabel="Filter news by topic"
+              variant="glass"
+              size="sm"
+            />
 
             {payload?.fetchedAt && (
               <span className="text-xs text-[#6F727C] font-mono tabular-nums">

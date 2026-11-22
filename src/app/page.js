@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { MotionConfig } from "motion/react";
 import SidebarNav from "../components/insights/SidebarNav";
+import { SlidingTabPanel } from "../components/insights/SlidingSegmentedTabs";
 import WorkspaceHeader from "../components/insights/WorkspaceHeader";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import TacticalKpiDeck from "../components/insights/TacticalKpiDeck";
@@ -191,8 +193,15 @@ export default function FootballInsightsDashboard() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [activeTab]);
 
+  const [workspaceDir, setWorkspaceDir] = useState(1);
+
   const setActiveTab = (tabId) => {
     const valid = resolveTabName(tabId) || tabId;
+    const curIdx = VALID_TABS.indexOf(activeTab);
+    const nextIdx = VALID_TABS.indexOf(valid);
+    if (curIdx >= 0 && nextIdx >= 0 && curIdx !== nextIdx) {
+      setWorkspaceDir(nextIdx > curIdx ? 1 : -1);
+    }
     setActiveTabState(valid);
     try {
       localStorage.setItem("football_active_tab", valid);
@@ -363,6 +372,7 @@ export default function FootballInsightsDashboard() {
       : null;
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="relative min-h-screen w-full bg-[#141518] text-[#F2F3F5] overflow-x-hidden">
       {/* Subtle Ambient Liquid Glass Backlight Pools (Low-intensity, calm atmospheric depth) */}
       <div
@@ -392,6 +402,13 @@ export default function FootballInsightsDashboard() {
             setSelectedClubId={setSelectedClubId}
           />
 
+          {/* ═══ ACTIVE WORKSPACE PANEL (Apple HIG Directional Slide Transition) ═══ */}
+          <SlidingTabPanel
+            activeKey={activeTab}
+            direction={workspaceDir}
+            axis="y"
+            distance={12}
+          >
           {/* ═══ TAB 1: MATCH CENTRE (Clean 2-Column Analytical Canvas + Fixtures Timeline Rail) ═══ */}
           {activeTab === "boot-room" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
@@ -474,6 +491,7 @@ export default function FootballInsightsDashboard() {
               activeMatch={activeMatch}
             />
           )}
+          </SlidingTabPanel>
 
           {/* Quiet Utility Footer */}
           <Footer />
@@ -500,5 +518,6 @@ export default function FootballInsightsDashboard() {
         clubName={selectedClub.name}
       />
     </div>
+    </MotionConfig>
   );
 }

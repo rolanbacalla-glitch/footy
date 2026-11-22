@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
+import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 export default function StandingsTable({ selectedClubId = "364", onSelectClub }) {
   const [standings, setStandings] = useState([]);
@@ -102,27 +103,19 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Segmented Zone Filter */}
-          <div className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5">
-            {[
+          {/* Apple HIG Sliding Segmented Zone Filter */}
+          <SlidingSegmentedTabs
+            tabs={[
               { id: "all", label: "All 20" },
               { id: "europe", label: "Top 6" },
               { id: "relegation", label: "Bottom 6" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setZoneFilter(tab.id)}
-                className={`min-h-[32px] px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                  zoneFilter === tab.id
-                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+            ]}
+            value={zoneFilter}
+            onChange={setZoneFilter}
+            layoutId="standings-zone-pill"
+            ariaLabel="Filter table by league zone"
+            size="sm"
+          />
 
           {/* Search Input */}
           <div className="relative">

@@ -14,6 +14,7 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react";
+import { SlidingSegmentedTabs, SlidingTabPanel } from "./SlidingSegmentedTabs";
 
 const MATCHDAY_STEPS = [
   {
@@ -176,35 +177,18 @@ export default function FixturesTimelineRail({
       <div>
         {/* Top Bar */}
         <div className="flex items-center justify-between gap-2 pb-4 border-b border-white/[0.06]">
-          {/* Mode Switcher */}
-          <div className="inline-flex items-center p-1 rounded-full bg-[#1C1D22] border border-white/[0.07]">
-            <button
-              type="button"
-              onClick={() => setRailMode("fixtures")}
-              aria-pressed={railMode === "fixtures"}
-              title="Club fixtures timeline"
-              className={`h-7 px-3 rounded-full text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                railMode === "fixtures"
-                  ? "bg-[#D2F865] text-[#0E100C]"
-                  : "text-[#8A8D96] hover:text-white"
-              }`}
-            >
-              Fixtures
-            </button>
-            <button
-              type="button"
-              onClick={() => setRailMode("matchday")}
-              aria-pressed={railMode === "matchday"}
-              title="Matchday T-75 itinerary"
-              className={`h-7 px-3 rounded-full text-[11px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                railMode === "matchday"
-                  ? "bg-[#D2F865] text-[#0E100C]"
-                  : "text-[#8A8D96] hover:text-white"
-              }`}
-            >
-              Matchday
-            </button>
-          </div>
+          {/* Apple HIG Sliding Mode Switcher */}
+          <SlidingSegmentedTabs
+            tabs={[
+              { id: "fixtures", label: "Fixtures", title: "Club fixtures timeline" },
+              { id: "matchday", label: "Matchday", title: "Matchday T-75 itinerary" },
+            ]}
+            value={railMode}
+            onChange={setRailMode}
+            layoutId="rail-mode-pill"
+            ariaLabel="Schedule view mode"
+            size="xs"
+          />
 
           {/* Fixture Stepping */}
           <div className="flex items-center gap-1 text-xs text-white font-medium">
@@ -238,7 +222,13 @@ export default function FixturesTimelineRail({
           </button>
         </div>
 
-        {/* ─── Timeline Body ─── */}
+        {/* ─── Timeline Body (Directional Slide Transition) ─── */}
+        <SlidingTabPanel
+          activeKey={railMode}
+          direction={railMode === "matchday" ? 1 : -1}
+          axis="x"
+          distance={16}
+        >
         {railMode === "fixtures" ? (
           <div className="mt-4 space-y-4">
             {/* Only show external selection banner if user picked a match outside the visible window */}
@@ -524,6 +514,7 @@ export default function FixturesTimelineRail({
             })}
           </div>
         )}
+        </SlidingTabPanel>
       </div>
 
       {/* Bottom Footer + Signature Electric Lime Circular Floating Action Button */}

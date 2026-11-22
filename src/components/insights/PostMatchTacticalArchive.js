@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 export default function PostMatchTacticalArchive({ match, selectedClub }) {
   const [activeShot, setActiveShot] = useState(null);
@@ -102,27 +103,19 @@ export default function PostMatchTacticalArchive({ match, selectedClub }) {
           </p>
         </div>
 
-        <div className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5">
-          {[
+        <SlidingSegmentedTabs
+          tabs={[
             { id: "all", label: "All Shots" },
             { id: "goal", label: "Goals" },
             { id: "saved", label: "Saved" },
             { id: "missed", label: "Off Target" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setFilterOutcome(tab.id)}
-              className={`min-h-[30px] px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                filterOutcome === tab.id
-                  ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                  : "text-[#8A8D96] hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+          ]}
+          value={filterOutcome}
+          onChange={setFilterOutcome}
+          layoutId="archive-shots-pill"
+          ariaLabel="Filter shots by outcome"
+          size="sm"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">

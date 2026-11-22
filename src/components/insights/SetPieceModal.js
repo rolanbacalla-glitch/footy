@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, CornerDownRight, ShieldAlert, Target } from "lucide-react";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
+import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedClub }) {
   const [activeSide, setActiveSide] = useState("left"); // 'left' | 'right' corner
@@ -99,58 +100,33 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
           <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
             <span className="text-xs text-[#8A8D96] pl-3">Delivery Side</span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => setActiveSide("left")}
-                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                  activeSide === "left"
-                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                Left
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveSide("right")}
-                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                  activeSide === "right"
-                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                Right
-              </button>
-            </div>
+            <SlidingSegmentedTabs
+              tabs={[
+                { id: "left", label: "Left" },
+                { id: "right", label: "Right" },
+              ]}
+              value={activeSide}
+              onChange={setActiveSide}
+              layoutId="setpiece-side-pill"
+              ariaLabel="Corner delivery side"
+              size="xs"
+            />
           </div>
 
           <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
             <span className="text-xs text-[#8A8D96] pl-3">Trajectory</span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => setDeliveryType("inswinger")}
-                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                  deliveryType === "inswinger"
-                    ? "bg-white text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                Inswinger
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeliveryType("outswinger")}
-                className={`text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                  deliveryType === "outswinger"
-                    ? "bg-white text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                Outswinger
-              </button>
-            </div>
+            <SlidingSegmentedTabs
+              tabs={[
+                { id: "inswinger", label: "Inswinger" },
+                { id: "outswinger", label: "Outswinger" },
+              ]}
+              value={deliveryType}
+              onChange={setDeliveryType}
+              layoutId="setpiece-trajectory-pill"
+              ariaLabel="Corner ball trajectory"
+              variant="light"
+              size="xs"
+            />
           </div>
         </div>
 

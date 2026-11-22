@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   Activity,
   Trophy,
@@ -12,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import FootballLogo from "./FootballLogo";
+import { APPLE_SPRING } from "./SlidingSegmentedTabs";
 
 export const NAV_WORKSPACES = [
   { id: "boot-room", label: "Match Centre", icon: Activity },
@@ -28,6 +30,7 @@ export default function SidebarNav({
   onOpenCalendar,
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <>
@@ -46,7 +49,7 @@ export default function SidebarNav({
           <FootballLogo className="w-7 h-7" />
         </button>
 
-        {/* Middle Workspace Icon Stack */}
+        {/* Middle Workspace Icon Stack with Vertical Spring-Sliding Active Pill */}
         <nav className="flex flex-col items-center gap-2.5 w-full px-3">
           {NAV_WORKSPACES.map((item) => {
             const Icon = item.icon;
@@ -55,19 +58,30 @@ export default function SidebarNav({
               (item.id === "match-archives" && activeTab === "time-machine");
 
             return (
-              <button
+              <motion.button
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
                 title={item.label}
-                className={`group relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+                className={`group relative z-10 w-11 h-11 rounded-2xl flex items-center justify-center transition-colors duration-150 cursor-pointer ${
                   isActive
-                    ? "bg-[#D2F865] text-[#0E100C] shadow-[0_6px_20px_-4px_rgba(210,248,101,0.45)]"
+                    ? "text-[#0E100C]"
                     : "text-[#8A8D96] hover:text-white hover:bg-white/[0.06]"
                 }`}
               >
+                {isActive && (
+                  <motion.span
+                    layoutId="desktop-rail-active-pill"
+                    aria-hidden="true"
+                    transition={
+                      prefersReducedMotion ? { duration: 0.01 } : APPLE_SPRING
+                    }
+                    className="absolute inset-0 rounded-2xl -z-10 bg-[#D2F865] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_6px_20px_-4px_rgba(210,248,101,0.45)]"
+                  />
+                )}
                 <Icon className="w-[19px] h-[19px]" strokeWidth={isActive ? 2.2 : 1.8} />
 
                 {/* Clean hover tooltip */}
@@ -77,7 +91,7 @@ export default function SidebarNav({
                 >
                   {item.label}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
         </nav>

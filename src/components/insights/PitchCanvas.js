@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { RotateCcw, Layers, BarChart3, Flame, Crosshair, LayoutGrid } from "lucide-react";
 import PreMatchPanel, { getMatchdayPhase } from "./PreMatchPanel";
+import { SlidingSegmentedTabs, SlidingTabPanel } from "./SlidingSegmentedTabs";
 
 export default function PitchCanvas({
   activeMatch,
@@ -60,6 +61,7 @@ export default function PitchCanvas({
   const [hoveredLink, setHoveredLink] = useState(null);
   const [selectedShot, setSelectedShot] = useState(null);
   const [showChannels, setShowChannels] = useState(false);
+  const [slideDir, setSlideDir] = useState(1);
 
   const activePlayerId = selectedPlayer?.id || hoveredPlayer?.id || null;
 
@@ -189,39 +191,31 @@ export default function PitchCanvas({
           </div>
         </div>
 
-        {/* Right: Fixed 4-Tab Visualisation Switcher (Zero Layout Shift) */}
+        {/* Right: Fixed 4-Tab Apple HIG Sliding Segmented Switcher */}
         <div className="flex items-center shrink-0">
-          <div
-            role="tablist"
-            aria-label="Visualisation mode"
-            className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5 overflow-x-auto max-w-full"
-          >
-            {modes.map((m) => {
-              const Icon = m.icon;
-              const isActive = overlayMode === m.id;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setOverlayMode && setOverlayMode(m.id)}
-                  className={`min-h-[34px] px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                    isActive
-                      ? "bg-[#D2F865] text-[#0E100C] shadow-sm"
-                      : "text-[#8A8D96] hover:text-white"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-                  <span>{m.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <SlidingSegmentedTabs
+            tabs={modes}
+            value={overlayMode}
+            layoutId="pitch-mode-pill"
+            ariaLabel="Visualisation mode"
+            onChange={(nextId) => {
+              const curIdx = modes.findIndex((m) => m.id === overlayMode);
+              const nextIdx = modes.findIndex((m) => m.id === nextId);
+              if (nextIdx !== curIdx) setSlideDir(nextIdx > curIdx ? 1 : -1);
+              if (setOverlayMode) setOverlayMode(nextId);
+            }}
+          />
         </div>
       </div>
 
-      {/* ─── Mode Content: Match Hub OR Tactical Pitch SVG ─── */}
+      {/* ─── Mode Content: Directional Slide Between Pitch Modes & Match Hub ─── */}
+      <SlidingTabPanel
+        activeKey={overlayMode}
+        direction={slideDir}
+        axis="x"
+        distance={16}
+        className="flex-1 flex flex-col justify-between"
+      >
       {overlayMode === "hub" ? (
         <div className="pt-5">
           <PreMatchPanel
@@ -774,6 +768,7 @@ export default function PitchCanvas({
           </div>
         </>
       )}
+      </SlidingTabPanel>
     </section>
   );
 }

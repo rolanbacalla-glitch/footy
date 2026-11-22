@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Calendar, X, Tv, MapPin, Clock, ArrowUpRight } from "lucide-react";
+import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 export default function FixturesCalendarModal({
   isOpen,
@@ -74,26 +75,18 @@ export default function FixturesCalendarModal({
 
         {/* Filter Bar */}
         <div className="shrink-0 px-5 sm:px-6 py-3 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
-          <div className="glass-segmented inline-flex items-center p-1 rounded-full gap-0.5">
-            {[
+          <SlidingSegmentedTabs
+            tabs={[
               { id: "all", label: `All (${fixtures.length})` },
               { id: "home", label: "Home" },
               { id: "away", label: "Away" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setFilter(tab.id)}
-                className={`min-h-[30px] px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                  filter === tab.id
-                    ? "bg-[#D2F865] text-[#0E100C] font-semibold"
-                    : "text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+            ]}
+            value={filter}
+            onChange={setFilter}
+            layoutId="calendar-venue-pill"
+            ariaLabel="Filter fixtures by venue"
+            size="sm"
+          />
 
           <span className="text-[11px] text-[#6F727C] font-mono">
             All times UK (GMT)
