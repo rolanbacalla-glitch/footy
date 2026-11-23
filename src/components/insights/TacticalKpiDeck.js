@@ -140,7 +140,7 @@ export default function TacticalKpiDeck({
         {kpiCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.id} className="stacked-kpi-wrap">
+            <div key={card.id}>
               <div
                 className={`stacked-kpi-card ${card.washClass} p-5 flex flex-col justify-between min-h-[168px]`}
               >
