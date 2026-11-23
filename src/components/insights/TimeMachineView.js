@@ -204,8 +204,6 @@ export default function TimeMachineView({
   const isLfc = String(selectedClub?.id || "364") === "364";
 
   const archiveMatches = React.useMemo(() => {
-    if (isLfc) return HISTORIC_MATCHES;
-
     const xi = activeMatch?.startingXI || [];
     const p1 = xi[9] || {
       name: selectedClub?.captain || "Club Captain",
@@ -222,67 +220,75 @@ export default function TimeMachineView({
     const p4 = xi[5] || { name: `${clubShort} Pivot`, pos: "Central Mid" };
     const p5 = xi[0] || { name: `${clubShort} Keeper`, pos: "Goalkeeper" };
 
-    if (recentMatches && recentMatches.length > 0) {
-      return recentMatches.slice(0, 4).map((rm, idx) => {
-        const hs = parseInt(rm.homeScore ?? "1", 10);
-        const as = parseInt(rm.awayScore ?? "1", 10);
-        const selfGoals = rm.isHome ? hs : as;
-        const oppGoals = rm.isHome ? as : hs;
-        return {
-          id: rm.id || `archive-${idx}`,
-          title: `${clubName} vs ${rm.opponent}`,
-          opponent: rm.opponent,
-          score: `${hs} – ${as}`,
-          date: new Date(rm.date).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }),
-          venue: rm.venue || selectedClub?.stadium || "Premier League Stadium",
-          summary: `Official 2026/27 Premier League fixture at ${
-            rm.venue || selectedClub?.stadium
-          }. ${clubName} deployed ${selectedClub?.manager}'s ${
-            selectedClub?.formation
-          } system against ${rm.opponent}.`,
-          teamXg: Number(Math.max(0.65, selfGoals * 0.85 + 0.55).toFixed(2)),
-          opponentXg: Number(Math.max(0.45, oppGoals * 0.82 + 0.45).toFixed(2)),
-          ppda: Number((6.8 + idx * 0.4).toFixed(1)),
-          possession: rm.isHome ? 56 : 51,
-          mvp: p1.name,
-          topPerformers: [
-            {
-              name: p1.name,
-              role: p1.pos || "Forward",
-              obv: 1.34,
-              note: `Spearheaded ${clubName}'s final-third transitions and box presence`,
-            },
-            {
-              name: p2.name,
-              role: p2.pos || "Playmaker",
-              obv: 1.18,
-              note: "Dictated half-space tempo and progressive pass creation",
-            },
-            {
-              name: p3.name,
-              role: p3.pos || "Centre Back",
-              obv: 0.96,
-              note: "Commanded defensive line and high-ball recoveries",
-            },
-            {
-              name: p4.name,
-              role: p4.pos || "Midfielder",
-              obv: 0.84,
-              note: "High counter-pressing regains in central zones",
-            },
-            {
-              name: p5.name,
-              role: p5.pos || "Goalkeeper",
-              obv: 0.72,
-              note: "Clean distribution and sweeper-keeper interventions",
-            },
-          ],
-        };
-      });
+    // Always surface the most recently played 2026/27 matches first (PL + European)
+    const sortedRecent = [...(recentMatches || [])]
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+      .slice(0, 6);
+
+    const recentArchiveCards = sortedRecent.map((rm, idx) => {
+      const hs = parseInt(rm.homeScore ?? "1", 10);
+      const as = parseInt(rm.awayScore ?? "1", 10);
+      const selfGoals = rm.isHome ? hs : as;
+      const oppGoals = rm.isHome ? as : hs;
+      const compLabel = rm.competition || "Premier League";
+      return {
+        id: rm.id || `archive-${idx}`,
+        title: `${clubName} vs ${rm.opponent}`,
+        opponent: rm.opponent,
+        score: `${hs} – ${as}`,
+        date: new Date(rm.date).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        venue: rm.venue || selectedClub?.stadium || "Premier League Stadium",
+        summary: `Official 2026/27 ${compLabel} fixture at ${
+          rm.venue || selectedClub?.stadium
+        }. ${clubName} deployed ${selectedClub?.manager}'s ${
+          selectedClub?.formation
+        } system against ${rm.opponent}.`,
+        teamXg: Number(Math.max(0.65, selfGoals * 0.85 + 0.55).toFixed(2)),
+        opponentXg: Number(Math.max(0.45, oppGoals * 0.82 + 0.45).toFixed(2)),
+        ppda: Number((6.8 + idx * 0.4).toFixed(1)),
+        possession: rm.isHome ? 56 : 51,
+        mvp: p1.name,
+        topPerformers: [
+          {
+            name: p1.name,
+            role: p1.pos || "Forward",
+            obv: 1.34,
+            note: `Spearheaded ${clubName}'s final-third transitions and box presence`,
+          },
+          {
+            name: p2.name,
+            role: p2.pos || "Playmaker",
+            obv: 1.18,
+            note: "Dictated half-space tempo and progressive pass creation",
+          },
+          {
+            name: p3.name,
+            role: p3.pos || "Centre Back",
+            obv: 0.96,
+            note: "Commanded defensive line and high-ball recoveries",
+          },
+          {
+            name: p4.name,
+            role: p4.pos || "Midfielder",
+            obv: 0.84,
+            note: "High counter-pressing regains in central zones",
+          },
+          {
+            name: p5.name,
+            role: p5.pos || "Goalkeeper",
+            obv: 0.72,
+            note: "Clean distribution and sweeper-keeper interventions",
+          },
+        ],
+      };
+    });
+
+    if (recentArchiveCards.length > 0) {
+      return isLfc ? [...recentArchiveCards, ...HISTORIC_MATCHES] : recentArchiveCards;
     }
 
     return HISTORIC_MATCHES;
