@@ -204,41 +204,9 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* 7. Signature Layered/Stacked Atmospheric KPI Glass Cards */
+/* 7. Signature Atmospheric KPI Glass Cards */
 .stacked-kpi-wrap {
   position: relative;
-  padding-bottom: 14px;
-}
-
-.stacked-kpi-wrap::before,
-.stacked-kpi-wrap::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-radius: 22px;
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.stacked-kpi-wrap::before {
-  bottom: 7px;
-  left: 6px;
-  right: 6px;
-  height: 26px;
-  background: rgba(34, 36, 43, 0.66);
-  z-index: 1;
-}
-
-.stacked-kpi-wrap::after {
-  bottom: 0;
-  left: 14px;
-  right: 14px;
-  height: 24px;
-  background: rgba(24, 26, 31, 0.54);
-  z-index: 0;
 }
 
 .stacked-kpi-card {
