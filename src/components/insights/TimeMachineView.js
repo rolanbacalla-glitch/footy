@@ -288,7 +288,7 @@ export default function TimeMachineView({
     });
 
     if (recentArchiveCards.length > 0) {
-      return isLfc ? [...recentArchiveCards, ...HISTORIC_MATCHES] : recentArchiveCards;
+      return recentArchiveCards;
     }
 
     return HISTORIC_MATCHES;
