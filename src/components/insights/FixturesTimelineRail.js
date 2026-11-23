@@ -133,19 +133,31 @@ export default function FixturesTimelineRail({
   onSelectPhasePreview,
 }) {
   const [railMode, setRailMode] = useState("fixtures"); // "fixtures" | "matchday"
+  const [compFilter, setCompFilter] = useState("all"); // "all" | "pl" | "europe"
 
   const rawUpcoming = liveSchedule?.upcoming || [];
   const rawRecent = liveSchedule?.recent || [];
 
+  const hasEuropeanFixtures =
+    rawUpcoming.some((fx) => fx.isEuropean) || rawRecent.some((fx) => fx.isEuropean);
+
+  const matchesCompFilter = (fx) => {
+    if (compFilter === "pl") return !fx.isEuropean;
+    if (compFilter === "europe") return Boolean(fx.isEuropean);
+    return true;
+  };
+
   // Sort past results chronologically (oldest -> most recent) so time flows smoothly top-to-bottom
   const recentResults = [...rawRecent]
-    .slice(0, 2)
+    .filter(matchesCompFilter)
+    .slice(0, 3)
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
     .map((fx) => ({ ...fx, bucket: "recent" }));
 
   // Sort upcoming fixtures chronologically (soonest -> later)
   const upcomingFixtures = [...rawUpcoming]
-    .slice(0, 4)
+    .filter(matchesCompFilter)
+    .slice(0, 5)
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
     .map((fx, i) => ({ ...fx, bucket: i === 0 ? "next" : "upcoming" }));
 
@@ -248,6 +260,33 @@ export default function FixturesTimelineRail({
               </div>
             )}
 
+            {hasEuropeanFixtures && (
+              <div
+                role="group"
+                aria-label="Filter fixtures by competition"
+                className="flex items-center gap-1.5"
+              >
+                {[
+                  { id: "all", label: "All" },
+                  { id: "pl", label: "PL" },
+                  { id: "europe", label: "Europe" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setCompFilter(opt.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
+                      compFilter === opt.id
+                        ? "bg-[#D2F865]/15 text-[#D2F865] border border-[#D2F865]/35"
+                        : "bg-white/[0.04] text-[#8A8D96] border border-white/[0.06] hover:text-white"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {timelineFixtures.length === 0 ? (
               <div className="glass-tile p-5 text-center text-xs text-[#8A8D96]">
                 Loading live {selectedClub?.name} schedule…
@@ -312,9 +351,16 @@ export default function FixturesTimelineRail({
                                     ? `vs ${fx.opponent}`
                                     : `@ ${fx.opponent}`}
                                 </div>
-                                <div className="text-[10px] text-[#6F727C] truncate mt-0.5">
-                                  {fx.isHome ? "Home" : "Away"} ·{" "}
-                                  {fx.competition || "Premier League"}
+                                <div className="flex items-center gap-1.5 text-[10px] text-[#6F727C] truncate mt-0.5">
+                                  {fx.isEuropean && (
+                                    <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/20 border border-[#637AE0]/35 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
+                                      {fx.competitionCode || "EUR"}
+                                    </span>
+                                  )}
+                                  <span className="truncate">
+                                    {fx.isHome ? "Home" : "Away"} ·{" "}
+                                    {fx.competition || "Premier League"}
+                                  </span>
                                 </div>
                               </div>
 
@@ -428,8 +474,15 @@ export default function FixturesTimelineRail({
                                     ? `vs ${fx.opponent}`
                                     : `@ ${fx.opponent}`}
                                 </div>
-                                <div className="text-[11px] text-[#9A9DA6] truncate mt-0.5">
-                                  {fx.broadcast || fx.competition}
+                                <div className="flex items-center gap-1.5 text-[11px] text-[#9A9DA6] truncate mt-0.5">
+                                  {fx.isEuropean && (
+                                    <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/20 border border-[#637AE0]/35 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
+                                      {fx.competitionCode || "EUR"}
+                                    </span>
+                                  )}
+                                  <span className="truncate">
+                                    {fx.broadcast || fx.competition}
+                                  </span>
                                 </div>
                               </div>
 

@@ -1,9 +1,35 @@
 import { NextResponse } from "next/server";
 import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
 
-// In-memory per-club cache (10 minutes TTL)
+// In-memory per-club cache (10 minutes TTL, capped for persistent Coolify containers)
 const scheduleCache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_CACHE_ENTRIES = 50;
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
+};
+
+const COMPETITIONS = [
+  { code: "PL", slug: "eng.1", label: "Premier League", isEuropean: false },
+  { code: "UCL", slug: "uefa.champions", label: "UEFA Champions League", isEuropean: true },
+  { code: "UEL", slug: "uefa.europa", label: "UEFA Europa League", isEuropean: true },
+  { code: "UECL", slug: "uefa.europa.conf", label: "UEFA Conference League", isEuropean: true },
+];
+
+const FETCH_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (compatible; FootballInsights/1.0)",
+  Accept: "application/json",
+};
+
+function setScheduleCache(key, value) {
+  if (scheduleCache.has(key)) {
+    scheduleCache.delete(key);
+  } else if (scheduleCache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = scheduleCache.keys().next().value;
+    scheduleCache.delete(oldestKey);
+  }
+  scheduleCache.set(key, value);
+}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -13,34 +39,33 @@ export async function GET(request) {
   const now = Date.now();
   const cached = scheduleCache.get(teamId);
   if (cached && now - cached.timestamp < CACHE_TTL_MS) {
-    return NextResponse.json(cached.payload);
+    return NextResponse.json(cached.payload, { headers: CACHE_HEADERS });
   }
 
   try {
-    // 1. Fetch upcoming fixtures for the chosen club
-    const upcomingUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}/schedule?fixture=true`;
-    // 2. Fetch past match results for the chosen club
-    const resultsUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/${teamId}/schedule`;
-
-    const [upcomingRes, resultsRes] = await Promise.all([
-      fetch(upcomingUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; FootballInsights/1.0)", Accept: "application/json" },
-        next: { revalidate: 600 },
-      }),
-      fetch(resultsUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; FootballInsights/1.0)", Accept: "application/json" },
-        next: { revalidate: 600 },
-      }),
+    // Fetch Premier League + UEFA European schedules in parallel
+    const fetches = COMPETITIONS.flatMap((compDef) => [
+      fetch(
+        `https://site.api.espn.com/apis/site/v2/sports/soccer/${compDef.slug}/teams/${teamId}/schedule?fixture=true`,
+        { headers: FETCH_HEADERS, next: { revalidate: 600 } }
+      ).then(async (res) => ({
+        compDef,
+        isUpcoming: true,
+        events: res.ok ? (await res.json())?.events || [] : [],
+      })),
+      fetch(
+        `https://site.api.espn.com/apis/site/v2/sports/soccer/${compDef.slug}/teams/${teamId}/schedule`,
+        { headers: FETCH_HEADERS, next: { revalidate: 600 } }
+      ).then(async (res) => ({
+        compDef,
+        isUpcoming: false,
+        events: res.ok ? (await res.json())?.events || [] : [],
+      })),
     ]);
 
-    if (!upcomingRes.ok && !resultsRes.ok) {
-      throw new Error(`Failed to reach ESPN schedule feeds for team ${teamId}`);
-    }
+    const settled = await Promise.allSettled(fetches);
 
-    const upcomingData = upcomingRes.ok ? await upcomingRes.json() : { events: [] };
-    const resultsData = resultsRes.ok ? await resultsRes.json() : { events: [] };
-
-    const parseEvents = (events = [], isUpcoming = true) => {
+    const parseEvents = (events = [], compDef, isUpcoming = true) => {
       return events.map((ev) => {
         const comp = ev.competitions?.[0] || {};
         const competitors = comp.competitors || [];
@@ -55,12 +80,16 @@ export async function GET(request) {
 
         const dateIso = ev.date;
         const statusDesc = comp.status?.type?.description || (isUpcoming ? "Scheduled" : "Full Time");
-        
-        // Cleanly parse scores: completed matches have a real score, while unplayed upcoming matches do not
-        const homeScore = !isUpcoming && home.score?.displayValue !== undefined ? String(home.score.displayValue) : null;
-        const awayScore = !isUpcoming && away.score?.displayValue !== undefined ? String(away.score.displayValue) : null;
 
-        // Broadcast channels
+        const homeScore =
+          !isUpcoming && home.score?.displayValue !== undefined
+            ? String(home.score.displayValue)
+            : null;
+        const awayScore =
+          !isUpcoming && away.score?.displayValue !== undefined
+            ? String(away.score.displayValue)
+            : null;
+
         const broadcasts = (comp.broadcasts || []).flatMap((b) => b.media?.shortName || b.names || []);
 
         return {
@@ -71,24 +100,53 @@ export async function GET(request) {
           opponent,
           opponentId,
           isHome: isSelectedClubHome,
-          venue: comp.venue?.fullName || (isSelectedClubHome ? `${clubInfo.name} Stadium` : `${opponent} Stadium`),
-          competition: ev.league?.name || "Premier League",
+          venue:
+            comp.venue?.fullName ||
+            (isSelectedClubHome ? `${clubInfo.name} Stadium` : `${opponent} Stadium`),
+          competition: ev.league?.name || compDef.label,
+          competitionCode: compDef.code,
+          isEuropean: compDef.isEuropean,
           date: dateIso,
-          statusText: isUpcoming ? statusDesc.toUpperCase() : (homeScore !== null && awayScore !== null ? `${homeScore} - ${awayScore}` : "FT"),
+          statusText: isUpcoming
+            ? statusDesc.toUpperCase()
+            : homeScore !== null && awayScore !== null
+            ? `${homeScore} - ${awayScore}`
+            : "FT",
           homeScore,
           awayScore,
           isLive: comp.status?.type?.state === "in",
           isUpcoming,
-          broadcast: broadcasts[0] || (isSelectedClubHome ? "Sky Sports" : "TNT Sports"),
+          broadcast:
+            broadcasts[0] ||
+            (compDef.isEuropean ? "TNT Sports" : isSelectedClubHome ? "Sky Sports" : "TNT Sports"),
         };
       });
     };
 
-    const parsedUpcoming = parseEvents(upcomingData.events || [], true);
-    const parsedRecent = parseEvents(resultsData.events || [], false);
+    const upcomingMap = new Map();
+    const recentMap = new Map();
+
+    for (const result of settled) {
+      if (result.status !== "fulfilled") continue;
+      const { compDef, isUpcoming, events } = result.value;
+      const parsed = parseEvents(events, compDef, isUpcoming);
+      const targetMap = isUpcoming ? upcomingMap : recentMap;
+      for (const item of parsed) {
+        if (!targetMap.has(item.id)) {
+          targetMap.set(item.id, item);
+        }
+      }
+    }
+
+    const parsedUpcoming = Array.from(upcomingMap.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    const parsedRecent = Array.from(recentMap.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
     const payload = {
-      source: `ESPN Official Live Schedule Feed (${clubInfo.name})`,
+      source: `ESPN Official Multi-Competition Feed (${clubInfo.name})`,
       teamId,
       teamName: clubInfo.name,
       isLive: true,
@@ -97,9 +155,9 @@ export async function GET(request) {
       recent: parsedRecent,
     };
 
-    scheduleCache.set(teamId, { timestamp: now, payload });
+    setScheduleCache(teamId, { timestamp: now, payload });
 
-    return NextResponse.json(payload);
+    return NextResponse.json(payload, { headers: CACHE_HEADERS });
   } catch (err) {
     console.error(`Error fetching live ESPN schedule for team ${teamId}:`, err);
     return NextResponse.json(

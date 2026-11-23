@@ -2,6 +2,8 @@
 // Source: Official Premier League & FA Registrations, corroborated via Wikipedia & live club announcements
 // Zero trademarked club crests or copyrighted logos used.
 
+import { getEuropeanClubInfo } from "./europeanClubs";
+
 export const PREMIER_LEAGUE_MANAGERS = {
   // Arsenal (359)
   "359": {
@@ -483,6 +485,12 @@ export function getTeamManagerInfo(teamIdentifier) {
   }
   if (normalised.includes("nottingham")) {
     return PREMIER_LEAGUE_MANAGERS["393"];
+  }
+
+  // Tier-2 lookup for UEFA Champions League / Europa League / Conference League rivals
+  const euroClub = getEuropeanClubInfo(teamIdentifier);
+  if (euroClub) {
+    return euroClub;
   }
 
   return null;
