@@ -147,11 +147,11 @@ export default function FixturesTimelineRail({
     return true;
   };
 
-  // Sort past results chronologically (oldest -> most recent) so time flows smoothly top-to-bottom
+  // Take the 3 most recent played results, then sort chronologically (oldest -> newest) so time flows top-to-bottom into Today
   const recentResults = [...rawRecent]
     .filter(matchesCompFilter)
-    .slice(0, 3)
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
+    .slice(-3)
     .map((fx) => ({ ...fx, bucket: "recent" }));
 
   // Sort upcoming fixtures chronologically (soonest -> later)
