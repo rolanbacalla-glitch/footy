@@ -3,9 +3,23 @@ import { PREMIER_LEAGUE_MANAGERS, getTeamManagerInfo } from "../../../data/premi
 
 export const dynamic = "force-dynamic";
 
-// Cache per club+event for 5 minutes
+// Cache per club+event for 5 minutes (capped for persistent Coolify/Docker containers)
 const contextCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const MAX_CACHE_ENTRIES = 100;
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
+function setContextCache(key, value) {
+  if (contextCache.has(key)) {
+    contextCache.delete(key);
+  } else if (contextCache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = contextCache.keys().next().value;
+    contextCache.delete(oldestKey);
+  }
+  contextCache.set(key, value);
+}
 
 // Formation slot pitch coordinates (x: 0-105 left->right attacking, y: 0-68 top->bottom)
 const FORMATION_COORDS = [
@@ -134,7 +148,7 @@ export async function GET(request) {
   const now = Date.now();
   const cached = contextCache.get(cacheKey);
   if (cached && now - cached.timestamp < CACHE_TTL_MS) {
-    return NextResponse.json(cached.payload);
+    return NextResponse.json(cached.payload, { headers: CACHE_HEADERS });
   }
 
   try {
@@ -603,8 +617,8 @@ export async function GET(request) {
       },
     };
 
-    contextCache.set(cacheKey, { timestamp: now, payload: matchPayload });
-    return NextResponse.json(matchPayload);
+    setContextCache(cacheKey, { timestamp: now, payload: matchPayload });
+    return NextResponse.json(matchPayload, { headers: CACHE_HEADERS });
   } catch (err) {
     console.error(`Error building club context for team ${teamId}:`, err);
     return NextResponse.json(

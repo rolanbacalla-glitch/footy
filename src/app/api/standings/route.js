@@ -6,11 +6,14 @@ import { getTeamManagerInfo } from "../../../data/premierLeagueManagers";
 let cachedStandings = null;
 let lastFetchedTime = 0;
 const CACHE_TTL_MS = 3 * 60 * 1000;
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=180",
+};
 
 export async function GET() {
   const now = Date.now();
   if (cachedStandings && now - lastFetchedTime < CACHE_TTL_MS) {
-    return NextResponse.json(cachedStandings);
+    return NextResponse.json(cachedStandings, { headers: CACHE_HEADERS });
   }
 
   // Multi-tier Fallback Chain
@@ -71,7 +74,7 @@ export async function GET() {
     cachedStandings = payload;
     lastFetchedTime = now;
 
-    return NextResponse.json(payload);
+    return NextResponse.json(payload, { headers: CACHE_HEADERS });
   } catch (err) {
     console.error("Live Standings Fallback Chain Failed:", err);
     return NextResponse.json(
