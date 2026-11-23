@@ -244,10 +244,9 @@
 .stacked-kpi-card {
   position: relative;
   z-index: 2;
+  background-color: #181A20;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(22px) saturate(165%);
-  -webkit-backdrop-filter: blur(22px) saturate(165%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     0 14px 28px -10px rgba(0, 0, 0, 0.6);
@@ -261,23 +260,23 @@
 
 /* Four Signature Atmospheric Colour Washes (Top-Right Painterly Glass Glow) */
 .kpi-wash-indigo {
-  background:
-    radial-gradient(circle at 86% 12%, rgba(96, 121, 224, 0.62) 0%, rgba(71, 90, 175, 0.24) 48%, rgba(28, 30, 38, 0.86) 100%);
+  background-image:
+    radial-gradient(circle at 86% 12%, rgba(96, 121, 224, 0.52) 0%, rgba(71, 90, 175, 0.2) 48%, rgba(24, 26, 32, 0.95) 100%);
 }
 
 .kpi-wash-olive {
-  background:
-    radial-gradient(circle at 86% 12%, rgba(164, 189, 94, 0.56) 0%, rgba(114, 134, 65, 0.24) 48%, rgba(28, 30, 34, 0.86) 100%);
+  background-image:
+    radial-gradient(circle at 86% 12%, rgba(164, 189, 94, 0.46) 0%, rgba(114, 134, 65, 0.2) 48%, rgba(24, 26, 32, 0.95) 100%);
 }
 
 .kpi-wash-teal {
-  background:
-    radial-gradient(circle at 86% 12%, rgba(69, 152, 166, 0.58) 0%, rgba(45, 102, 114, 0.24) 48%, rgba(26, 30, 35, 0.86) 100%);
+  background-image:
+    radial-gradient(circle at 86% 12%, rgba(69, 152, 166, 0.48) 0%, rgba(45, 102, 114, 0.2) 48%, rgba(24, 26, 32, 0.95) 100%);
 }
 
 .kpi-wash-sage {
-  background:
-    radial-gradient(circle at 86% 12%, rgba(108, 146, 98, 0.54) 0%, rgba(70, 96, 65, 0.22) 48%, rgba(27, 30, 32, 0.86) 100%);
+  background-image:
+    radial-gradient(circle at 86% 12%, rgba(108, 146, 98, 0.44) 0%, rgba(70, 96, 65, 0.18) 48%, rgba(24, 26, 32, 0.95) 100%);
 }
 
 /* Highlight card alias (replaces legacy crimson highlight with refined olive-lime glass) */
