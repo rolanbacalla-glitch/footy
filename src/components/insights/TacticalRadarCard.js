@@ -16,17 +16,34 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
     ? `${oppInfo.manager} (${oppInfo.formation})`
     : `${awayTeamIdentifier} Setup`;
 
-  const ppdaVal = activeMatch?.metrics?.ppda || 7.1;
-  const tiltVal = activeMatch?.metrics?.fieldTilt || 65.4;
-  const regainsVal = activeMatch?.metrics?.counterPressRegains || 24;
+  const ppdaVal = Number(activeMatch?.metrics?.ppda || 8.4);
+  const tiltVal = Number(activeMatch?.metrics?.fieldTilt || 58.0);
+  const regainsVal = Number(activeMatch?.metrics?.counterPressRegains || 20);
+  const xgFor = Number(activeMatch?.metrics?.xgFor ?? activeMatch?.metrics?.homeXg ?? 1.85);
+  const xgAgainst = Number(activeMatch?.metrics?.xgAgainst ?? activeMatch?.metrics?.awayXg ?? 1.05);
+
+  // Derive normalised 0-100 tactical scores dynamically for the active club
+  const clamp = (n, min = 35, max = 96) => Math.max(min, Math.min(max, Math.round(n)));
+  const pressScore = clamp(125 - ppdaVal * 5);
+  const progressionVal = (2.1 + (tiltVal / 100) * 1.6).toFixed(1);
+  const progressionScore = clamp(50 + (Number(progressionVal) - 1.8) * 24);
+  const regainsScore = clamp(regainsVal * 3.4);
+  const tiltScore = clamp(tiltVal * 1.18);
+  const setPieceNet = Number(((xgFor - xgAgainst) * 0.28).toFixed(2));
+  const setPieceScore = clamp(65 + setPieceNet * 40);
+
+  const oppPpda = Number((13.5 - (ppdaVal - 6) * 0.4).toFixed(1));
+  const oppPressScore = clamp(125 - oppPpda * 5);
+  const oppTilt = Number((100 - tiltVal).toFixed(1));
+  const oppRegains = Math.max(10, Math.round(38 - regainsVal));
 
   // Tactical Radar Dimensions (Scale: 0 to 100)
   const dimensions = [
-    { label: "Vertical Press", lfc: 92, opp: 71, lfcVal: `${ppdaVal} PPDA`, oppVal: "10.4 PPDA" },
-    { label: "Direct Progression", lfc: 87, opp: 66, lfcVal: "3.3 m/s", oppVal: "2.2 m/s" },
-    { label: "High Regains", lfc: 90, opp: 68, lfcVal: `${regainsVal} / 90`, oppVal: "16 / 90" },
-    { label: "Field Tilt Dominance", lfc: 84, opp: 54, lfcVal: `${tiltVal}%`, oppVal: `${(100 - tiltVal).toFixed(1)}%` },
-    { label: "Set-Piece xG Net", lfc: 79, opp: 61, lfcVal: "+0.38 xG", oppVal: "+0.09 xG" },
+    { label: "Vertical Press", clubScore: pressScore, opp: oppPressScore, clubVal: `${ppdaVal} PPDA`, oppVal: `${oppPpda} PPDA` },
+    { label: "Direct Progression", clubScore: progressionScore, opp: 64, clubVal: `${progressionVal} m/s`, oppVal: "2.2 m/s" },
+    { label: "High Regains", clubScore: regainsScore, opp: clamp(oppRegains * 3.4), clubVal: `${regainsVal} / 90`, oppVal: `${oppRegains} / 90` },
+    { label: "Field Tilt Dominance", clubScore: tiltScore, opp: clamp(oppTilt * 1.18), clubVal: `${tiltVal}%`, oppVal: `${oppTilt}%` },
+    { label: "Set-Piece xG Net", clubScore: setPieceScore, opp: 58, clubVal: `${setPieceNet >= 0 ? "+" : ""}${setPieceNet} xG`, oppVal: "+0.09 xG" },
   ];
 
   // SVG Radar Chart (Center: 100, 100, Radius: 68)
@@ -43,10 +60,10 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
     return { x, y };
   };
 
-  const lfcPoints = dimensions.map((d, i) => getCoordinates(i, d.lfc));
+  const clubPoints = dimensions.map((d, i) => getCoordinates(i, d.clubScore));
   const oppPoints = dimensions.map((d, i) => getCoordinates(i, d.opp));
 
-  const lfcPath = `${lfcPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ")} Z`;
+  const clubPath = `${clubPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ")} Z`;
   const oppPath = `${oppPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ")} Z`;
 
   return (
@@ -127,14 +144,14 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
             />
 
             <path
-              d={lfcPath}
+              d={clubPath}
               fill="rgba(210, 248, 101, 0.24)"
               stroke="#D2F865"
               strokeWidth="2"
               strokeLinejoin="round"
             />
 
-            {lfcPoints.map((p, i) => (
+            {clubPoints.map((p, i) => (
               <circle key={`club-${i}`} cx={p.x} cy={p.y} r="2.5" fill="#D2F865" stroke="#0E100C" strokeWidth="0.6" />
             ))}
             {oppPoints.map((p, i) => (
@@ -149,7 +166,7 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
               <div className="flex items-center justify-between text-xs mb-1.5">
                 <span className="font-medium text-white/90">{dim.label}</span>
                 <span className="font-mono text-[11px] tabular-nums">
-                  <strong className="text-[#D2F865]">{dim.lfcVal}</strong>
+                  <strong className="text-[#D2F865]">{dim.clubVal}</strong>
                   <span className="text-white/25"> vs </span>
                   <span className="text-[#8A8D96]">{dim.oppVal}</span>
                 </span>
@@ -157,11 +174,11 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
               <div className="w-full bg-white/[0.08] h-1.5 rounded-full overflow-hidden flex gap-0.5">
                 <div
                   className="bg-[#D2F865] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(dim.lfc / (dim.lfc + dim.opp)) * 100}%` }}
+                  style={{ width: `${(dim.clubScore / (dim.clubScore + dim.opp)) * 100}%` }}
                 />
                 <div
                   className="bg-[#637AE0]/70 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(dim.opp / (dim.lfc + dim.opp)) * 100}%` }}
+                  style={{ width: `${(dim.opp / (dim.clubScore + dim.opp)) * 100}%` }}
                 />
               </div>
             </div>
