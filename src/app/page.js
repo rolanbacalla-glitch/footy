@@ -5,6 +5,7 @@ import { MotionConfig } from "motion/react";
 import SidebarNav from "../components/insights/SidebarNav";
 import { SlidingTabPanel } from "../components/insights/SlidingSegmentedTabs";
 import WorkspaceHeader from "../components/insights/WorkspaceHeader";
+import LiveMatchTicker from "../components/insights/LiveMatchTicker";
 import LiveScoreboard from "../components/insights/LiveScoreboard";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import TacticalKpiDeck from "../components/insights/TacticalKpiDeck";
@@ -424,6 +425,15 @@ export default function FootballInsightsDashboard() {
             activeTab={activeTab}
             selectedClubId={selectedClubId}
             setSelectedClubId={setSelectedClubId}
+          />
+
+          {/* Shared Multi-Match Live Ticker (Final Day & European Matchnights) */}
+          <LiveMatchTicker
+            selectedClubId={selectedClubId}
+            onSelectClub={(id) => {
+              setSelectedClubId(id);
+              setActiveTab("boot-room");
+            }}
           />
 
           {/* ═══ ACTIVE WORKSPACE PANEL (Apple HIG Directional Slide Transition) ═══ */}

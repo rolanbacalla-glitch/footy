@@ -7,6 +7,7 @@ import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
 
 export default function StandingsTable({ selectedClubId = "364", onSelectClub }) {
   const [standings, setStandings] = useState([]);
+  const [livePlMatches, setLivePlMatches] = useState([]);
   const [source, setSource] = useState("Live Premier League Feed");
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,11 +49,60 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
     };
   }, [fetchStandings]);
 
+  // Poll shared /api/live-scores for "As It Stands" live Premier League table updates
+  useEffect(() => {
+    let mounted = true;
+    const fetchLivePl = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      try {
+        const res = await fetch("/api/live-scores");
+        if (!res.ok) return;
+        const data = await res.json();
+        const plLive = (data.liveMatches || []).filter((m) => m.competitionCode === "PL");
+        if (mounted) setLivePlMatches(plLive);
+      } catch {
+        // Silent fallback
+      }
+    };
+    fetchLivePl();
+    const interval = setInterval(fetchLivePl, livePlMatches.length > 0 ? 20000 : 60000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [livePlMatches.length]);
+
+  const effectiveStandings = React.useMemo(() => {
+    if (livePlMatches.length === 0) return standings;
+    const adjusted = standings.map((team) => {
+      const liveMatch = livePlMatches.find(
+        (m) => String(m.homeTeamId) === String(team.id) || String(m.awayTeamId) === String(team.id)
+      );
+      if (!liveMatch) return team;
+      const isHome = String(liveMatch.homeTeamId) === String(team.id);
+      const teamGoals = isHome ? liveMatch.homeScore : liveMatch.awayScore;
+      const oppGoals = isHome ? liveMatch.awayScore : liveMatch.homeScore;
+      const livePtsDelta = teamGoals > oppGoals ? 3 : teamGoals === oppGoals ? 1 : 0;
+      const liveGdDelta = teamGoals - oppGoals;
+      return {
+        ...team,
+        played: Number(team.played || 0) + 1,
+        points: Number(team.points || 0) + livePtsDelta,
+        goalDifference: Number(team.goalDifference || 0) + liveGdDelta,
+        isLiveInPlay: true,
+        liveScoreLabel: `${liveMatch.homeShort} ${liveMatch.homeScore}–${liveMatch.awayScore} ${liveMatch.awayShort}`,
+      };
+    });
+    return adjusted
+      .sort((a, b) => Number(b.points) - Number(a.points) || Number(b.goalDifference) - Number(a.goalDifference))
+      .map((team, idx) => ({ ...team, rank: idx + 1 }));
+  }, [standings, livePlMatches]);
+
   const selectedTeamInfo =
     PREMIER_LEAGUE_MANAGERS[selectedClubId] || PREMIER_LEAGUE_MANAGERS["364"];
-  const selectedRow = standings.find((t) => String(t.id) === String(selectedClubId));
+  const selectedRow = effectiveStandings.find((t) => String(t.id) === String(selectedClubId));
 
-  const filteredRows = standings.filter((team) => {
+  const filteredRows = effectiveStandings.filter((team) => {
     if (zoneFilter === "europe" && team.rank > 6) return false;
     if (zoneFilter === "relegation" && team.rank < 15) return false;
     if (search.trim()) {
@@ -77,6 +127,12 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
             <h2 className="font-display text-lg font-semibold text-white tracking-tight">
               2026/27 Premier League Table
             </h2>
+            {livePlMatches.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FF2636]/20 border border-[#FF2636]/40 text-[#FF4D5A] font-mono text-[10px] font-bold uppercase tracking-wider">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#FF2636] animate-ping" />
+                As It Stands · {livePlMatches.length} Live
+              </span>
+            )}
             {selectedRow && (
               <span className="text-xs font-mono text-[#D2F865] tabular-nums">
                 {selectedTeamInfo.shortName} #{selectedRow.rank} · {selectedRow.points} pts
