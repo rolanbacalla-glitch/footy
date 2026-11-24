@@ -5,6 +5,7 @@ import { MotionConfig } from "motion/react";
 import SidebarNav from "../components/insights/SidebarNav";
 import { SlidingTabPanel } from "../components/insights/SlidingSegmentedTabs";
 import WorkspaceHeader from "../components/insights/WorkspaceHeader";
+import LiveScoreboard from "../components/insights/LiveScoreboard";
 import PitchCanvas from "../components/insights/PitchCanvas";
 import TacticalKpiDeck from "../components/insights/TacticalKpiDeck";
 import FixturesTimelineRail from "../components/insights/FixturesTimelineRail";
@@ -435,8 +436,15 @@ export default function FootballInsightsDashboard() {
           {/* ═══ TAB 1: MATCH CENTRE (Clean 2-Column Analytical Canvas + Fixtures Timeline Rail) ═══ */}
           {activeTab === "boot-room" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-              {/* Main Left-Centre 8/9 Cols: Hero Pitch Visualisation + 4 Stacked Atmospheric KPI Deck */}
+              {/* Main Left-Centre 8/9 Cols: Live Scoreboard (when in play) + Hero Pitch Visualisation + 4 Stacked Atmospheric KPI Deck */}
               <div className="xl:col-span-8 2xl:col-span-9 space-y-6 min-w-0">
+                {(activeMatch?.isLive || liveFactData?.activeLiveMatch?.isLive) && (
+                  <LiveScoreboard
+                    activeMatch={activeMatch}
+                    selectedClub={selectedClub}
+                  />
+                )}
+
                 <PitchCanvas
                   activeMatch={activeMatch}
                   selectedClub={selectedClub}
