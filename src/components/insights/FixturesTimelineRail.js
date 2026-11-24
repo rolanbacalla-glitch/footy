@@ -135,17 +135,24 @@ export default function FixturesTimelineRail({
   const [railMode, setRailMode] = useState("fixtures"); // "fixtures" | "matchday"
   const [compFilter, setCompFilter] = useState("all"); // "all" | "pl" | "europe"
 
+  const rawLive = liveSchedule?.live || [];
   const rawUpcoming = liveSchedule?.upcoming || [];
   const rawRecent = liveSchedule?.recent || [];
 
   const hasEuropeanFixtures =
-    rawUpcoming.some((fx) => fx.isEuropean) || rawRecent.some((fx) => fx.isEuropean);
+    rawLive.some((fx) => fx.isEuropean) ||
+    rawUpcoming.some((fx) => fx.isEuropean) ||
+    rawRecent.some((fx) => fx.isEuropean);
 
   const matchesCompFilter = (fx) => {
     if (compFilter === "pl") return !fx.isEuropean;
     if (compFilter === "europe") return Boolean(fx.isEuropean);
     return true;
   };
+
+  const liveFixtures = [...rawLive]
+    .filter(matchesCompFilter)
+    .map((fx) => ({ ...fx, bucket: "live" }));
 
   // Take the 3 most recent played results, then sort chronologically (oldest -> newest) so time flows top-to-bottom into Today
   const recentResults = [...rawRecent]
@@ -161,7 +168,7 @@ export default function FixturesTimelineRail({
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
     .map((fx, i) => ({ ...fx, bucket: i === 0 ? "next" : "upcoming" }));
 
-  const timelineFixtures = [...recentResults, ...upcomingFixtures];
+  const timelineFixtures = [...recentResults, ...liveFixtures, ...upcomingFixtures];
   const isSelectedInTimeline = timelineFixtures.some(
     (fx) => fx.id === selectedMatchId
   );
@@ -383,17 +390,97 @@ export default function FixturesTimelineRail({
                   </section>
                 )}
 
-                {/* ═══ CHRONOLOGICAL HORIZON DIVIDER (Past Above · Upcoming Below) ═══ */}
+                {/* ═══ CHRONOLOGICAL HORIZON DIVIDER (Past Above · Live / Upcoming Below) ═══ */}
                 <div
                   className="flex items-center gap-2.5 py-1"
                   role="separator"
                   aria-label="Today divider between played results and upcoming fixtures"
                 >
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#D2F865] text-[#0E100C] text-[10px] font-bold font-mono tracking-wide uppercase tabular-nums shrink-0 shadow-[0_0_16px_rgba(210,248,101,0.3)]">
-                    {activeMatch?.isLive ? "LIVE NOW" : `TODAY · ${todayLabel}`}
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono tracking-wide uppercase tabular-nums shrink-0 ${
+                      liveFixtures.length > 0 || activeMatch?.isLive
+                        ? "bg-[#FF2636] text-white shadow-[0_0_16px_rgba(255,38,54,0.45)]"
+                        : "bg-[#D2F865] text-[#0E100C] shadow-[0_0_16px_rgba(210,248,101,0.3)]"
+                    }`}
+                  >
+                    {liveFixtures.length > 0 || activeMatch?.isLive ? "LIVE NOW" : `TODAY · ${todayLabel}`}
                   </span>
-                  <div className="h-[1.5px] flex-1 bg-gradient-to-r from-[#D2F865] via-[#D2F865]/40 to-transparent" />
+                  <div
+                    className={`h-[1.5px] flex-1 bg-gradient-to-r to-transparent ${
+                      liveFixtures.length > 0 || activeMatch?.isLive
+                        ? "from-[#FF2636] via-[#FF2636]/40"
+                        : "from-[#D2F865] via-[#D2F865]/40"
+                    }`}
+                  />
                 </div>
+
+                {/* ═══ LIVE IN-PLAY FIXTURES (PL & European UCL/UEL/UECL) ═══ */}
+                {liveFixtures.length > 0 && (
+                  <section aria-label="Live matches in play" className="space-y-2">
+                    {liveFixtures.map((fx) => {
+                      const isSelected = fx.id === selectedMatchId;
+                      const scoreDisplay =
+                        fx.homeScore !== null && fx.awayScore !== null
+                          ? `${fx.homeScore}–${fx.awayScore}`
+                          : fx.statusText || "LIVE";
+
+                      return (
+                        <div
+                          key={fx.id}
+                          className="grid grid-cols-[48px_1fr] items-center gap-2.5"
+                        >
+                          <span className="text-[11px] font-mono font-bold tabular-nums text-[#FF4D5A] text-right pr-0.5">
+                            {fx.displayClock || "LIVE"}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => onSelectMatch(fx.id)}
+                            aria-pressed={isSelected}
+                            aria-label={`Live match: ${fx.isHome ? "vs" : "at"} ${fx.opponent}, ${scoreDisplay}, ${fx.displayClock || "Live"}`}
+                            className={`relative w-full text-left px-3 py-3 rounded-[18px] border transition-all cursor-pointer flex items-center gap-2.5 min-h-[58px] ${
+                              isSelected
+                                ? "bg-[#2A1418]/95 border-[#FF4D5A]/70 shadow-[0_10px_26px_-8px_rgba(255,38,54,0.35)]"
+                                : "bg-[#221216]/90 hover:bg-[#2A151A] border-[#FF2636]/35 hover:border-[#FF4D5A]/60"
+                            }`}
+                          >
+                            <div className="w-8 h-8 rounded-full border border-[#FF2636]/45 bg-[#FF2636]/20 flex items-center justify-center shrink-0">
+                              <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF2636]" />
+                              </span>
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[12.5px] font-semibold text-white truncate">
+                                {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-[#B7BAC3] truncate mt-0.5">
+                                {fx.isEuropean && (
+                                  <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/25 border border-[#637AE0]/45 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
+                                    {fx.competitionCode || "EUR"}
+                                  </span>
+                                )}
+                                <span className="truncate">
+                                  {fx.competition || "Premier League"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0 pl-1">
+                              <div className="font-mono text-[14px] font-bold tabular-nums leading-none text-white">
+                                {scoreDisplay}
+                              </div>
+                              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4D5A] mt-1">
+                                LIVE
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </section>
+                )}
 
                 {/* ═══ 2. UPCOMING FIXTURES (Bright Elevated Glass, Kick-off Time + Broadcast) ═══ */}
                 {upcomingFixtures.length > 0 && (

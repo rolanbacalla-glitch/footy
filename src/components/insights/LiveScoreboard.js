@@ -22,12 +22,14 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
   const [liveFactData, setLiveFactData] = useState(null);
 
   const club = selectedClub || getTeamManagerInfo(activeMatch?.teamId || "364") || getTeamManagerInfo("364");
-  const isLive = activeMatch?.type === "LIVE" || activeMatch?.isLive;
+  const liveMatchFromApi = liveFactData?.activeLiveMatch || null;
+  const isLive = Boolean(activeMatch?.type === "LIVE" || activeMatch?.isLive || liveMatchFromApi?.isLive);
   const isMatchdayPreMatch =
-    activeMatch?.type === "MATCHDAY" ||
-    activeMatch?.status === "PRE_MATCH" ||
-    (activeMatch?.isMatchday && !activeMatch?.isLive);
-  const isFinished = activeMatch?.type === "RECENT";
+    !isLive &&
+    (activeMatch?.type === "MATCHDAY" ||
+      activeMatch?.status === "PRE_MATCH" ||
+      (activeMatch?.isMatchday && !activeMatch?.isLive));
+  const isFinished = !isLive && activeMatch?.type === "RECENT";
 
   // Adaptive Live Fact-Checking Polling scoped to the selected club
   useEffect(() => {
@@ -174,10 +176,10 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
 
   const homeScore = isMatchdayPreMatch
     ? 0
-    : (activeMatch?.homeScore ?? (isLive ? 2 : activeMatch?.score?.split("-")[0]?.trim() || 0));
+    : (liveMatchFromApi?.homeScore ?? activeMatch?.homeScore ?? (isLive ? 0 : activeMatch?.score?.split("-")[0]?.trim() || 0));
   const awayScore = isMatchdayPreMatch
     ? 0
-    : (activeMatch?.awayScore ?? (isLive ? 1 : activeMatch?.score?.split("-")[1]?.trim() || 0));
+    : (liveMatchFromApi?.awayScore ?? activeMatch?.awayScore ?? (isLive ? 0 : activeMatch?.score?.split("-")[1]?.trim() || 0));
 
   const homeScorers = isMatchdayPreMatch
     ? []
@@ -197,7 +199,8 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
   const xG = activeMatch?.liveStats?.xg || [activeMatch?.metrics?.teamXg || 2.18, activeMatch?.metrics?.opponentXg || 1.04];
   const corners = activeMatch?.liveStats?.corners || [6, 3];
 
-  const currentMinute = activeMatch?.minute || 68;
+  const currentMinute =
+    liveMatchFromApi?.displayClock || activeMatch?.minute || "LIVE";
   const kickoffTime = activeMatch?.kickoffTime || "16:30 GMT";
 
   const selectedRank = liveFactData?.standings?.selected?.rank || activeMatch?.standings?.selected?.rank;

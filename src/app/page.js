@@ -85,7 +85,7 @@ export default function FootballInsightsDashboard() {
   const [countdownSeconds, setCountdownSeconds] = useState(16155);
   const [previewOffset, setPreviewOffset] = useState(null);
   const [realCountdown, setRealCountdown] = useState(null);
-  const [liveSchedule, setLiveSchedule] = useState({ upcoming: [], recent: [] });
+  const [liveSchedule, setLiveSchedule] = useState({ live: [], upcoming: [], recent: [] });
   const [clubContextMatch, setClubContextMatch] = useState(null);
   const [liveFactData, setLiveFactData] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -116,10 +116,15 @@ export default function FootballInsightsDashboard() {
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled && data && data.isLive) {
+          const live = data.live || [];
           const up = data.upcoming || [];
           const rec = data.recent || [];
-          setLiveSchedule({ upcoming: up, recent: rec });
-          if (selectedClubId !== "364") {
+          setLiveSchedule({ live, upcoming: up, recent: rec });
+          if (live.length > 0) {
+            setSelectedMatchId((prev) =>
+              prev && prev.startsWith("espn-") ? prev : live[0].id
+            );
+          } else if (selectedClubId !== "364") {
             const firstMatch = up[0] || rec[0];
             if (firstMatch) {
               setSelectedMatchId((prev) =>
@@ -267,16 +272,26 @@ export default function FootballInsightsDashboard() {
       return clubContextMatch;
     }
 
+    const liveFixture = liveSchedule.live?.[0] || null;
     const nextFixture = liveSchedule.upcoming[0];
     const recentFixture = liveSchedule.recent[0];
     const targetFixture =
       (selectedMatchId && selectedMatchId.startsWith("espn-")
-        ? liveSchedule.upcoming
+        ? (liveSchedule.live || [])
+            .concat(liveSchedule.upcoming)
             .concat(liveSchedule.recent)
             .find((f) => f.id === selectedMatchId)
         : null) ||
+      liveFixture ||
       nextFixture ||
       recentFixture;
+
+    const liveOverride =
+      liveFactData?.activeLiveMatch &&
+      (!targetFixture || targetFixture.id === liveFactData.activeLiveMatch.id || targetFixture.isLive)
+        ? liveFactData.activeLiveMatch
+        : null;
+    const isMatchLive = Boolean(targetFixture?.isLive || liveOverride?.isLive);
 
     const oppName = targetFixture?.opponent || "Premier League Opponent";
     const oppInfo =
@@ -301,22 +316,30 @@ export default function FootballInsightsDashboard() {
       teamId: selectedClubId,
       clubName: selectedClub.name,
       clubShort: selectedClub.shortName,
-      type: targetFixture?.isUpcoming !== false ? "MATCHDAY" : "RECENT",
-      isMatchday: targetFixture?.isUpcoming !== false,
-      title: `${homeInfo.name} vs ${awayInfo.name}`,
+      type: isMatchLive ? "LIVE" : targetFixture?.isUpcoming !== false ? "MATCHDAY" : "RECENT",
+      isLive: isMatchLive,
+      isMatchday: !isMatchLive && targetFixture?.isUpcoming !== false,
+      title: `${liveOverride?.homeTeam || homeInfo.name} vs ${liveOverride?.awayTeam || awayInfo.name}`,
       opponent: oppName,
-      competition: targetFixture?.competition || "Premier League",
+      competition: liveOverride?.competition || targetFixture?.competition || "Premier League",
       date: formattedDate,
-      venue: targetFixture?.venue || homeInfo.stadium,
+      venue: liveOverride?.venue || targetFixture?.venue || homeInfo.stadium,
       city: homeInfo.city,
       capacity: homeInfo.capacity,
       mainStand: homeInfo.mainStand,
       anthem: homeInfo.anthem,
       lat: homeInfo.lat,
       lon: homeInfo.lon,
-      score: targetFixture?.isUpcoming ? null : targetFixture?.statusText,
-      homeTeam: homeInfo.name,
-      awayTeam: awayInfo.name,
+      score: isMatchLive
+        ? `${liveOverride?.homeScore ?? targetFixture?.homeScore ?? 0} - ${liveOverride?.awayScore ?? targetFixture?.awayScore ?? 0}`
+        : targetFixture?.isUpcoming
+        ? null
+        : targetFixture?.statusText,
+      homeScore: isMatchLive ? (liveOverride?.homeScore ?? targetFixture?.homeScore ?? 0) : targetFixture?.homeScore,
+      awayScore: isMatchLive ? (liveOverride?.awayScore ?? targetFixture?.awayScore ?? 0) : targetFixture?.awayScore,
+      minute: liveOverride?.displayClock || targetFixture?.displayClock || undefined,
+      homeTeam: liveOverride?.homeTeam || homeInfo.name,
+      awayTeam: liveOverride?.awayTeam || awayInfo.name,
       homeShort: homeInfo.shortName,
       awayShort: awayInfo.shortName,
       selectedManager: selectedClub.manager,

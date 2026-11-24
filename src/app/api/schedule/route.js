@@ -4,6 +4,7 @@ import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
 // In-memory per-club cache (10 minutes TTL, capped for persistent Coolify containers)
 const scheduleCache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const LIVE_CACHE_TTL_MS = 30 * 1000;
 const MAX_CACHE_ENTRIES = 50;
 const CACHE_HEADERS = {
   "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
@@ -38,7 +39,8 @@ export async function GET(request) {
 
   const now = Date.now();
   const cached = scheduleCache.get(teamId);
-  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+  const activeTtl = cached?.hasLive ? LIVE_CACHE_TTL_MS : CACHE_TTL_MS;
+  if (cached && now - cached.timestamp < activeTtl) {
     return NextResponse.json(cached.payload, { headers: CACHE_HEADERS });
   }
 
@@ -79,14 +81,19 @@ export async function GET(request) {
         const opponentId = isSelectedClubHome ? away.team?.id : home.team?.id;
 
         const dateIso = ev.date;
+        const state = comp.status?.type?.state || (isUpcoming ? "pre" : "post");
+        const isLive = state === "in";
+        const isPost = state === "post";
         const statusDesc = comp.status?.type?.description || (isUpcoming ? "Scheduled" : "Full Time");
+        const displayClock =
+          comp.status?.displayClock || comp.status?.type?.shortDetail || null;
 
         const homeScore =
-          !isUpcoming && home.score?.displayValue !== undefined
+          (isLive || isPost || !isUpcoming) && home.score?.displayValue !== undefined
             ? String(home.score.displayValue)
             : null;
         const awayScore =
-          !isUpcoming && away.score?.displayValue !== undefined
+          (isLive || isPost || !isUpcoming) && away.score?.displayValue !== undefined
             ? String(away.score.displayValue)
             : null;
 
@@ -107,15 +114,21 @@ export async function GET(request) {
           competitionCode: compDef.code,
           isEuropean: compDef.isEuropean,
           date: dateIso,
-          statusText: isUpcoming
-            ? statusDesc.toUpperCase()
-            : homeScore !== null && awayScore !== null
-            ? `${homeScore} - ${awayScore}`
-            : "FT",
+          statusText:
+            isLive
+              ? homeScore !== null && awayScore !== null
+                ? `${homeScore} - ${awayScore}`
+                : "LIVE"
+              : isUpcoming
+              ? statusDesc.toUpperCase()
+              : homeScore !== null && awayScore !== null
+              ? `${homeScore} - ${awayScore}`
+              : "FT",
           homeScore,
           awayScore,
-          isLive: comp.status?.type?.state === "in",
-          isUpcoming,
+          isLive,
+          displayClock,
+          isUpcoming: isUpcoming && !isLive && !isPost,
           broadcast:
             broadcasts[0] ||
             (compDef.isEuropean ? "TNT Sports" : isSelectedClubHome ? "Sky Sports" : "TNT Sports"),
@@ -123,6 +136,7 @@ export async function GET(request) {
       });
     };
 
+    const liveMap = new Map();
     const upcomingMap = new Map();
     const recentMap = new Map();
 
@@ -130,32 +144,39 @@ export async function GET(request) {
       if (result.status !== "fulfilled") continue;
       const { compDef, isUpcoming, events } = result.value;
       const parsed = parseEvents(events, compDef, isUpcoming);
-      const targetMap = isUpcoming ? upcomingMap : recentMap;
       for (const item of parsed) {
+        if (item.isLive) {
+          liveMap.set(item.id, item);
+          continue;
+        }
+        const targetMap = isUpcoming ? upcomingMap : recentMap;
         if (!targetMap.has(item.id)) {
           targetMap.set(item.id, item);
         }
       }
     }
 
-    const parsedUpcoming = Array.from(upcomingMap.values()).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    const parsedRecent = Array.from(recentMap.values()).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    const parsedLive = Array.from(liveMap.values());
+    const parsedUpcoming = Array.from(upcomingMap.values())
+      .filter((item) => !liveMap.has(item.id))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const parsedRecent = Array.from(recentMap.values())
+      .filter((item) => !liveMap.has(item.id))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const payload = {
       source: `ESPN Official Multi-Competition Feed (${clubInfo.name})`,
       teamId,
       teamName: clubInfo.name,
       isLive: true,
+      hasLiveMatch: parsedLive.length > 0,
       lastUpdated: new Date().toISOString(),
+      live: parsedLive,
       upcoming: parsedUpcoming,
       recent: parsedRecent,
     };
 
-    setScheduleCache(teamId, { timestamp: now, payload });
+    setScheduleCache(teamId, { timestamp: now, hasLive: parsedLive.length > 0, payload });
 
     return NextResponse.json(payload, { headers: CACHE_HEADERS });
   } catch (err) {

@@ -9,12 +9,20 @@ import { PREMIER_LEAGUE_MANAGERS } from "../../../data/premierLeagueManagers";
  * Accepts ?teamId=... parameter (defaults to Liverpool 364)
  */
 
+const SCOREBOARD_COMPETITIONS = [
+  { code: "PL", slug: "eng.1", label: "Premier League", isEuropean: false },
+  { code: "UCL", slug: "uefa.champions", label: "UEFA Champions League", isEuropean: true },
+  { code: "UEL", slug: "uefa.europa", label: "UEFA Europa League", isEuropean: true },
+  { code: "UECL", slug: "uefa.europa.conf", label: "UEFA Conference League", isEuropean: true },
+];
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const teamId = searchParams.get("teamId") || "364";
   const clubInfo = PREMIER_LEAGUE_MANAGERS[teamId] || PREMIER_LEAGUE_MANAGERS["364"];
 
   let liveMatches = [];
+  let activeLiveMatch = null;
   let standings = { selected: null, opponent: null };
   let liveNextEvent = null;
   let liveRoster = [];
@@ -22,10 +30,7 @@ export async function GET(request) {
   let dataSource = "espn_verified_live";
 
   try {
-    const [scoreboardRes, standingsRes, teamRes, rosterRes, newsRes] = await Promise.allSettled([
-      fetch("https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard", {
-        next: { revalidate: 30 },
-      }),
+    const [standingsRes, teamRes, rosterRes, newsRes, ...scoreboardResults] = await Promise.allSettled([
       fetch("https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings", {
         next: { revalidate: 180 },
       }),
@@ -38,6 +43,14 @@ export async function GET(request) {
       fetch("https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/news", {
         next: { revalidate: 300 },
       }),
+      ...SCOREBOARD_COMPETITIONS.map((compDef) =>
+        fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${compDef.slug}/scoreboard`, {
+          next: { revalidate: 20 },
+        }).then(async (res) => ({
+          compDef,
+          data: res.ok ? await res.json() : null,
+        }))
+      ),
     ]);
 
     // 1. Next Fixture & Broadcast Details
@@ -127,26 +140,51 @@ export async function GET(request) {
       }
     }
 
-    // 5. Current Gameweek Scoreboard
-    if (scoreboardRes.status === "fulfilled" && scoreboardRes.value.ok) {
-      const sbData = await scoreboardRes.value.json();
-      liveMatches = (sbData.events || []).map((e) => {
+    // 5. Current Gameweek & European Scoreboards (PL, UCL, UEL, UECL)
+    for (const sbRes of scoreboardResults) {
+      if (sbRes.status !== "fulfilled" || !sbRes.value?.data) continue;
+      const { compDef, data: sbData } = sbRes.value;
+      const events = sbData.events || [];
+      for (const e of events) {
         const comp = e.competitions?.[0];
         const home = comp?.competitors?.find((c) => c.homeAway === "home");
         const away = comp?.competitors?.find((c) => c.homeAway === "away");
-        return {
-          id: e.id,
+        const state = comp?.status?.type?.state || e.status?.type?.state || "pre";
+        const isLive = state === "in";
+        const displayClock =
+          comp?.status?.displayClock ||
+          e.status?.displayClock ||
+          comp?.status?.type?.shortDetail ||
+          null;
+        const parsedMatch = {
+          id: `espn-${e.id}`,
+          rawEventId: e.id,
           name: e.name,
           date: e.date,
-          state: e.status?.type?.state,
-          statusText: e.status?.type?.detail,
+          state,
+          isLive,
+          displayClock,
+          statusText: comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled",
+          competition: e.league?.name || compDef.label,
+          competitionCode: compDef.code,
+          isEuropean: compDef.isEuropean,
+          homeTeamId: home?.team?.id ? String(home.team.id) : null,
+          awayTeamId: away?.team?.id ? String(away.team.id) : null,
           homeTeam: home?.team?.displayName,
           awayTeam: away?.team?.displayName,
-          homeScore: home?.score ? parseInt(home.score, 10) : 0,
-          awayScore: away?.score ? parseInt(away.score, 10) : 0,
-          venue: comp?.venue?.fullName || "Premier League Stadium",
+          homeScore: home?.score !== undefined ? parseInt(home.score, 10) : 0,
+          awayScore: away?.score !== undefined ? parseInt(away.score, 10) : 0,
+          venue: comp?.venue?.fullName || (compDef.isEuropean ? "European Stadium" : "Premier League Stadium"),
         };
-      });
+        liveMatches.push(parsedMatch);
+
+        if (
+          isLive &&
+          (parsedMatch.homeTeamId === String(teamId) || parsedMatch.awayTeamId === String(teamId))
+        ) {
+          activeLiveMatch = parsedMatch;
+        }
+      }
     }
   } catch (err) {
     console.warn("Live sports feed fetch error:", err.message);
@@ -161,6 +199,7 @@ export async function GET(request) {
     clubName: clubInfo.name,
     manager: clubInfo.manager,
     formation: clubInfo.formation,
+    activeLiveMatch,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {
