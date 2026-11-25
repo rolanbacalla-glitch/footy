@@ -228,14 +228,21 @@ export default function TimeMachineView({
     const recentArchiveCards = sortedRecent.map((rm, idx) => {
       const hs = parseInt(rm.homeScore ?? "1", 10);
       const as = parseInt(rm.awayScore ?? "1", 10);
-      const selfGoals = rm.isHome ? hs : as;
-      const oppGoals = rm.isHome ? as : hs;
+      const isHome = Boolean(rm.isHome);
+      const selfGoals = isHome ? hs : as;
+      const oppGoals = isHome ? as : hs;
+      const outcome =
+        selfGoals > oppGoals ? "W" : selfGoals < oppGoals ? "L" : "D";
       const compLabel = rm.competition || "Premier League";
       return {
         id: rm.id || `archive-${idx}`,
-        title: `${clubName} vs ${rm.opponent}`,
+        title: `${clubName} ${isHome ? "vs" : "at"} ${rm.opponent}`,
         opponent: rm.opponent,
-        score: `${hs} – ${as}`,
+        isHome,
+        outcome,
+        selfGoals,
+        oppGoals,
+        score: `${selfGoals} – ${oppGoals}`,
         date: new Date(rm.date).toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
@@ -307,6 +314,33 @@ export default function TimeMachineView({
     archiveMatches[0] ||
     HISTORIC_MATCHES[0];
 
+  const getOutcomeStyles = (outcome) => {
+    if (outcome === "L") {
+      return {
+        label: "LOSS",
+        badge: "bg-[#F26E7C]/15 text-[#F26E7C] border-[#F26E7C]/35",
+        score: "text-[#F26E7C]",
+        accent: "border-l-[#F26E7C]/70",
+      };
+    }
+    if (outcome === "D") {
+      return {
+        label: "DRAW",
+        badge: "bg-[#F4BA5B]/15 text-[#F4BA5B] border-[#F4BA5B]/35",
+        score: "text-[#F4BA5B]",
+        accent: "border-l-[#F4BA5B]/70",
+      };
+    }
+    return {
+      label: "WIN",
+      badge: "bg-[#D2F865]/15 text-[#D2F865] border-[#D2F865]/35",
+      score: "text-[#D2F865]",
+      accent: "border-l-[#D2F865]/70",
+    };
+  };
+
+  const selectedOutcomeStyle = getOutcomeStyles(selectedMatch.outcome || "W");
+
   return (
     <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
       {/* Left 8 Cols: Archive Selector & Breakdown */}
@@ -314,34 +348,51 @@ export default function TimeMachineView({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {archiveMatches.map((match) => {
             const isSelected = selectedMatch.id === match.id;
+            const style = getOutcomeStyles(match.outcome || "W");
             return (
               <button
                 type="button"
                 key={match.id}
                 onClick={() => setSelectedMatchId(match.id)}
                 aria-pressed={isSelected}
-                className={`text-left p-5 rounded-[24px] transition-all cursor-pointer flex flex-col justify-between border ${
+                className={`text-left p-5 rounded-[24px] transition-all cursor-pointer flex flex-col justify-between border border-l-2 ${
+                  style.accent
+                } ${
                   isSelected
                     ? "glass-crimson-card"
                     : "glass-card hover:border-white/15"
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-[#8A8D96] mb-2">
-                    <span className="font-mono tabular-nums">{match.date}</span>
-                    <span className="truncate ml-2">{match.venue}</span>
+                  <div className="flex items-center justify-between gap-2 text-xs text-[#8A8D96] mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono tabular-nums shrink-0">{match.date}</span>
+                      {typeof match.isHome === "boolean" && (
+                        <span className="px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] font-mono text-[10px] font-semibold uppercase tracking-wider text-white/75 shrink-0">
+                          {match.isHome ? "HOME" : "AWAY"}
+                        </span>
+                      )}
+                    </div>
+                    <span className="truncate ml-1">{match.venue}</span>
                   </div>
 
-                  <h3 className="font-display text-base font-semibold text-white tracking-tight">
-                    {match.title}
-                  </h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-display text-base font-semibold text-white tracking-tight">
+                      {match.title}
+                    </h3>
+                    <span
+                      className={`px-2 py-0.5 rounded-full border font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 ${style.badge}`}
+                    >
+                      {style.label}
+                    </span>
+                  </div>
 
                   <div className="flex items-baseline gap-2.5 mt-2">
-                    <span className="font-display text-2xl font-light text-[#D2F865] tabular-nums">
+                    <span className={`font-display text-2xl font-light tabular-nums ${style.score}`}>
                       {match.score}
                     </span>
                     <span className="text-xs text-[#8A8D96]">
-                      vs {match.opponent}
+                      {clubShort} {match.isHome === false ? "away at" : "vs"} {match.opponent}
                     </span>
                   </div>
 
@@ -441,8 +492,15 @@ export default function TimeMachineView({
             </span>
           </div>
           <div className="glass-tile p-4">
-            <span className="text-[11px] text-[#8A8D96] block">Final Score</span>
-            <span className="font-display text-xl font-medium text-white tabular-nums mt-1.5 block">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] text-[#8A8D96] block">Final Score</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-full border font-mono text-[9px] font-bold uppercase tracking-wider ${selectedOutcomeStyle.badge}`}
+              >
+                {selectedOutcomeStyle.label}
+              </span>
+            </div>
+            <span className={`font-display text-xl font-medium tabular-nums mt-1.5 block ${selectedOutcomeStyle.score}`}>
               {selectedMatch.score}
             </span>
           </div>

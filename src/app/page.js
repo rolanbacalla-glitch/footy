@@ -34,6 +34,18 @@ const VALID_TABS = [
   "transfer-scout",
 ];
 
+function isSameCalendarDay(isoDate) {
+  if (!isoDate) return false;
+  const target = new Date(isoDate);
+  if (Number.isNaN(target.getTime())) return false;
+  const now = new Date();
+  return (
+    target.getFullYear() === now.getFullYear() &&
+    target.getMonth() === now.getMonth() &&
+    target.getDate() === now.getDate()
+  );
+}
+
 function resolveTabName(raw) {
   if (!raw) return null;
   const clean = String(raw).replace(/^#/, "").toLowerCase().trim();
@@ -293,9 +305,23 @@ export default function FootballInsightsDashboard() {
       (!targetFixture || targetFixture.id === liveFactData.activeLiveMatch.id || targetFixture.isLive)
         ? liveFactData.activeLiveMatch
         : null;
+    const matchdayOverride =
+      !liveOverride && liveFactData?.matchdayFixture ? liveFactData.matchdayFixture : null;
     const isMatchLive = Boolean(targetFixture?.isLive || liveOverride?.isLive);
+    const rawKickoffIso =
+      liveOverride?.date ||
+      matchdayOverride?.date ||
+      targetFixture?.date ||
+      liveFactData?.nextFixture?.date ||
+      null;
+    const isTodayUpcoming =
+      !isMatchLive &&
+      Boolean(
+        matchdayOverride ||
+          (targetFixture?.isUpcoming !== false && isSameCalendarDay(rawKickoffIso))
+      );
 
-    const oppName = targetFixture?.opponent || "Premier League Opponent";
+    const oppName = targetFixture?.opponent || matchdayOverride?.awayTeam || "Premier League Opponent";
     const oppInfo =
       Object.values(PREMIER_LEAGUE_MANAGERS).find(
         (c) => c.name.toLowerCase() === oppName.toLowerCase()
@@ -304,8 +330,8 @@ export default function FootballInsightsDashboard() {
     const isHome = targetFixture?.isHome ?? true;
     const homeInfo = isHome ? selectedClub : oppInfo;
     const awayInfo = isHome ? oppInfo : selectedClub;
-    const formattedDate = targetFixture?.date
-      ? new Date(targetFixture.date).toLocaleDateString("en-GB", {
+    const formattedDate = rawKickoffIso
+      ? new Date(rawKickoffIso).toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
           hour: "2-digit",
@@ -314,18 +340,22 @@ export default function FootballInsightsDashboard() {
       : "Upcoming Matchday";
 
     return {
-      id: targetFixture?.id || `club-${selectedClubId}`,
+      id: targetFixture?.id || matchdayOverride?.id || `club-${selectedClubId}`,
       teamId: selectedClubId,
       clubName: selectedClub.name,
       clubShort: selectedClub.shortName,
       type: isMatchLive ? "LIVE" : targetFixture?.isUpcoming !== false ? "MATCHDAY" : "RECENT",
       isLive: isMatchLive,
       isMatchday: !isMatchLive && targetFixture?.isUpcoming !== false,
-      title: `${liveOverride?.homeTeam || homeInfo.name} vs ${liveOverride?.awayTeam || awayInfo.name}`,
+      isMatchdayToday: isTodayUpcoming,
+      kickoffIso: rawKickoffIso,
+      broadcast: liveOverride?.broadcast || matchdayOverride?.broadcast || targetFixture?.broadcast || liveFactData?.nextFixture?.broadcast || null,
+      competitionCode: liveOverride?.competitionCode || matchdayOverride?.competitionCode || targetFixture?.competitionCode || null,
+      title: `${liveOverride?.homeTeam || matchdayOverride?.homeTeam || homeInfo.name} vs ${liveOverride?.awayTeam || matchdayOverride?.awayTeam || awayInfo.name}`,
       opponent: oppName,
-      competition: liveOverride?.competition || targetFixture?.competition || "Premier League",
+      competition: liveOverride?.competition || matchdayOverride?.competition || targetFixture?.competition || "Premier League",
       date: formattedDate,
-      venue: liveOverride?.venue || targetFixture?.venue || homeInfo.stadium,
+      venue: liveOverride?.venue || matchdayOverride?.venue || targetFixture?.venue || homeInfo.stadium,
       city: homeInfo.city,
       capacity: homeInfo.capacity,
       mainStand: homeInfo.mainStand,
@@ -340,8 +370,8 @@ export default function FootballInsightsDashboard() {
       homeScore: isMatchLive ? (liveOverride?.homeScore ?? targetFixture?.homeScore ?? 0) : targetFixture?.homeScore,
       awayScore: isMatchLive ? (liveOverride?.awayScore ?? targetFixture?.awayScore ?? 0) : targetFixture?.awayScore,
       minute: liveOverride?.displayClock || targetFixture?.displayClock || undefined,
-      homeTeam: liveOverride?.homeTeam || homeInfo.name,
-      awayTeam: liveOverride?.awayTeam || awayInfo.name,
+      homeTeam: liveOverride?.homeTeam || matchdayOverride?.homeTeam || homeInfo.name,
+      awayTeam: liveOverride?.awayTeam || matchdayOverride?.awayTeam || awayInfo.name,
       homeShort: homeInfo.shortName,
       awayShort: awayInfo.shortName,
       selectedManager: selectedClub.manager,
@@ -389,8 +419,43 @@ export default function FootballInsightsDashboard() {
     };
   })();
 
+  const isMatchdayToday = Boolean(
+    !activeMatch?.isLive &&
+      !liveFactData?.activeLiveMatch?.isLive &&
+      (liveFactData?.matchdayFixture ||
+        activeMatch?.isMatchdayToday ||
+        (liveSchedule.upcoming?.[0]?.date &&
+          isSameCalendarDay(liveSchedule.upcoming[0].date)) ||
+        (liveFactData?.nextFixture?.state === "pre" &&
+          isSameCalendarDay(liveFactData?.nextFixture?.date)))
+  );
+
+  const shouldShowScoreboard = Boolean(
+    activeMatch?.isLive || liveFactData?.activeLiveMatch?.isLive || isMatchdayToday
+  );
+
+  const matchdayKickoffIso =
+    liveFactData?.matchdayFixture?.date ||
+    activeMatch?.kickoffIso ||
+    (liveSchedule.upcoming?.[0]?.date &&
+    isSameCalendarDay(liveSchedule.upcoming[0].date)
+      ? liveSchedule.upcoming[0].date
+      : null) ||
+    (liveFactData?.nextFixture?.date &&
+    isSameCalendarDay(liveFactData.nextFixture.date)
+      ? liveFactData.nextFixture.date
+      : null);
+
+  // Sync dashboard countdown with real matchday kick-off timestamp
+  useEffect(() => {
+    if (!matchdayKickoffIso || previewOffset !== null) return;
+    const ts = new Date(matchdayKickoffIso).getTime();
+    if (Number.isNaN(ts)) return;
+    setCountdownSeconds(Math.max(0, Math.floor((ts - Date.now()) / 1000)));
+  }, [matchdayKickoffIso, previewOffset]);
+
   const lineupStatus =
-    activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday
+    activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday || isMatchdayToday
       ? isLineupConfirmed(currentPhase.id)
         ? "confirmed"
         : "predicted"
@@ -446,12 +511,17 @@ export default function FootballInsightsDashboard() {
           {/* ═══ TAB 1: MATCH CENTRE (Clean 2-Column Analytical Canvas + Fixtures Timeline Rail) ═══ */}
           {activeTab === "boot-room" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-              {/* Main Left-Centre 8/9 Cols: Live Scoreboard (when in play) + Hero Pitch Visualisation + 4 Stacked Atmospheric KPI Deck */}
+              {/* Main Left-Centre 8/9 Cols: Live / Matchday Countdown Scoreboard + Hero Pitch Visualisation + 4 Stacked Atmospheric KPI Deck */}
               <div className="xl:col-span-8 2xl:col-span-9 space-y-6 min-w-0">
-                {(activeMatch?.isLive || liveFactData?.activeLiveMatch?.isLive) && (
+                {shouldShowScoreboard && (
                   <LiveScoreboard
-                    activeMatch={activeMatch}
+                    activeMatch={
+                      matchdayKickoffIso && !activeMatch?.kickoffIso
+                        ? { ...activeMatch, kickoffIso: matchdayKickoffIso, isMatchdayToday }
+                        : activeMatch
+                    }
                     selectedClub={selectedClub}
+                    initialLiveFactData={liveFactData}
                   />
                 )}
 

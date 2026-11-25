@@ -16,6 +16,123 @@ const SCOREBOARD_COMPETITIONS = [
   { code: "UECL", slug: "uefa.europa.conf", label: "UEFA Conference League", isEuropean: true },
 ];
 
+function isSameUtcOrLocalDay(isoDate) {
+  if (!isoDate) return false;
+  const target = new Date(isoDate);
+  if (Number.isNaN(target.getTime())) return false;
+  const now = new Date();
+  return (
+    target.getUTCFullYear() === now.getUTCFullYear() &&
+    target.getUTCMonth() === now.getUTCMonth() &&
+    target.getUTCDate() === now.getUTCDate()
+  );
+}
+
+function parseScoreboardDetails(comp, homeTeamId, awayTeamId, homeName, awayName) {
+  const details = Array.isArray(comp?.details) ? comp.details : [];
+  const homeScorers = [];
+  const awayScorers = [];
+  const homeCards = [];
+  const awayCards = [];
+  const incidents = [];
+
+  for (const d of details) {
+    const min = d.clock?.displayValue || "";
+    const teamId = d.team?.id ? String(d.team.id) : null;
+    const isHome = teamId && homeTeamId && teamId === String(homeTeamId);
+    const isAway = teamId && awayTeamId && teamId === String(awayTeamId);
+    const player =
+      d.athletesInvolved?.[0]?.displayName ||
+      d.athletesInvolved?.[0]?.shortName ||
+      "Player";
+    const teamSide = isHome ? "home" : isAway ? "away" : "info";
+    const teamLabel = isHome ? homeName : isAway ? awayName : "";
+
+    if (d.scoringPlay) {
+      const scorer = {
+        player,
+        min,
+        isPenalty: Boolean(d.penaltyKick),
+        isOwnGoal: Boolean(d.ownGoal),
+      };
+      if (isHome) homeScorers.push(scorer);
+      else if (isAway) awayScorers.push(scorer);
+
+      const suffix = d.penaltyKick ? " (Pen)" : d.ownGoal ? " (OG)" : "";
+      incidents.push({
+        min,
+        type: "goal",
+        text: `GOAL! ${player}${suffix}${teamLabel ? ` (${teamLabel})` : ""}`,
+        team: teamSide,
+      });
+    } else if (d.redCard || d.yellowCard) {
+      const cardType = d.redCard ? "red" : "yellow";
+      const cardEntry = { player, min, type: cardType };
+      if (isHome) homeCards.push(cardEntry);
+      else if (isAway) awayCards.push(cardEntry);
+
+      incidents.push({
+        min,
+        type: cardType === "red" ? "red-card" : "yellow-card",
+        text: `${cardType === "red" ? "Red card" : "Yellow card"}: ${player}${teamLabel ? ` (${teamLabel})` : ""}`,
+        team: teamSide,
+      });
+    }
+  }
+
+  return {
+    homeScorers,
+    awayScorers,
+    homeCards,
+    awayCards,
+    incidents: incidents.reverse(),
+  };
+}
+
+function parseTeamStats(home, away) {
+  const getStat = (comp, names) => {
+    const stats = Array.isArray(comp?.statistics) ? comp.statistics : [];
+    for (const name of names) {
+      const found = stats.find((s) => s.name === name);
+      if (found && found.displayValue !== undefined && found.displayValue !== "") {
+        const num = parseFloat(found.displayValue);
+        if (!Number.isNaN(num)) return num;
+      }
+    }
+    return null;
+  };
+
+  const homePoss = getStat(home, ["possessionPct"]);
+  const awayPoss = getStat(away, ["possessionPct"]);
+  const homeShots = getStat(home, ["totalShots"]);
+  const awayShots = getStat(away, ["totalShots"]);
+  const homeSot = getStat(home, ["shotsOnTarget"]);
+  const awaySot = getStat(away, ["shotsOnTarget"]);
+  const homeCorners = getStat(home, ["wonCorners"]);
+  const awayCorners = getStat(away, ["wonCorners"]);
+  const homeFouls = getStat(home, ["foulsCommitted"]);
+  const awayFouls = getStat(away, ["foulsCommitted"]);
+  const homeSaves = getStat(home, ["saves"]);
+  const awaySaves = getStat(away, ["saves"]);
+
+  const hasAny = [
+    homePoss, awayPoss, homeShots, awayShots,
+    homeSot, awaySot, homeCorners, awayCorners,
+    homeFouls, awayFouls, homeSaves, awaySaves,
+  ].some((v) => v !== null);
+
+  if (!hasAny) return null;
+
+  return {
+    possession: homePoss !== null && awayPoss !== null ? [homePoss, awayPoss] : null,
+    shots: homeShots !== null && awayShots !== null ? [homeShots, awayShots] : null,
+    shotsOnTarget: homeSot !== null && awaySot !== null ? [homeSot, awaySot] : null,
+    corners: homeCorners !== null && awayCorners !== null ? [homeCorners, awayCorners] : null,
+    fouls: homeFouls !== null && awayFouls !== null ? [homeFouls, awayFouls] : null,
+    saves: homeSaves !== null && awaySaves !== null ? [homeSaves, awaySaves] : null,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const teamId = searchParams.get("teamId") || "364";
@@ -23,6 +140,7 @@ export async function GET(request) {
 
   let liveMatches = [];
   let activeLiveMatch = null;
+  let matchdayFixture = null;
   let standings = { selected: null, opponent: null };
   let liveNextEvent = null;
   let liveRoster = [];
@@ -156,6 +274,25 @@ export async function GET(request) {
           e.status?.displayClock ||
           comp?.status?.type?.shortDetail ||
           null;
+        const period = comp?.status?.period ?? e.status?.period ?? null;
+        const shortDetail =
+          comp?.status?.type?.shortDetail || e.status?.type?.shortDetail || null;
+        const broadcasts = (comp?.broadcasts || []).flatMap(
+          (b) => b.media?.shortName || b.names || []
+        );
+        const homeTeamId = home?.team?.id ? String(home.team.id) : null;
+        const awayTeamId = away?.team?.id ? String(away.team.id) : null;
+        const homeName = home?.team?.displayName || "Home";
+        const awayName = away?.team?.displayName || "Away";
+        const parsedDetails = parseScoreboardDetails(
+          comp,
+          homeTeamId,
+          awayTeamId,
+          homeName,
+          awayName
+        );
+        const liveStats = parseTeamStats(home, away);
+
         const parsedMatch = {
           id: `espn-${e.id}`,
           rawEventId: e.id,
@@ -163,28 +300,99 @@ export async function GET(request) {
           date: e.date,
           state,
           isLive,
+          isMatchday: state === "pre" && isSameUtcOrLocalDay(e.date),
+          period,
           displayClock,
+          shortDetail,
           statusText: comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled",
           competition: e.league?.name || compDef.label,
           competitionCode: compDef.code,
           isEuropean: compDef.isEuropean,
-          homeTeamId: home?.team?.id ? String(home.team.id) : null,
-          awayTeamId: away?.team?.id ? String(away.team.id) : null,
-          homeTeam: home?.team?.displayName,
-          awayTeam: away?.team?.displayName,
+          broadcast:
+            broadcasts[0] || (compDef.isEuropean ? "TNT Sports" : "Sky Sports"),
+          attendance: comp?.attendance || null,
+          homeTeamId,
+          awayTeamId,
+          homeTeam: homeName,
+          awayTeam: awayName,
+          homeShort: home?.team?.abbreviation || homeName.slice(0, 3).toUpperCase(),
+          awayShort: away?.team?.abbreviation || awayName.slice(0, 3).toUpperCase(),
           homeScore: home?.score !== undefined ? parseInt(home.score, 10) : 0,
           awayScore: away?.score !== undefined ? parseInt(away.score, 10) : 0,
           venue: comp?.venue?.fullName || (compDef.isEuropean ? "European Stadium" : "Premier League Stadium"),
+          homeScorers: parsedDetails.homeScorers,
+          awayScorers: parsedDetails.awayScorers,
+          homeCards: parsedDetails.homeCards,
+          awayCards: parsedDetails.awayCards,
+          incidents: parsedDetails.incidents,
+          liveStats,
         };
         liveMatches.push(parsedMatch);
 
-        if (
-          isLive &&
-          (parsedMatch.homeTeamId === String(teamId) || parsedMatch.awayTeamId === String(teamId))
-        ) {
+        const involvesSelectedClub =
+          parsedMatch.homeTeamId === String(teamId) ||
+          parsedMatch.awayTeamId === String(teamId);
+
+        if (isLive && involvesSelectedClub) {
           activeLiveMatch = parsedMatch;
+        } else if (
+          !matchdayFixture &&
+          state === "pre" &&
+          involvesSelectedClub &&
+          isSameUtcOrLocalDay(e.date)
+        ) {
+          matchdayFixture = parsedMatch;
         }
       }
+    }
+
+    // Fallback: if team nextEvent is scheduled for today and not already captured from scoreboard
+    if (
+      !activeLiveMatch &&
+      !matchdayFixture &&
+      liveNextEvent &&
+      liveNextEvent.state === "pre" &&
+      isSameUtcOrLocalDay(liveNextEvent.date)
+    ) {
+      matchdayFixture = {
+        id: `espn-${liveNextEvent.id}`,
+        rawEventId: liveNextEvent.id,
+        name: liveNextEvent.name,
+        date: liveNextEvent.date,
+        state: "pre",
+        isLive: false,
+        isMatchday: true,
+        period: null,
+        displayClock: null,
+        shortDetail: liveNextEvent.status,
+        statusText: liveNextEvent.status,
+        competition: liveNextEvent.competition,
+        competitionCode: liveNextEvent.competition?.toLowerCase().includes("champions")
+          ? "UCL"
+          : liveNextEvent.competition?.toLowerCase().includes("europa")
+            ? "UEL"
+            : liveNextEvent.competition?.toLowerCase().includes("conference")
+              ? "UECL"
+              : "PL",
+        isEuropean: !liveNextEvent.competition?.toLowerCase().includes("premier"),
+        broadcast: liveNextEvent.broadcast,
+        attendance: null,
+        homeTeamId: liveNextEvent.isHome ? String(teamId) : String(liveNextEvent.opponentId || ""),
+        awayTeamId: liveNextEvent.isHome ? String(liveNextEvent.opponentId || "") : String(teamId),
+        homeTeam: liveNextEvent.homeTeam,
+        awayTeam: liveNextEvent.awayTeam,
+        homeShort: (liveNextEvent.homeTeam || "HOM").slice(0, 3).toUpperCase(),
+        awayShort: (liveNextEvent.awayTeam || "AWY").slice(0, 3).toUpperCase(),
+        homeScore: 0,
+        awayScore: 0,
+        venue: liveNextEvent.venue,
+        homeScorers: [],
+        awayScorers: [],
+        homeCards: [],
+        awayCards: [],
+        incidents: [],
+        liveStats: null,
+      };
     }
   } catch (err) {
     console.warn("Live sports feed fetch error:", err.message);
@@ -200,6 +408,7 @@ export async function GET(request) {
     manager: clubInfo.manager,
     formation: clubInfo.formation,
     activeLiveMatch,
+    matchdayFixture,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {

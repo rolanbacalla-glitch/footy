@@ -1,57 +1,141 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PreMatchPanel, { getMatchdayPhase, isLineupConfirmed } from "./PreMatchPanel";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 import {
   Clock,
-  Flame,
+  Tv,
   Zap,
   Volume2,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 
-export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChange }) {
-  const [seconds, setSeconds] = useState(42);
-  const [countdownSeconds, setCountdownSeconds] = useState(16155); // ~4 hours 29 mins 15 secs
+function computeSecondsUntilKickoff(isoDate) {
+  if (!isoDate) return null;
+  const ts = new Date(isoDate).getTime();
+  if (Number.isNaN(ts)) return null;
+  return Math.max(0, Math.floor((ts - Date.now()) / 1000));
+}
+
+function formatKickoffTimeUk(isoDate, fallback = "Kick-off TBC") {
+  if (!isoDate) return fallback;
+  const dt = new Date(isoDate);
+  if (Number.isNaN(dt.getTime())) return fallback;
+  try {
+    return dt.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
+      timeZoneName: "short",
+    });
+  } catch {
+    return dt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+}
+
+function formatOffsetTimeUk(isoDate, minusMinutes) {
+  if (!isoDate) return `T-${minusMinutes}m`;
+  const ts = new Date(isoDate).getTime();
+  if (Number.isNaN(ts)) return `T-${minusMinutes}m`;
+  const dt = new Date(ts - minusMinutes * 60 * 1000);
+  try {
+    return dt.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
+    });
+  } catch {
+    return dt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+}
+
+function formatPeriodLabel(match) {
+  const clock = String(match?.displayClock || match?.shortDetail || "").toUpperCase();
+  if (clock === "HT" || clock.includes("HALF")) return "Half-Time";
+  if (clock === "FT" || clock.includes("FULL")) return "Full-Time";
+  if (match?.period === 1) return "1st Half";
+  if (match?.period === 2) return "2nd Half";
+  if (match?.period >= 3) return "Extra Time";
+  return "In Play";
+}
+
+function formatLiveClock(rawClock) {
+  if (!rawClock) return "LIVE";
+  const trimmed = String(rawClock).trim();
+  if (/^\d+$/.test(trimmed)) return `${trimmed}'`;
+  return trimmed;
+}
+
+export default function LiveScoreboard({
+  activeMatch,
+  selectedClub,
+  onPhaseChange,
+  initialLiveFactData = null,
+}) {
+  const [liveFactData, setLiveFactData] = useState(initialLiveFactData);
   const [previewOffset, setPreviewOffset] = useState(null);
-  const [realCountdown, setRealCountdown] = useState(null);
   const [expandedStats, setExpandedStats] = useState(false);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
-  const [liveFactData, setLiveFactData] = useState(null);
 
-  const club = selectedClub || getTeamManagerInfo(activeMatch?.teamId || "364") || getTeamManagerInfo("364");
+  useEffect(() => {
+    if (initialLiveFactData) setLiveFactData(initialLiveFactData);
+  }, [initialLiveFactData]);
+
+  const club =
+    selectedClub ||
+    getTeamManagerInfo(activeMatch?.teamId || "364") ||
+    getTeamManagerInfo("364");
+
   const liveMatchFromApi = liveFactData?.activeLiveMatch || null;
-  const isLive = Boolean(activeMatch?.type === "LIVE" || activeMatch?.isLive || liveMatchFromApi?.isLive);
+  const matchdayFromApi = liveFactData?.matchdayFixture || null;
+
+  const isLive = Boolean(
+    activeMatch?.type === "LIVE" || activeMatch?.isLive || liveMatchFromApi?.isLive
+  );
   const isMatchdayPreMatch =
     !isLive &&
-    (activeMatch?.type === "MATCHDAY" ||
-      activeMatch?.status === "PRE_MATCH" ||
-      (activeMatch?.isMatchday && !activeMatch?.isLive));
-  const isFinished = !isLive && activeMatch?.type === "RECENT";
+    Boolean(
+      matchdayFromApi ||
+        activeMatch?.isMatchdayToday ||
+        activeMatch?.type === "MATCHDAY" ||
+        activeMatch?.status === "PRE_MATCH" ||
+        (activeMatch?.isMatchday && !activeMatch?.isLive)
+    );
+  const isFinished = !isLive && !isMatchdayPreMatch && activeMatch?.type === "RECENT";
+
+  const kickoffIso =
+    liveMatchFromApi?.date ||
+    matchdayFromApi?.date ||
+    activeMatch?.kickoffIso ||
+    liveFactData?.nextFixture?.date ||
+    null;
+
+  const [countdownSeconds, setCountdownSeconds] = useState(() => {
+    const computed = computeSecondsUntilKickoff(kickoffIso);
+    return computed !== null ? computed : 0;
+  });
+
+  const checkLiveFacts = useCallback(async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
+    const teamId = club?.id || activeMatch?.teamId || "364";
+    try {
+      const res = await fetch(`/api/live-fixtures?teamId=${encodeURIComponent(teamId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        setLiveFactData(json);
+      }
+    } catch {
+      // Silent fallback
+    }
+  }, [club?.id, activeMatch?.teamId]);
 
   // Adaptive Live Fact-Checking Polling scoped to the selected club
   useEffect(() => {
-    let isMounted = true;
-    const teamId = club?.id || activeMatch?.teamId || "364";
-
-    async function checkLiveFacts() {
-      if (typeof document !== "undefined" && document.hidden) return;
-      try {
-        const res = await fetch(`/api/live-fixtures?teamId=${encodeURIComponent(teamId)}`);
-        if (res.ok) {
-          const json = await res.json();
-          if (isMounted) setLiveFactData(json);
-        }
-      } catch {
-        // Silent fallback
-      }
-    }
-
     checkLiveFacts();
 
-    const pollIntervalMs = isLive ? 15000 : isMatchdayPreMatch ? 60000 : 300000;
+    const pollIntervalMs = isLive ? 15000 : isMatchdayPreMatch ? 45000 : 300000;
     const interval = setInterval(checkLiveFacts, pollIntervalMs);
 
     const handleVisibilityChange = () => {
@@ -62,37 +146,48 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
     }
 
     return () => {
-      isMounted = false;
       clearInterval(interval);
       if (typeof document !== "undefined") {
         document.removeEventListener("visibilitychange", handleVisibilityChange);
       }
     };
-  }, [isLive, isMatchdayPreMatch, club?.id, activeMatch?.teamId]);
+  }, [isLive, isMatchdayPreMatch, checkLiveFacts]);
 
-  // Match clock seconds ticker for live match
+  // Real-time kick-off countdown anchored to ISO timestamp (zero drift)
   useEffect(() => {
-    if (!isLive) return;
-    const interval = setInterval(() => {
-      setSeconds((prev) => (prev >= 59 ? 0 : prev + 1));
-    }, 1000);
+    if (!isMatchdayPreMatch || previewOffset !== null) return;
+
+    const syncCountdown = () => {
+      const remaining = computeSecondsUntilKickoff(kickoffIso);
+      if (remaining !== null) {
+        setCountdownSeconds(remaining);
+        if (remaining === 0) {
+          checkLiveFacts();
+        }
+      }
+    };
+
+    syncCountdown();
+    const interval = setInterval(syncCountdown, 1000);
     return () => clearInterval(interval);
-  }, [isLive]);
+  }, [isMatchdayPreMatch, kickoffIso, previewOffset, checkLiveFacts]);
 
-  // Pre-match countdown ticker towards kick-off
+  // Preview mode ticker when user inspects matchday phases
   useEffect(() => {
-    if (!isMatchdayPreMatch) return;
+    if (!isMatchdayPreMatch || previewOffset === null) return;
     const interval = setInterval(() => {
       setCountdownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [isMatchdayPreMatch]);
+  }, [isMatchdayPreMatch, previewOffset]);
 
   const countdownHours = Math.floor(countdownSeconds / 3600);
   const countdownMinutes = Math.floor((countdownSeconds % 3600) / 60);
   const countdownSecs = countdownSeconds % 60;
+  const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+  const formattedCountdown = `${pad2(countdownHours)}:${pad2(countdownMinutes)}:${pad2(countdownSecs)}`;
 
-  // Matchday phase (Predicted XI until line-ups are published at T-75)
+  // Matchday phase (Predicted XI until line-ups are published at T-75m)
   const phase = getMatchdayPhase(countdownSeconds);
   const lineupConfirmed = isLineupConfirmed(phase.id);
   const isPreviewing = previewOffset !== null;
@@ -102,72 +197,148 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
   }, [isMatchdayPreMatch, phase.id, onPhaseChange]);
 
   const handlePreviewPhase = (secondsBeforeKickoff) => {
-    if (previewOffset === null) setRealCountdown(countdownSeconds);
     setPreviewOffset(secondsBeforeKickoff);
     setCountdownSeconds(secondsBeforeKickoff);
   };
 
   const handleResetPreview = () => {
-    setCountdownSeconds(realCountdown ?? 16155);
     setPreviewOffset(null);
+    const real = computeSecondsUntilKickoff(kickoffIso);
+    setCountdownSeconds(real !== null ? real : 0);
   };
 
-  const homeTeam = activeMatch?.homeTeam || club.name;
-  const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Opponent";
+  const authoritativeMatch = liveMatchFromApi || matchdayFromApi || null;
+
+  const homeTeam = authoritativeMatch?.homeTeam || activeMatch?.homeTeam || club.name;
+  const awayTeam =
+    authoritativeMatch?.awayTeam ||
+    activeMatch?.awayTeam ||
+    activeMatch?.opponent ||
+    "Opponent";
+
   const homeInfo = getTeamManagerInfo(homeTeam) || club;
   const awayInfo = getTeamManagerInfo(awayTeam) || {
     name: awayTeam,
     shortName: (awayTeam || "OPP").slice(0, 3).toUpperCase(),
     manager: "Head Coach",
     formation: "4-2-3-1",
-    stadium: "Premier League Stadium",
-    city: "England",
-    capacity: "45,000",
+    stadium: "Stadium",
+    city: "",
+    capacity: "",
     mainStand: "Main Stand",
     anthem: "Club Anthem",
   };
 
-  const venueName = activeMatch?.venue || homeInfo.stadium || club.stadium;
+  const venueName =
+    authoritativeMatch?.venue || activeMatch?.venue || homeInfo.stadium || club.stadium;
   const venueCity = activeMatch?.city || homeInfo.city || club.city;
-  const venueCapacity = activeMatch?.capacity || homeInfo.capacity || club.capacity;
+  const venueCapacity = authoritativeMatch?.attendance
+    ? `${Number(authoritativeMatch.attendance).toLocaleString("en-GB")} Att.`
+    : activeMatch?.capacity || homeInfo.capacity || club.capacity;
   const venueMainStand = activeMatch?.mainStand || homeInfo.mainStand || club.mainStand;
   const venueAnthem = activeMatch?.anthem || homeInfo.anthem || club.anthem;
+  const competitionName =
+    authoritativeMatch?.competition || activeMatch?.competition || "Premier League";
+  const competitionCode =
+    authoritativeMatch?.competitionCode ||
+    activeMatch?.competitionCode ||
+    (competitionName.toLowerCase().includes("champions")
+      ? "UCL"
+      : competitionName.toLowerCase().includes("europa")
+        ? "UEL"
+        : competitionName.toLowerCase().includes("conference")
+          ? "UECL"
+          : "PL");
+  const isEuropean =
+    authoritativeMatch?.isEuropean ?? competitionCode !== "PL";
+  const broadcastChannel =
+    authoritativeMatch?.broadcast ||
+    activeMatch?.broadcast ||
+    liveFactData?.nextFixture?.broadcast ||
+    null;
+
+  const kickoffTime = formatKickoffTimeUk(
+    kickoffIso,
+    activeMatch?.kickoffTime || "Kick-off TBC"
+  );
 
   const PHASE_ATMOSPHERE = {
-    BUILD_UP: `Matchday build-up • ${venueName} turnstiles open 14:30`,
+    BUILD_UP: `Matchday build-up • Turnstiles open ${formatOffsetTimeUk(kickoffIso, 120)}`,
     GATES: `Turnstiles open • Supporters arriving at ${venueName}`,
-    LINEUPS: "Official Premier League team news is in",
+    LINEUPS: "Official team news confirmed",
     WARMUPS: `Warm-ups underway at ${venueName}`,
     TUNNEL: `Teams in the tunnel • ${venueAnthem}`,
-    KICKOFF: "Kick-off",
+    KICKOFF: "Kick-off imminent",
   };
 
-  const strikerName = activeMatch?.startingXI?.[9]?.name || club.captain;
-  const playmakerName = activeMatch?.startingXI?.[7]?.name || club.captain;
-  const wingerName = activeMatch?.startingXI?.[8]?.name || club.captain;
+  // Timeline events: real in-play match incidents OR real-time-anchored pre-match itinerary
+  const liveIncidents = authoritativeMatch?.incidents?.length
+    ? authoritativeMatch.incidents
+    : activeMatch?.incidents?.length
+      ? activeMatch.incidents
+      : null;
 
-  // Timeline events: in-play match incidents OR pre-match matchday itinerary
-  const preMatchNotes = isMatchdayPreMatch && activeMatch?.preMatch?.milestones
-    ? activeMatch.preMatch.milestones.map((text) => ({ min: "★", type: "note", text, team: "info" }))
-    : null;
-  const incidents = preMatchNotes || activeMatch?.incidents || (
-    isMatchdayPreMatch
-      ? [
-          { min: "15:15", type: "news", text: "Official starting line-ups submitted & confirmed to the Premier League", team: "info" },
-          { min: "15:45", type: "warmup", text: `${homeTeam} & ${awayTeam} squads emerge onto the ${venueName} pitch for warm-up drills`, team: "info" },
-          { min: "16:15", type: "atmosphere", text: `${venueMainStand} fills to ${venueCapacity} capacity as club banners are unfurled`, team: "home" },
-          { min: "16:25", type: "hymn", text: `'${venueAnthem}' rings out across ${venueName}; captains line up in the tunnel`, team: "home" },
-          { min: "16:30", type: "kickoff", text: "Scheduled Kick-Off • Live match telemetry, xG, and pass networks stream live", team: "info" },
-        ]
-      : [
-          { min: "74'", type: "chance", text: `${strikerName} forces a fingertip save after ${playmakerName}'s through-ball`, team: "home" },
-          { min: "61'", type: "goal", text: `GOAL! ${playmakerName} finishes clinical cutback from ${wingerName}`, team: "home" },
-          { min: "24'", type: "goal", text: `GOAL! ${strikerName} opens the scoring with a composed finish inside the box`, team: "home" },
-        ]
-  );
+  const preMatchNotes =
+    isMatchdayPreMatch && activeMatch?.preMatch?.milestones
+      ? activeMatch.preMatch.milestones.map((text) => ({
+          min: "★",
+          type: "note",
+          text,
+          team: "info",
+        }))
+      : null;
+
+  const incidents = isMatchdayPreMatch
+    ? preMatchNotes || [
+        {
+          min: formatOffsetTimeUk(kickoffIso, 75),
+          type: "news",
+          text: "Official starting line-ups & substitutes published (T-75m)",
+          team: "info",
+        },
+        {
+          min: formatOffsetTimeUk(kickoffIso, 45),
+          type: "warmup",
+          text: `${homeTeam} & ${awayTeam} squads emerge onto the ${venueName} pitch for warm-up drills`,
+          team: "info",
+        },
+        {
+          min: formatOffsetTimeUk(kickoffIso, 15),
+          type: "atmosphere",
+          text: `${venueMainStand} fills ahead of kick-off at ${venueName}`,
+          team: "home",
+        },
+        {
+          min: formatOffsetTimeUk(kickoffIso, 5),
+          type: "hymn",
+          text: `Teams line up in the tunnel at ${venueName}`,
+          team: "home",
+        },
+        {
+          min: kickoffTime,
+          type: "kickoff",
+          text: `Scheduled Kick-Off • Live score, scorers, cards & telemetry update automatically`,
+          team: "info",
+        },
+      ]
+    : liveIncidents || [
+        {
+          min: formatLiveClock(
+            liveMatchFromApi?.displayClock || activeMatch?.minute || "LIVE"
+          ),
+          type: "info",
+          text: `${homeTeam} vs ${awayTeam} — Live match feed connected (${competitionName})`,
+          team: "info",
+        },
+      ];
 
   // Auto-cycle through timeline events
   useEffect(() => {
+    setActiveIncidentIndex(0);
+  }, [incidents.length, isLive, isMatchdayPreMatch]);
+
+  useEffect(() => {
+    if (incidents.length <= 1) return;
     const timer = setInterval(() => {
       setActiveIncidentIndex((prev) => (prev + 1) % incidents.length);
     }, 4500);
@@ -176,40 +347,57 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
 
   const homeScore = isMatchdayPreMatch
     ? 0
-    : (liveMatchFromApi?.homeScore ?? activeMatch?.homeScore ?? (isLive ? 0 : activeMatch?.score?.split("-")[0]?.trim() || 0));
+    : (liveMatchFromApi?.homeScore ??
+      activeMatch?.homeScore ??
+      (isLive ? 0 : activeMatch?.score?.split("-")[0]?.trim() || 0));
   const awayScore = isMatchdayPreMatch
     ? 0
-    : (liveMatchFromApi?.awayScore ?? activeMatch?.awayScore ?? (isLive ? 0 : activeMatch?.score?.split("-")[1]?.trim() || 0));
+    : (liveMatchFromApi?.awayScore ??
+      activeMatch?.awayScore ??
+      (isLive ? 0 : activeMatch?.score?.split("-")[1]?.trim() || 0));
 
   const homeScorers = isMatchdayPreMatch
     ? []
-    : (activeMatch?.homeScorers?.length
-        ? activeMatch.homeScorers
-        : [{ player: strikerName, min: "24'" }, { player: playmakerName, min: "61'" }].slice(0, Number(homeScore) || 0));
-
+    : liveMatchFromApi?.homeScorers || activeMatch?.homeScorers || [];
   const awayScorers = isMatchdayPreMatch
     ? []
-    : (activeMatch?.awayScorers?.length
-        ? activeMatch.awayScorers
-        : [{ player: awayInfo.captain || "Visitor", min: "52'" }].slice(0, Number(awayScore) || 0));
+    : liveMatchFromApi?.awayScorers || activeMatch?.awayScorers || [];
+  const homeCards = isMatchdayPreMatch
+    ? []
+    : liveMatchFromApi?.homeCards || activeMatch?.homeCards || [];
+  const awayCards = isMatchdayPreMatch
+    ? []
+    : liveMatchFromApi?.awayCards || activeMatch?.awayCards || [];
 
-  const possession = activeMatch?.liveStats?.possession || [58, 42];
-  const shots = activeMatch?.liveStats?.shots || [15, 8];
-  const shotsOnTarget = activeMatch?.liveStats?.shotsOnTarget || [6, 3];
-  const xG = activeMatch?.liveStats?.xg || [activeMatch?.metrics?.teamXg || 2.18, activeMatch?.metrics?.opponentXg || 1.04];
-  const corners = activeMatch?.liveStats?.corners || [6, 3];
+  const realStats = liveMatchFromApi?.liveStats || activeMatch?.liveStats || null;
+  const possession = realStats?.possession || null;
+  const shots = realStats?.shots || null;
+  const shotsOnTarget = realStats?.shotsOnTarget || null;
+  const corners = realStats?.corners || null;
+  const fouls = realStats?.fouls || null;
+  const saves = realStats?.saves || null;
 
-  const currentMinute =
-    liveMatchFromApi?.displayClock || activeMatch?.minute || "LIVE";
-  const kickoffTime = activeMatch?.kickoffTime || "16:30 GMT";
+  const liveClockDisplay = formatLiveClock(
+    liveMatchFromApi?.displayClock || activeMatch?.minute || "LIVE"
+  );
+  const periodLabel = formatPeriodLabel(liveMatchFromApi || activeMatch);
 
-  const selectedRank = liveFactData?.standings?.selected?.rank || activeMatch?.standings?.selected?.rank;
-  const selectedPts = liveFactData?.standings?.selected?.points || activeMatch?.standings?.selected?.points;
-  const oppRank = liveFactData?.standings?.opponent?.rank || activeMatch?.standings?.opponent?.rank;
-  const oppPts = liveFactData?.standings?.opponent?.points || activeMatch?.standings?.opponent?.points;
+  const selectedRank =
+    liveFactData?.standings?.selected?.rank || activeMatch?.standings?.selected?.rank;
+  const selectedPts =
+    liveFactData?.standings?.selected?.points || activeMatch?.standings?.selected?.points;
+  const oppRank =
+    liveFactData?.standings?.opponent?.rank || activeMatch?.standings?.opponent?.rank;
+  const oppPts =
+    liveFactData?.standings?.opponent?.points || activeMatch?.standings?.opponent?.points;
+
+  const safeIncident = incidents[activeIncidentIndex] || incidents[0];
 
   return (
-    <div className="w-full relative rounded-[22px] overflow-hidden apple-card border border-white/[0.12] bg-[#0A0D12]/90 shadow-[0_12px_40px_rgba(0,0,0,0.65)] select-none">
+    <div
+      aria-label={isLive ? "Live match scoreboard" : "Matchday countdown scoreboard"}
+      className="w-full relative rounded-[22px] overflow-hidden apple-card border border-white/[0.12] bg-[#0A0D12]/90 shadow-[0_12px_40px_rgba(0,0,0,0.65)] select-none"
+    >
       {/* Dynamic Ambient Stadium Floodlight Glow */}
       <div
         aria-hidden="true"
@@ -228,11 +416,12 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/[0.08] text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             {isMatchdayPreMatch ? (
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-bold text-[11px] tracking-wide shadow-sm">
-                <Clock className="w-3.5 h-3.5 text-white animate-pulse" />
-                {phase.id === "BUILD_UP" ? "MATCHDAY" : phase.label.toUpperCase()} • KICK-OFF {kickoffTime}
-                <span className="text-white/80 font-mono text-[10px] ml-1 bg-black/50 px-2 py-0.5 rounded-full border border-white/10 tabular-nums">
-                  T-{countdownHours}h {countdownMinutes}m {countdownSecs < 10 ? `0${countdownSecs}` : countdownSecs}s
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D2F865]/15 border border-[#D2F865]/35 text-[#D2F865] font-bold text-[11px] tracking-wide shadow-sm">
+                <Clock className="w-3.5 h-3.5 animate-pulse" />
+                {phase.id === "BUILD_UP" ? "MATCHDAY" : phase.label.toUpperCase()} • KICK-OFF{" "}
+                {kickoffTime}
+                <span className="text-white font-mono text-[10px] ml-1 bg-black/60 px-2 py-0.5 rounded-full border border-white/15 tabular-nums">
+                  {countdownSeconds > 0 ? `T-${formattedCountdown}` : "KICK-OFF IMMINENT"}
                 </span>
               </span>
             ) : isLive ? (
@@ -241,9 +430,9 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF2636]" />
                 </span>
-                LIVE {currentMinute}&apos;
-                <span className="text-white/60 font-mono text-[10px] tabular-nums">
-                  ({currentMinute}:{seconds < 10 ? `0${seconds}` : seconds})
+                LIVE • {liveClockDisplay}
+                <span className="text-white/75 font-mono text-[10px] uppercase">
+                  ({periodLabel})
                 </span>
               </span>
             ) : isFinished ? (
@@ -256,20 +445,42 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
               </span>
             )}
 
+            <span
+              className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-bold uppercase ${
+                isEuropean
+                  ? "bg-[#637AE0]/25 text-[#A5B8FF] border border-[#637AE0]/35"
+                  : "bg-white/10 text-white/90 border border-white/15"
+              }`}
+            >
+              {competitionCode}
+            </span>
+
             <span className="font-semibold text-white/90 tracking-[-0.01em]">
-              {activeMatch?.competition || "Premier League"}
+              {competitionName}
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-[#8E8E93] text-[11px] hidden sm:inline">
-              {venueName}, {venueCity} • Att: {venueCapacity} (Capacity)
+              {venueName}
+              {venueCity ? `, ${venueCity}` : ""}
+              {venueCapacity ? ` • ${venueCapacity}` : ""}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 text-[11px]">
+          <div className="flex items-center gap-2 text-[11px] flex-wrap">
+            {broadcastChannel && (
+              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.1] text-white/85 font-medium">
+                <Tv className="w-3 h-3 text-[#637AE0]" />
+                <span>{broadcastChannel}</span>
+              </span>
+            )}
+
             {selectedRank && (
               <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8E8E93]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
-                <span className="text-white font-semibold">{club.shortName} #{selectedRank}</span> ({selectedPts} pts)
+                <span className="text-white font-semibold">
+                  {club.shortName} #{selectedRank}
+                </span>{" "}
+                ({selectedPts} pts)
                 {oppRank && (
                   <>
                     <span className="text-white/30">vs</span>
@@ -279,11 +490,10 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
               </span>
             )}
 
-            <span className="flex items-center gap-1 text-[#8E8E93]">
+            <span className="hidden xl:flex items-center gap-1 text-[#8E8E93]">
               <Volume2 className="w-3.5 h-3.5 text-[#FF2636] animate-pulse" />
-              <span className="hidden md:inline">Atmosphere:</span>
               <strong className="text-white font-medium">
-                {isMatchdayPreMatch ? PHASE_ATMOSPHERE[phase.id] : `102 dB (${venueMainStand})`}
+                {isMatchdayPreMatch ? PHASE_ATMOSPHERE[phase.id] : `${venueName} Live`}
               </strong>
             </span>
 
@@ -295,7 +505,9 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                   ? "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30 shadow-[0_0_10px_rgba(255,38,54,0.15)]"
                   : "bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border-white/[0.08]"
               }`}
-              aria-label={expandedStats ? "Collapse pre-match analysis" : "Expand pre-match analysis"}
+              aria-label={
+                expandedStats ? "Collapse match details" : "Expand match details"
+              }
             >
               <span className="text-[10px] font-semibold uppercase tracking-wider">
                 {isMatchdayPreMatch
@@ -303,10 +515,14 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                     ? "Hide Pre-Match Hub"
                     : "Pre-Match Hub"
                   : expandedStats
-                    ? "Hide Match Telemetry"
-                    : "Match Telemetry"}
+                    ? "Hide Live Stats"
+                    : "Live Stats"}
               </span>
-              {expandedStats ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {expandedStats ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
             </button>
           </div>
         </div>
@@ -328,20 +544,41 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                 {homeInfo.manager} • {homeInfo.formation}
               </p>
 
-              {/* Status / Scorers */}
+              {/* Status / Scorers / Cards */}
               {isMatchdayPreMatch ? (
                 <div className="flex items-center md:justify-end gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
-                  <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-white" : "border border-white/60 border-dashed"} animate-pulse`} />
-                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Official line-ups at T-75m"}</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      lineupConfirmed
+                        ? "bg-[#30D158]"
+                        : "border border-white/60 border-dashed"
+                    } animate-pulse`}
+                  />
+                  <span>
+                    {lineupConfirmed
+                      ? "Confirmed XI"
+                      : "Predicted XI • Official line-ups at T-75m"}
+                  </span>
                 </div>
               ) : (
-                homeScorers.length > 0 && (
+                (homeScorers.length > 0 || homeCards.length > 0) && (
                   <div className="flex flex-wrap md:justify-end gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
                     {homeScorers.map((s, i) => (
-                      <span key={i} className="flex items-center gap-1">
-                        <span className="text-[#FF2636] font-bold">⚽</span>
+                      <span key={`hs-${i}`} className="flex items-center gap-1">
+                        <span className="text-[#D2F865] font-bold">⚽</span>
                         <strong className="text-white">{s.player}</strong>
-                        <span className="text-white/60 text-[11px]">{s.min}</span>
+                        <span className="text-white/60 text-[11px]">
+                          {s.min}
+                          {s.isPenalty ? " (P)" : ""}
+                          {s.isOwnGoal ? " (OG)" : ""}
+                        </span>
+                      </span>
+                    ))}
+                    {homeCards.map((c, i) => (
+                      <span key={`hc-${i}`} className="flex items-center gap-1 text-[11px]">
+                        <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                        <span className="text-white/80">{c.player}</span>
+                        <span className="text-white/50">{c.min}</span>
                       </span>
                     ))}
                   </div>
@@ -350,27 +587,45 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
             </div>
           </div>
 
-          {/* Central Live Score Display */}
+          {/* Central Score & Countdown Display */}
           <div className="md:col-span-1 flex flex-col items-center justify-center order-2 py-1">
             <div className="flex items-center gap-2 sm:gap-3 bg-black/60 px-4 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/[0.14] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8),0_4px_20px_rgba(0,0,0,0.5)]">
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${isMatchdayPreMatch ? "text-white/40" : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"}`}>
+              <span
+                className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${
+                  isMatchdayPreMatch
+                    ? "text-white/35"
+                    : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
+                }`}
+              >
                 {homeScore}
               </span>
               <span className="text-xl sm:text-2xl font-bold text-white/30">:</span>
-              <span className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${isMatchdayPreMatch ? "text-white/40" : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"}`}>
+              <span
+                className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${
+                  isMatchdayPreMatch
+                    ? "text-white/35"
+                    : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
+                }`}
+              >
                 {awayScore}
               </span>
             </div>
 
             {isMatchdayPreMatch ? (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70 mt-2 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-                Awaiting Kick-off
-              </span>
+              <div className="mt-2 flex flex-col items-center gap-0.5">
+                <span className="font-mono text-xs sm:text-sm font-bold text-[#D2F865] tabular-nums tracking-wider">
+                  {countdownSeconds > 0 ? formattedCountdown : "00:00:00"}
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/65">
+                  {countdownSeconds > 0 ? "To Kick-off" : "Kick-off Imminent"}
+                </span>
+              </div>
             ) : (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF2636] mt-2 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
-                Attacking {venueMainStand}
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-2 flex items-center gap-1.5">
+                {isLive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
+                )}
+                {isLive ? `${periodLabel} • ${liveClockDisplay}` : "Full-Time"}
               </span>
             )}
           </div>
@@ -390,20 +645,41 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                 {awayInfo.manager} • {awayInfo.formation}
               </p>
 
-              {/* Status / Scorers */}
+              {/* Status / Scorers / Cards */}
               {isMatchdayPreMatch ? (
                 <div className="flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
-                  <span className={`w-1.5 h-1.5 rounded-full ${lineupConfirmed ? "bg-white" : "border border-white/60 border-dashed"} animate-pulse`} />
-                  <span>{lineupConfirmed ? "Confirmed XI" : "Predicted XI • Official line-ups at T-75m"}</span>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      lineupConfirmed
+                        ? "bg-[#30D158]"
+                        : "border border-white/60 border-dashed"
+                    } animate-pulse`}
+                  />
+                  <span>
+                    {lineupConfirmed
+                      ? "Confirmed XI"
+                      : "Predicted XI • Official line-ups at T-75m"}
+                  </span>
                 </div>
               ) : (
-                awayScorers.length > 0 && (
+                (awayScorers.length > 0 || awayCards.length > 0) && (
                   <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
                     {awayScorers.map((s, i) => (
-                      <span key={i} className="flex items-center gap-1">
-                        <span className="text-[#FF2636] font-bold">⚽</span>
+                      <span key={`as-${i}`} className="flex items-center gap-1">
+                        <span className="text-[#D2F865] font-bold">⚽</span>
                         <strong className="text-white">{s.player}</strong>
-                        <span className="text-white/60 text-[11px]">{s.min}</span>
+                        <span className="text-white/60 text-[11px]">
+                          {s.min}
+                          {s.isPenalty ? " (P)" : ""}
+                          {s.isOwnGoal ? " (OG)" : ""}
+                        </span>
+                      </span>
+                    ))}
+                    {awayCards.map((c, i) => (
+                      <span key={`ac-${i}`} className="flex items-center gap-1 text-[11px]">
+                        <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                        <span className="text-white/80">{c.player}</span>
+                        <span className="text-white/50">{c.min}</span>
                       </span>
                     ))}
                   </div>
@@ -413,7 +689,7 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
           </div>
         </div>
 
-        {/* ── Matchday Telemetry Section ── */}
+        {/* ── Expandable Pre-Match Hub OR Live Match Telemetry ── */}
         {expandedStats && (
           <div className="pt-3 border-t border-white/[0.08] space-y-3">
             {isMatchdayPreMatch ? (
@@ -426,60 +702,58 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                 isPreviewing={isPreviewing}
                 onResetPreview={handleResetPreview}
               />
-            ) : (
-              /* Live / Full-Time Match Telemetry */
+            ) : realStats ? (
               <div className="space-y-3">
                 {/* Possession Duel Gauge */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-white flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
-                      {homeTeam} <strong className="font-mono text-sm ml-1 text-white">{possession[0]}%</strong>
-                    </span>
-                    <span className="text-[10px] uppercase font-bold text-[#8E8E93] tracking-widest">
-                      Match Possession
-                    </span>
-                    <span className="text-white/80 flex items-center gap-1.5">
-                      <strong className="font-mono text-sm mr-1 text-white">{possession[1]}%</strong>
-                      {awayTeam}
-                      <span className="w-2 h-2 rounded-full bg-white/40" />
-                    </span>
-                  </div>
+                {possession && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#E31B23]" />
+                        {homeTeam}{" "}
+                        <strong className="font-mono text-sm ml-1 text-white tabular-nums">
+                          {possession[0]}%
+                        </strong>
+                      </span>
+                      <span className="text-[10px] uppercase font-bold text-[#8E8E93] tracking-widest">
+                        Possession
+                      </span>
+                      <span className="text-white/80 flex items-center gap-1.5">
+                        <strong className="font-mono text-sm mr-1 text-white tabular-nums">
+                          {possession[1]}%
+                        </strong>
+                        {awayTeam}
+                        <span className="w-2 h-2 rounded-full bg-white/40" />
+                      </span>
+                    </div>
 
-                  {/* Gradient Split Progress Bar */}
-                  <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden flex border border-white/10 shadow-inner">
-                    <div
-                      style={{ width: `${possession[0]}%` }}
-                      className="bg-gradient-to-r from-[#800A1A] via-[#C8102E] to-[#FF2636] h-full shadow-[0_0_8px_#FF2636] transition-all duration-500"
-                    />
-                    <div
-                      style={{ width: `${possession[1]}%` }}
-                      className="bg-gradient-to-r from-white/30 to-white/60 h-full transition-all duration-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Quick Metrics Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
-                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Expected Goals (xG)
-                    </span>
-                    <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-[#FF2636] font-mono">{Number(xG[0] || 1.8).toFixed(2)}</span>
-                      <span className="text-[10px] text-white/30">-</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">{Number(xG[1] || 1.0).toFixed(2)}</span>
+                    <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden flex border border-white/10 shadow-inner">
+                      <div
+                        style={{ width: `${possession[0]}%` }}
+                        className="bg-gradient-to-r from-[#800A1A] via-[#C8102E] to-[#FF2636] h-full shadow-[0_0_8px_#FF2636] transition-all duration-500"
+                      />
+                      <div
+                        style={{ width: `${possession[1]}%` }}
+                        className="bg-gradient-to-r from-white/30 to-white/60 h-full transition-all duration-500"
+                      />
                     </div>
                   </div>
+                )}
 
+                {/* Real Live Match Stats Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                   <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Shots (On Target)
                     </span>
-                    <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-white font-mono">{shots[0]} ({shotsOnTarget[0]})</span>
+                    <div className="flex items-center justify-center gap-2 mt-0.5 font-mono text-sm font-bold tabular-nums">
+                      <span className="text-white">
+                        {shots ? `${shots[0]} (${shotsOnTarget?.[0] ?? 0})` : "—"}
+                      </span>
                       <span className="text-[10px] text-white/30">-</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">{shots[1]} ({shotsOnTarget[1]})</span>
+                      <span className="text-[#8E8E93]">
+                        {shots ? `${shots[1]} (${shotsOnTarget?.[1] ?? 0})` : "—"}
+                      </span>
                     </div>
                   </div>
 
@@ -487,52 +761,76 @@ export default function LiveScoreboard({ activeMatch, selectedClub, onPhaseChang
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Corner Kicks
                     </span>
-                    <div className="flex items-center justify-center gap-2 mt-0.5">
-                      <span className="font-bold text-sm text-white font-mono">{corners[0]}</span>
+                    <div className="flex items-center justify-center gap-2 mt-0.5 font-mono text-sm font-bold tabular-nums">
+                      <span className="text-white">{corners ? corners[0] : "—"}</span>
                       <span className="text-[10px] text-white/30">-</span>
-                      <span className="font-bold text-sm text-[#8E8E93] font-mono">{corners[1]}</span>
+                      <span className="text-[#8E8E93]">{corners ? corners[1] : "—"}</span>
                     </div>
                   </div>
 
                   <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
-                      Territory Tilt
+                      Fouls
                     </span>
-                    <div className="flex items-center justify-center gap-1 mt-0.5">
-                      <Flame className="w-3.5 h-3.5 text-[#FF2636]" />
-                      <span className="font-bold text-sm text-white font-mono">{activeMatch?.metrics?.fieldTilt || 65.4}%</span>
-                      <span className="text-[10px] text-[#FF4D5A] font-semibold">{club.shortName}</span>
+                    <div className="flex items-center justify-center gap-2 mt-0.5 font-mono text-sm font-bold tabular-nums">
+                      <span className="text-white">{fouls ? fouls[0] : "—"}</span>
+                      <span className="text-[10px] text-white/30">-</span>
+                      <span className="text-[#8E8E93]">{fouls ? fouls[1] : "—"}</span>
+                    </div>
+                  </div>
+
+                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
+                    <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
+                      Goalkeeper Saves
+                    </span>
+                    <div className="flex items-center justify-center gap-2 mt-0.5 font-mono text-sm font-bold tabular-nums">
+                      <span className="text-white">{saves ? saves[0] : "—"}</span>
+                      <span className="text-[10px] text-white/30">-</span>
+                      <span className="text-[#8E8E93]">{saves ? saves[1] : "—"}</span>
                     </div>
                   </div>
                 </div>
+              </div>
+            ) : (
+              <div className="py-3 px-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-center text-xs text-[#8E8E93]">
+                Live match statistics are awaiting publication from the official match feed.
               </div>
             )}
           </div>
         )}
 
-        {/* ── Matchday Timeline Ticker Strip ── */}
-        <div className="mt-3 pt-2.5 border-t border-white/[0.08] flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 border flex items-center gap-1 ${
-              isMatchdayPreMatch
-                ? "bg-white/10 text-white/90 border-white/20"
-                : "bg-[#E31B23]/20 text-[#FF4D5A] border-[#E31B23]/30"
-            }`}>
-              <Zap className="w-3 h-3 text-[#FF2636]" />
-              {isMatchdayPreMatch ? "Matchday Notes" : "Match Incident"}
-            </span>
-            <span className="font-mono text-[11px] font-bold text-white shrink-0">
-              {incidents[activeIncidentIndex]?.min}
-            </span>
-            <p className="text-white/90 truncate font-medium text-[11px]">
-              {incidents[activeIncidentIndex]?.text}
-            </p>
-          </div>
+        {/* ── Matchday / Live Incident Ticker Strip ── */}
+        {safeIncident && (
+          <div className="mt-3 pt-2.5 border-t border-white/[0.08] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 border flex items-center gap-1 ${
+                  isMatchdayPreMatch
+                    ? "bg-white/10 text-white/90 border-white/20"
+                    : "bg-[#E31B23]/20 text-[#FF4D5A] border-[#E31B23]/30"
+                }`}
+              >
+                <Zap className="w-3 h-3 text-[#FF2636]" />
+                {isMatchdayPreMatch ? "Matchday Schedule" : "Match Event"}
+              </span>
+              <span className="font-mono text-[11px] font-bold text-white shrink-0 tabular-nums">
+                {safeIncident.min}
+              </span>
+              <p className="text-white/90 truncate font-medium text-[11px]">
+                {safeIncident.text}
+              </p>
+            </div>
 
-          <div className="hidden sm:flex items-center gap-1 text-[10px] text-[#8E8E93] shrink-0 pl-2">
-            <span>{activeIncidentIndex + 1} of {incidents.length} {isMatchdayPreMatch ? "notes" : "events"}</span>
+            {incidents.length > 1 && (
+              <div className="hidden sm:flex items-center gap-1 text-[10px] text-[#8E8E93] shrink-0 pl-2">
+                <span>
+                  {activeIncidentIndex + 1} of {incidents.length}{" "}
+                  {isMatchdayPreMatch ? "milestones" : "events"}
+                </span>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
