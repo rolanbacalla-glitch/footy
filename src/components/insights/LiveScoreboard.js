@@ -931,67 +931,98 @@ export default function LiveScoreboard({
                       })}
                     </ul>
 
-                    {team?.substitutes?.length > 0 && (
-                      <div className="pt-2 border-t border-white/[0.06]">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-1.5">
-                          Substitutes ({team.substitutes.length})
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {team.substitutes.map((s) => {
-                            const cameOn = Boolean(s.subbedIn);
-                            const hasRed = Boolean(s.redCard);
-                            const hasYellow = (s.yellowCards?.length || 0) > 0;
-                            const hasGoals = (s.goals?.length || 0) > 0;
+                    {team?.substitutes?.length > 0 && (() => {
+                      const usedSubs = team.substitutes.filter((s) => Boolean(s.subbedIn));
+                      const unusedSubs = team.substitutes.filter((s) => !s.subbedIn);
+                      const hasUsedSubs = usedSubs.length > 0;
 
-                            return (
-                              <span
-                                key={s.id}
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] ${
-                                  hasRed
-                                    ? "bg-[#EF4444]/15 border-[#EF4444]/40 text-white"
-                                    : cameOn
-                                      ? "bg-[#30D158]/10 border-[#30D158]/35 text-white"
-                                      : "bg-white/[0.04] border-white/[0.06] text-white/75"
-                                }`}
-                              >
-                                {s.jersey && (
-                                  <span className="font-mono text-[10px] text-white/45 tabular-nums">
-                                    #{s.jersey}
-                                  </span>
-                                )}
-                                <span>{s.shortName || s.name}</span>
-                                {cameOn && (
-                                  <span
-                                    title={`Substituted on${s.subbedInMin ? ` (${s.subbedInMin})` : ""}`}
-                                    className="inline-flex items-center gap-0.5 font-mono text-[10px] font-semibold text-[#30D158] tabular-nums"
-                                  >
-                                    <span>↑</span>
-                                    {s.subbedInMin && <span>{s.subbedInMin}</span>}
-                                  </span>
-                                )}
-                                {hasGoals && (
-                                  <span className="font-mono text-[10px] font-bold text-[#D2F865] tabular-nums">
-                                    ⚽{s.goals.length > 1 ? `×${s.goals.length}` : s.goals[0]}
-                                  </span>
-                                )}
-                                {hasYellow && (
-                                  <span
-                                    title={`Yellow card${s.yellowCards[0] ? ` (${s.yellowCards.join(", ")})` : ""}`}
-                                    className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#FACC15]"
-                                  />
-                                )}
-                                {hasRed && (
-                                  <span
-                                    title={`Red card (${s.redCard})`}
-                                    className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#EF4444]"
-                                  />
-                                )}
+                      const renderSubPill = (s, isUsed) => {
+                        const hasRed = Boolean(s.redCard);
+                        const hasYellow = (s.yellowCards?.length || 0) > 0;
+                        const hasGoals = (s.goals?.length || 0) > 0;
+
+                        return (
+                          <span
+                            key={s.id}
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[11px] ${
+                              hasRed
+                                ? "bg-[#EF4444]/15 border-[#EF4444]/40 text-white"
+                                : isUsed
+                                  ? "bg-white/[0.05] border-white/[0.09] text-white/90"
+                                  : "bg-white/[0.03] border-white/[0.05] text-white/60"
+                            }`}
+                          >
+                            {s.jersey && (
+                              <span className="font-mono text-[10px] text-white/40 tabular-nums">
+                                #{s.jersey}
                               </span>
-                            );
-                          })}
+                            )}
+                            <span>{s.shortName || s.name}</span>
+                            {isUsed && s.subbedInMin && (
+                              <span
+                                title={`Came on in ${s.subbedInMin}`}
+                                className="font-mono text-[10px] text-white/45 tabular-nums"
+                              >
+                                {s.subbedInMin}
+                              </span>
+                            )}
+                            {hasGoals && (
+                              <span className="font-mono text-[10px] font-bold text-[#D2F865] tabular-nums">
+                                ⚽{s.goals.length > 1 ? `×${s.goals.length}` : s.goals[0]}
+                              </span>
+                            )}
+                            {hasYellow && (
+                              <span
+                                title={`Yellow card${s.yellowCards[0] ? ` (${s.yellowCards.join(", ")})` : ""}`}
+                                className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#FACC15]"
+                              />
+                            )}
+                            {hasRed && (
+                              <span
+                                title={`Red card (${s.redCard})`}
+                                className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#EF4444]"
+                              />
+                            )}
+                          </span>
+                        );
+                      };
+
+                      return (
+                        <div className="pt-2 border-t border-white/[0.06] space-y-2.5">
+                          {hasUsedSubs ? (
+                            <>
+                              <div>
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-1.5">
+                                  Used Substitutes ({usedSubs.length})
+                                </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {usedSubs.map((s) => renderSubPill(s, true))}
+                                </div>
+                              </div>
+                              {unusedSubs.length > 0 && (
+                                <div>
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93]/75 block mb-1.5">
+                                    Unused Substitutes ({unusedSubs.length})
+                                  </span>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {unusedSubs.map((s) => renderSubPill(s, false))}
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div>
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-1.5">
+                                Substitutes ({team.substitutes.length})
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {team.substitutes.map((s) => renderSubPill(s, false))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 ))}
               </div>

@@ -133,7 +133,7 @@ export default function TacticalKpiDeck({
   return (
     <section
       aria-label="Match performance indicators"
-      className="glass-card p-5 sm:p-6 space-y-5"
+      className="space-y-4"
     >
       {/* Top Row: Signature 4 Stacked Atmospheric Glass KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -180,9 +180,9 @@ export default function TacticalKpiDeck({
       </div>
 
       {/* Bottom Row: 4 Clean Utility Stat Tiles + Glowing Electric Lime Momentum Wave */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
         {/* Left 7 cols: 2x2 quiet glass utility tiles */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="glass-tile px-4 py-3.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <Gauge className="w-4 h-4 text-[#8A8D96] shrink-0" strokeWidth={1.8} />

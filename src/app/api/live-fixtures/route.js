@@ -133,9 +133,33 @@ function parseTeamStats(home, away) {
   };
 }
 
+function parseMinuteOrder(minStr) {
+  if (!minStr) return 999;
+  const match = String(minStr).match(/(\d+)(?:\+(\d+))?/);
+  if (!match) return 999;
+  return Number(match[1]) + (match[2] ? Number(match[2]) / 100 : 0);
+}
+
 function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, awayName) {
   const rosters = Array.isArray(summaryData?.rosters) ? summaryData.rosters : [];
   if (rosters.length === 0) return null;
+
+  // Build fallback substitution minute lookup from keyEvents when roster plays omit clock values
+  const subMinByAthleteId = new Map();
+  const keyEvents = Array.isArray(summaryData?.keyEvents) ? summaryData.keyEvents : [];
+  for (const ev of keyEvents) {
+    const typeText = String(ev?.type?.text || "").toLowerCase();
+    if (!typeText.includes("substitution")) continue;
+    const min = ev?.clock?.displayValue || "";
+    if (!min) continue;
+    const participants = Array.isArray(ev?.participants) ? ev.participants : [];
+    for (const part of participants) {
+      const aid = part?.athlete?.id ? String(part.athlete.id) : null;
+      if (aid && !subMinByAthleteId.has(aid)) {
+        subMinByAthleteId.set(aid, min);
+      }
+    }
+  }
 
   const parseTeamRoster = (entry, fallbackName) => {
     if (!entry) {
@@ -157,11 +181,13 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
         if (pl.substitution && min) subMin = min;
       }
 
+      const athleteId = p.athlete?.id ? String(p.athlete.id) : null;
+      const resolvedSubMin = subMin || (athleteId ? subMinByAthleteId.get(athleteId) : null) || null;
       const subbedIn = Boolean(p.subbedIn);
       const subbedOut = Boolean(p.subbedOut);
 
       return {
-        id: p.athlete?.id ? String(p.athlete.id) : `${p.jersey || ""}-${p.athlete?.displayName || "player"}`,
+        id: athleteId || `${p.jersey || ""}-${p.athlete?.displayName || "player"}`,
         name: p.athlete?.displayName || p.athlete?.shortName || "Player",
         shortName: p.athlete?.shortName || p.athlete?.displayName || "Player",
         jersey: p.jersey ? String(p.jersey) : "",
@@ -173,8 +199,8 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
         redCard,
         subbedIn,
         subbedOut,
-        subbedInMin: subbedIn ? subMin || "" : null,
-        subbedOutMin: subbedOut ? subMin || "" : null,
+        subbedInMin: subbedIn ? resolvedSubMin : null,
+        subbedOutMin: subbedOut ? resolvedSubMin : null,
       };
     };
 
@@ -184,7 +210,14 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
       .sort((a, b) => a.formationPlace - b.formationPlace);
     const substitutes = items
       .filter((p) => p.starter !== true)
-      .map(mapPlayer);
+      .map(mapPlayer)
+      .sort((a, b) => {
+        if (a.subbedIn !== b.subbedIn) return a.subbedIn ? -1 : 1;
+        if (a.subbedIn && b.subbedIn) {
+          return parseMinuteOrder(a.subbedInMin) - parseMinuteOrder(b.subbedInMin);
+        }
+        return 0;
+      });
 
     return {
       teamName: entry.team?.displayName || fallbackName,
