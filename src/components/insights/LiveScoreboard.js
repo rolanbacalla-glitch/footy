@@ -253,14 +253,39 @@ export default function LiveScoreboard({
   const awayFormationDisplay =
     officialLineups?.away?.formation || awayInfo.formation;
 
+  const matchPreMatch =
+    authoritativeMatch?.preMatchData || liveFactData?.matchPreMatch || null;
+
   const venueName =
-    authoritativeMatch?.venue || activeMatch?.venue || homeInfo.stadium || club.stadium;
-  const venueCity = activeMatch?.city || homeInfo.city || club.city;
+    authoritativeMatch?.venue ||
+    matchPreMatch?.venue?.name ||
+    activeMatch?.venue ||
+    (isClubHome ? club.stadium : homeInfo.stadium) ||
+    "Stadium";
+  const venueCity =
+    authoritativeMatch?.venueCity ||
+    matchPreMatch?.venue?.city ||
+    (isClubHome ? club.city : homeInfo.city) ||
+    "";
+  const venueCountry =
+    authoritativeMatch?.venueCountry || matchPreMatch?.venue?.country || "";
+  const venueLocation =
+    venueCity && venueCountry && venueCountry !== "England"
+      ? `${venueCity}, ${venueCountry}`
+      : venueCity;
   const venueCapacity = authoritativeMatch?.attendance
     ? `${Number(authoritativeMatch.attendance).toLocaleString("en-GB")} Att.`
-    : activeMatch?.capacity || homeInfo.capacity || club.capacity;
-  const venueMainStand = activeMatch?.mainStand || homeInfo.mainStand || club.mainStand;
-  const venueAnthem = activeMatch?.anthem || homeInfo.anthem || club.anthem;
+    : authoritativeMatch?.venueCapacity
+      ? Number(authoritativeMatch.venueCapacity).toLocaleString("en-GB")
+      : isClubHome
+        ? club.capacity
+        : homeInfo.capacity || "";
+  const venueMainStand = isClubHome
+    ? club.mainStand
+    : homeInfo.mainStand || "Main Stand";
+  const venueAnthem = isClubHome
+    ? club.anthem
+    : homeInfo.anthem || "Club Anthem";
   const competitionName =
     authoritativeMatch?.competition || activeMatch?.competition || "Premier League";
   const competitionCode =
@@ -302,8 +327,13 @@ export default function LiveScoreboard({
       ? activeMatch.incidents
       : null;
 
+  const isSameFixtureContext =
+    !authoritativeMatch ||
+    !activeMatch?.id ||
+    activeMatch.id === authoritativeMatch.id;
+
   const preMatchNotes =
-    isMatchdayPreMatch && activeMatch?.preMatch?.milestones
+    isMatchdayPreMatch && isSameFixtureContext && activeMatch?.preMatch?.milestones
       ? activeMatch.preMatch.milestones.map((text) => ({
           min: "★",
           type: "note",
@@ -482,7 +512,7 @@ export default function LiveScoreboard({
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-[#8E8E93] text-[11px] hidden sm:inline">
               {venueName}
-              {venueCity ? `, ${venueCity}` : ""}
+              {venueLocation ? `, ${venueLocation}` : ""}
               {venueCapacity ? ` • ${venueCapacity}` : ""}
             </span>
           </div>
@@ -495,7 +525,7 @@ export default function LiveScoreboard({
               </span>
             )}
 
-            {selectedRank && (
+            {!isEuropean && selectedRank && (
               <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8E8E93]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
                 <span className="text-white font-semibold">
@@ -1002,13 +1032,30 @@ export default function LiveScoreboard({
           <div className="pt-3 border-t border-white/[0.08] space-y-3">
             {isMatchdayPreMatch ? (
               <PreMatchPanel
-                activeMatch={activeMatch}
+                activeMatch={
+                  isSameFixtureContext
+                    ? activeMatch
+                    : {
+                        ...activeMatch,
+                        id: authoritativeMatch?.id || activeMatch?.id,
+                        homeTeam,
+                        awayTeam,
+                        opponent: isClubHome ? awayTeam : homeTeam,
+                        competition: competitionName,
+                        venue: venueName,
+                        city: venueLocation || venueCity,
+                        capacity: venueCapacity,
+                        preMatch: null,
+                      }
+                }
                 selectedClub={club}
                 phase={phase}
                 countdownSeconds={countdownSeconds}
                 onPreviewPhase={handlePreviewPhase}
                 isPreviewing={isPreviewing}
                 onResetPreview={handleResetPreview}
+                matchPreMatch={matchPreMatch}
+                kickoffIso={kickoffIso}
               />
             ) : realStats ? (
               <div className="space-y-3">

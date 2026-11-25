@@ -41,7 +41,29 @@ export function isLineupConfirmed(phaseId) {
   return ["LINEUPS", "WARMUPS", "TUNNEL", "KICKOFF"].includes(phaseId);
 }
 
-function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
+function formatScheduleClock(kickoffIso, minusMinutes, fallback) {
+  if (!kickoffIso) return fallback;
+  const ts = new Date(kickoffIso).getTime();
+  if (Number.isNaN(ts)) return fallback;
+  const dt = new Date(ts - minusMinutes * 60 * 1000);
+  try {
+    return dt.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
+    });
+  } catch {
+    return fallback;
+  }
+}
+
+function buildDynamicPhases(venue, capacity, mainStand, anthem, manager, kickoffIso) {
+  const gatesClock = formatScheduleClock(kickoffIso, 120, "T-2h");
+  const lineupsClock = formatScheduleClock(kickoffIso, 75, "T-75m");
+  const warmupsClock = formatScheduleClock(kickoffIso, 45, "T-45m");
+  const tunnelClock = formatScheduleClock(kickoffIso, 5, "T-5m");
+  const kickoffClock = formatScheduleClock(kickoffIso, 0, "Kick-off");
+
   return [
     {
       id: "BUILD_UP",
@@ -50,11 +72,11 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       clock: "",
       note: "Matchday build-up",
       headline: `${venue} Matchday Preparation`,
-      summary: `Stadium operations commenced at ${venue}. Match programmes and hospitality concourses open around the ground.`,
+      summary: `Stadium operations commenced at ${venue}. Match programmes and concourses open ahead of kick-off.`,
       details: [
-        "Club store & matchday fan zones open to ticket holders",
+        "Matchday fan zones and stadium concourses open to ticket holders",
         `Official team coaches depart team hotels en route to ${venue}`,
-        "Pitch inspection completed by Premier League match officials",
+        "Pitch inspection completed by match officials",
       ],
       actionLabel: "View Match Context",
     },
@@ -62,14 +84,14 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       id: "GATES",
       label: "Turnstiles Open",
       at: 7200,
-      clock: "14:30",
+      clock: gatesClock,
       note: "Turnstiles open • Fans arriving",
-      headline: "Turnstiles Open Across All Four Stands",
-      summary: `${venue} gates open 2 hours prior to kick-off across ${mainStand} and all stadium tiers.`,
+      headline: "Turnstiles Open Across All Stands",
+      summary: `${venue} gates open 2 hours prior to kick-off${capacity ? ` (${capacity} capacity)` : ""}.`,
       details: [
-        `Access control active at ${capacity} capacity; NFC digital passes scan at turnstiles`,
-        "Players' coach arrival at stadium players' entrance scheduled for 14:45",
-        "Concourse kiosks open with matchday specials and digital match programmes",
+        `Access control active at ${venue}; digital passes scanning at turnstiles`,
+        "Team coaches arrive at the players' entrance ahead of team sheet submission",
+        "Concourse kiosks open for arriving supporters",
       ],
       actionLabel: "Stadium Access Guide",
     },
@@ -77,14 +99,14 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       id: "LINEUPS",
       label: "Line-ups In",
       at: 4500,
-      clock: "15:15",
+      clock: lineupsClock,
       note: "Official team sheets published",
-      headline: "Premier League Official Team Sheets Exchanged",
-      summary: "Official starting XIs and 9-player substitutes benches submitted to match referee and broadcast directors under the Premier League T-75 rule.",
+      headline: "Official Team Sheets Exchanged",
+      summary: "Official starting XIs and substitutes benches submitted to match officials and published to the live feed.",
       details: [
-        "Confirmed starting line-ups officially verified and locked into match protocol",
-        "Pitch status transitions from Predicted XI to Confirmed Tactical Shape",
-        "Opposition bench composition and formation nuances published to analyst feeds",
+        "Confirmed starting line-ups verified and published in the Confirmed XI panel",
+        "Substitutes benches and official formations locked into match protocol",
+        "Pre-match tactical shapes ready for kick-off",
       ],
       actionLabel: "Inspect Confirmed XI",
     },
@@ -92,14 +114,14 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       id: "WARMUPS",
       label: "Warm-ups",
       at: 2700,
-      clock: "15:45",
+      clock: warmupsClock,
       note: "Players out for warm-ups",
       headline: `Squads Emerge onto ${venue} Pitch for Drills`,
-      summary: `Goalkeepers start warm-up routines with coaching staff at 15:45; outfield squads emerge at 15:52 to ${venue} applause.`,
+      summary: `Goalkeepers and outfield squads complete on-pitch warm-up routines at ${venue}.`,
       details: [
         "Rondo possession drills, progressive passing channels, and counter-press triggers",
-        `High-intensity sprint activations and box finishing routines facing ${mainStand}`,
-        "Stadium sound system begins matchday playlist countdown",
+        "High-intensity sprint activations and finishing routines",
+        "Final goalkeeper distribution and shot-stopping drills",
       ],
       actionLabel: "View Tactical Drills",
     },
@@ -107,13 +129,13 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       id: "TUNNEL",
       label: "Tunnel & Anthem",
       at: 300,
-      clock: "16:25",
-      note: `Teams in the tunnel • ${anthem}`,
-      headline: `Tunnel Assembly & '${anthem}'`,
-      summary: `Captains lead both squads into the ${venue} tunnel as '${anthem}' plays to a standing home crowd.`,
+      clock: tunnelClock,
+      note: "Teams in the tunnel",
+      headline: `Tunnel Assembly at ${venue}`,
+      summary: `Captains lead both squads into the ${venue} tunnel ahead of kick-off.`,
       details: [
-        `Full stadium scarf and banner display across ${mainStand}`,
-        `Final tactical reminders from ${manager} in tunnel corridor prior to referee bell`,
+        `Full stadium atmosphere building across ${venue}`,
+        `Final tactical reminders from ${manager} in the tunnel prior to referee bell`,
         "Coin toss with club captains and match referee on the centre circle",
       ],
       actionLabel: "Listen to Atmosphere",
@@ -122,14 +144,14 @@ function buildDynamicPhases(venue, capacity, mainStand, anthem, manager) {
       id: "KICKOFF",
       label: "Kick-off",
       at: 0,
-      clock: "16:30",
+      clock: kickoffClock,
       note: "Kick-off • Live data starts",
       headline: "Referee Whistle & Live Telemetry Ingest",
-      summary: "Official kick-off whistle. Real-time ball possession, expected goals (xG), high-press intensity (PPDA), and pass networks commence live feed.",
+      summary: "Official kick-off whistle. Live score, scorers, cards, substitutions, and match statistics update automatically.",
       details: [
-        "Live telemetry switches to 15-second high-frequency refresh rate",
-        "Opta/StatsPerform positional tracking and heatmaps begin plotting live",
-        "Real-time tactical mismatch and momentum radar activated",
+        "Live feed switches to 15-second high-frequency refresh rate",
+        "Real-time goals, yellow/red cards, and substitutions stream onto the scoreboard",
+        "Live match statistics and event ticker activated",
       ],
       actionLabel: "Switch to Live Match Centre",
     },
@@ -265,6 +287,8 @@ export default function PreMatchPanel({
   onPreviewPhase,
   isPreviewing,
   onResetPreview,
+  matchPreMatch = null,
+  kickoffIso = null,
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [h2hHomeVenueOnly, setH2hHomeVenueOnly] = useState(false);
@@ -274,14 +298,28 @@ export default function PreMatchPanel({
   const pm = activeMatch?.preMatch || {};
   const homeTeam = activeMatch?.homeTeam || club.name;
   const awayTeam = activeMatch?.awayTeam || activeMatch?.opponent || "Opponent";
-  const homeInfo = getTeamManagerInfo(homeTeam) || club;
-  const venueName = activeMatch?.venue || homeInfo.stadium || club.stadium;
-  const venueCity = activeMatch?.city || homeInfo.city || club.city;
-  const venueCapacity = activeMatch?.capacity || homeInfo.capacity || club.capacity;
-  const venueMainStand = activeMatch?.mainStand || homeInfo.mainStand || club.mainStand;
-  const venueAnthem = activeMatch?.anthem || homeInfo.anthem || club.anthem;
-  const venueLat = activeMatch?.lat ?? homeInfo.lat ?? club.lat;
-  const venueLon = activeMatch?.lon ?? homeInfo.lon ?? club.lon;
+  const isClubHome = homeTeam.toLowerCase() === club.name.toLowerCase();
+  const homeInfo = (isClubHome ? club : getTeamManagerInfo(homeTeam)) || {
+    name: homeTeam,
+    manager: "Head Coach",
+    captain: homeTeam,
+    stadium: "Stadium",
+    city: "",
+    capacity: "",
+    mainStand: "Main Stand",
+    anthem: "Club Anthem",
+  };
+  const venueName = matchPreMatch?.venue?.name || activeMatch?.venue || homeInfo.stadium;
+  const venueCity = matchPreMatch?.venue?.city || activeMatch?.city || homeInfo.city || "";
+  const venueCapacity =
+    (matchPreMatch?.venue?.capacity ? Number(matchPreMatch.venue.capacity).toLocaleString("en-GB") : null) ||
+    activeMatch?.capacity ||
+    homeInfo.capacity ||
+    "";
+  const venueMainStand = isClubHome ? club.mainStand : homeInfo.mainStand || "Main Stand";
+  const venueAnthem = isClubHome ? club.anthem : homeInfo.anthem || "Club Anthem";
+  const venueLat = isClubHome ? club.lat : homeInfo.lat ?? 51.2;
+  const venueLon = isClubHome ? club.lon : homeInfo.lon ?? 3.2;
 
   const confirmed = isLineupConfirmed(phase.id);
 
@@ -290,31 +328,39 @@ export default function PreMatchPanel({
     venueCapacity,
     venueMainStand,
     venueAnthem,
-    homeInfo.manager || club.manager
+    club.manager,
+    kickoffIso
   );
   const currentPhaseDetails = dynamicPhases.find((p) => p.id === phase.id) || dynamicPhases[0];
 
+  const kickoffHourFromIso = kickoffIso ? new Date(kickoffIso).getUTCHours() : null;
   const weather = useKickoffWeather(
-    pm.kickoffHour ?? 16,
+    kickoffHourFromIso ?? pm.kickoffHour ?? 19,
     venueLat,
     venueLon,
-    venueCity,
+    venueCity || venueName,
     pm.conditions || DEFAULT_CONDITIONS
   );
 
-  const wp = pm.winProbability || { home: 52, draw: 24, away: 24 };
-  const homeForm = pm.form?.home?.length ? pm.form.home : ["W", "W", "D", "W", "L", "W"];
-  const awayForm = pm.form?.away?.length ? pm.form.away : ["W", "D", "L", "W", "D", "L"];
-  const homeSeries = pm.xgTrend?.home?.length ? pm.xgTrend.home : [[1.6, 1.1], [1.9, 0.9], [1.4, 1.2], [2.1, 0.8], [1.7, 1.1], [2.2, 1.0]];
-  const awaySeries = pm.xgTrend?.away?.length ? pm.xgTrend.away : [[1.4, 1.3], [1.2, 1.5], [1.5, 1.2], [1.1, 1.6], [1.3, 1.4], [1.2, 1.5]];
+  const wp = matchPreMatch?.winProbability || pm.winProbability || null;
+  const homeForm = matchPreMatch?.form?.home?.length
+    ? matchPreMatch.form.home
+    : pm.form?.home?.length
+      ? pm.form.home
+      : [];
+  const awayForm = matchPreMatch?.form?.away?.length
+    ? matchPreMatch.form.away
+    : pm.form?.away?.length
+      ? pm.form.away
+      : [];
+  const homeSeries = pm.xgTrend?.home?.length ? pm.xgTrend.home : [];
+  const awaySeries = pm.xgTrend?.away?.length ? pm.xgTrend.away : [];
   const homeTrend = trendLabel(homeSeries);
   const awayTrend = trendLabel(awaySeries);
 
-  const rawH2h = pm.headToHead?.length
-    ? pm.headToHead
-    : [
-        { date: "Recent", fixture: `${homeTeam} vs ${awayTeam}`, score: "2–1", result: "W", venue: venueName },
-      ];
+  const realRecentHome = matchPreMatch?.lastFive?.home || [];
+  const realRecentAway = matchPreMatch?.lastFive?.away || [];
+  const rawH2h = pm.headToHead?.length ? pm.headToHead : [];
   const h2h = rawH2h.filter((m) => !h2hHomeVenueOnly || m.venue === venueName);
   const h2hSummary = h2h.reduce(
     (acc, m) => {
@@ -326,129 +372,121 @@ export default function PreMatchPanel({
 
   const lineupsInMins = Math.max(0, Math.ceil((countdownSeconds - 4500) / 60));
 
-  const defaultKeyDuel = pm.keyDuel || {
-    home: {
-      name: activeMatch?.startingXI?.[8]?.name || homeInfo.captain,
-      number: activeMatch?.startingXI?.[8]?.number || 7,
-      stat: "3.8",
-      label: "progressive carries /90",
-    },
-    away: {
-      name: `${awayTeam} Defender`,
-      number: 3,
-      stat: "2.1",
-      label: "tackles won /90",
-    },
-    takeaway: `${homeInfo.name}'s half-space overload under ${homeInfo.manager} is the primary tactical battleground against ${awayTeam}.`,
-  };
+  const realRestHome = matchPreMatch?.rest?.home || pm.rest?.home || null;
+  const realRestAway = matchPreMatch?.rest?.away || pm.rest?.away || null;
+  const realReferee = matchPreMatch?.referee || pm.officials?.referee || null;
 
   return (
     <div className="space-y-4">
-      {/* Win probability + forecast xG */}
-      <div className="glass-tile p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-2 text-xs font-medium text-white">
-            <Target className="w-3.5 h-3.5 text-[#D2F865]" />
-            <span>Win Probability</span>
-            <span className="text-[#8A8D96] font-normal">
-              · Forecast xG {pm.projectedXg?.[0] ?? 2.18} – {pm.projectedXg?.[1] ?? 1.05}
+      {/* Win probability (only shown when real odds or fixture model exist) */}
+      {wp && (
+        <div className="glass-tile p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-white">
+              <Target className="w-3.5 h-3.5 text-[#D2F865]" />
+              <span>Win Probability</span>
+              {pm.projectedXg && (
+                <span className="text-[#8A8D96] font-normal">
+                  · Forecast xG {pm.projectedXg[0]} – {pm.projectedXg[1]}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-[#8A8D96]">
+              {wp.source || pm.winProbabilitySource || "Live implied match odds"}
             </span>
           </div>
-          <span className="text-[11px] text-[#8A8D96]">
-            {pm.winProbabilitySource || "Elo rating blended with live Premier League table"}
-          </span>
-        </div>
-        <div className="flex h-7 w-full rounded-full overflow-hidden border border-white/[0.08] text-xs font-semibold">
-          <div style={{ width: `${wp.home}%` }} className="bg-[#D2F865] flex items-center px-3 text-[#0E100C] truncate tabular-nums">
-            {homeTeam} {wp.home}%
-          </div>
-          <div style={{ width: `${wp.draw}%` }} className="bg-white/12 flex items-center justify-center text-white/80 tabular-nums">
-            Draw {wp.draw}%
-          </div>
-          <div style={{ width: `${wp.away}%` }} className="bg-[#637AE0]/50 flex items-center justify-end px-3 text-white tabular-nums">
-            {wp.away}%
+          <div className="flex h-7 w-full rounded-full overflow-hidden border border-white/[0.08] text-xs font-semibold">
+            <div style={{ width: `${wp.home}%` }} className="bg-[#D2F865] flex items-center px-3 text-[#0E100C] truncate tabular-nums">
+              {homeTeam} {wp.home}%
+            </div>
+            <div style={{ width: `${wp.draw}%` }} className="bg-white/12 flex items-center justify-center text-white/80 tabular-nums">
+              Draw {wp.draw}%
+            </div>
+            <div style={{ width: `${wp.away}%` }} className="bg-[#637AE0]/50 flex items-center justify-end px-3 text-white truncate tabular-nums">
+              {awayTeam} {wp.away}%
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Tactical Counter-Press Radar Comparison */}
       <TacticalRadarCard activeMatch={activeMatch} selectedClub={club} />
 
-      {/* Tier 1: form, team news, key duel */}
+      {/* Tier 1: Real Form, Rest & Fixture Load, and Conditions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Card icon={TimerReset} title="Form & xG trend (last 6)">
-          {[
-            { team: homeTeam, form: homeForm, series: homeSeries, trend: homeTrend, colour: "#D2F865" },
-            { team: awayTeam, form: awayForm, series: awaySeries, trend: awayTrend, colour: "#8BA3F5" },
-          ].map((row) => (
-            <div key={row.team} className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <span className="text-xs font-medium text-white block truncate mb-1">{row.team}</span>
-                <FormPills results={row.form} />
-              </div>
-              <div className="flex flex-col items-end shrink-0">
-                {row.series.length > 1 && <XgSparkline series={row.series} colour={row.colour} />}
-                <span className={`text-[10px] font-medium ${row.trend.cls}`}>
-                  {row.trend.arrow} {row.trend.text}
-                </span>
-              </div>
-            </div>
-          ))}
-          <p className="text-[10px] text-[#6F727C]">Solid: xG for · dashed: xG against</p>
-        </Card>
-
-        <Card icon={HeartPulse} title="Team news & availability">
-          {[
-            {
-              team: homeTeam,
-              items: pm.teamNews?.home?.length
-                ? pm.teamNews.home
-                : [{ name: homeInfo.captain, status: "doubt", detail: "Assessed in final training session" }],
-            },
-            {
-              team: awayTeam,
-              items: pm.teamNews?.away?.length
-                ? pm.teamNews.away
-                : [{ name: `${awayTeam} Squad`, status: "booking", detail: "1 caution away from suspension" }],
-            },
-          ].map((group) => (
-            <div key={group.team} className="space-y-1.5">
-              <span className="text-[11px] font-medium text-[#8A8D96]">{group.team}</span>
-              {group.items.map((p, idx) => {
-                const st = NEWS_STYLES[p.status] || NEWS_STYLES.doubt;
-                return (
-                  <div key={`${p.name}-${idx}`} className="flex items-start gap-2 text-xs">
-                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-semibold ${st.cls}`}>
-                      {st.label}
-                    </span>
-                    <span className="min-w-0">
-                      <strong className="text-white font-medium">{p.name}</strong>
-                      <span className="text-[#8A8D96]"> · {p.detail}</span>
+        <Card icon={TimerReset} title={`Recent Form (Last ${Math.max(homeForm.length, awayForm.length, 5)})`}>
+          {homeForm.length > 0 || awayForm.length > 0 ? (
+            [
+              { team: homeTeam, form: homeForm, series: homeSeries, trend: homeTrend, colour: "#D2F865" },
+              { team: awayTeam, form: awayForm, series: awaySeries, trend: awayTrend, colour: "#8BA3F5" },
+            ].map((row) => (
+              <div key={row.team} className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="text-xs font-medium text-white block truncate mb-1">{row.team}</span>
+                  {row.form.length > 0 ? (
+                    <FormPills results={row.form} />
+                  ) : (
+                    <span className="text-[11px] text-[#6F727C]">Awaiting form feed</span>
+                  )}
+                </div>
+                {row.series.length > 1 && (
+                  <div className="flex flex-col items-end shrink-0">
+                    <XgSparkline series={row.series} colour={row.colour} />
+                    <span className={`text-[10px] font-medium ${row.trend.cls}`}>
+                      {row.trend.arrow} {row.trend.text}
                     </span>
                   </div>
-                );
-              })}
-            </div>
-          ))}
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-[#8A8D96]">
+              Recent form data is awaiting publication from the official match feed.
+            </p>
+          )}
         </Card>
 
-        <Card icon={Swords} title="Key duel">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <div className="text-left min-w-0">
-              <span className="text-[11px] font-mono text-[#D2F865] font-semibold">#{defaultKeyDuel.home.number}</span>
-              <span className="block text-xs font-semibold text-white truncate">{defaultKeyDuel.home.name}</span>
-              <span className="block font-display text-xl font-light text-[#D2F865] leading-none mt-1.5 tabular-nums">{defaultKeyDuel.home.stat}</span>
-              <span className="block text-[10px] text-[#8A8D96] mt-0.5">{defaultKeyDuel.home.label}</span>
-            </div>
-            <span className="text-[10px] font-medium text-white/30">vs</span>
-            <div className="text-right min-w-0">
-              <span className="text-[11px] font-mono text-[#8BA3F5] font-semibold">#{defaultKeyDuel.away.number}</span>
-              <span className="block text-xs font-semibold text-white truncate">{defaultKeyDuel.away.name}</span>
-              <span className="block font-display text-xl font-light text-white leading-none mt-1.5 tabular-nums">{defaultKeyDuel.away.stat}</span>
-              <span className="block text-[10px] text-[#8A8D96] mt-0.5">{defaultKeyDuel.away.label}</span>
-            </div>
+        <Card icon={BatteryMedium} title="Rest & Previous Match">
+          {realRestHome || realRestAway ? (
+            [
+              { team: homeTeam, d: realRestHome },
+              { team: awayTeam, d: realRestAway },
+            ].map((row) => (
+              <div key={row.team} className="space-y-0.5 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-white font-medium truncate">{row.team}</span>
+                  <strong className={row.d && row.d.days <= 3 ? "text-[#F4BA5B] tabular-nums" : "text-[#D2F865] tabular-nums"}>
+                    {row.d ? `${row.d.days}d rest` : "TBC"}
+                  </strong>
+                </div>
+                {row.d?.last && (
+                  <span className="text-[11px] text-[#8A8D96] block truncate">
+                    Last: {row.d.last}
+                  </span>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-[#8A8D96]">
+              Recovery and previous fixture details will appear once published.
+            </p>
+          )}
+        </Card>
+
+        <Card icon={CloudRain} title="Venue & Kick-off Conditions">
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-2xl font-light font-mono text-white tabular-nums">{weather.tempC}°C</span>
+            <span className="text-xs text-[#B7BAC3]">{weather.summary}</span>
           </div>
-          <p className="text-xs text-[#B7BAC3] leading-relaxed">{defaultKeyDuel.takeaway}</p>
+          <div className="text-xs text-[#8A8D96] tabular-nums">
+            Rain {weather.rainPct}% · Wind {weather.windKmh} km/h
+          </div>
+          <div className="text-xs text-[#8A8D96]">
+            {venueName}
+            {venueCity ? ` · ${venueCity}` : ""}
+            {venueCapacity ? ` · ${venueCapacity}` : ""}
+          </div>
+          <p className="text-[10px] text-[#6F727C]">{weather.source}</p>
         </Card>
       </div>
 
@@ -459,58 +497,73 @@ export default function PreMatchPanel({
         aria-expanded={showDetails}
         className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-[#B7BAC3] hover:text-white cursor-pointer transition-colors"
       >
-        {showDetails ? "Hide match context" : "More match context: recent results, tactics, set pieces, rest, officials, conditions"}
+        {showDetails ? "Hide match context" : "More match context: last 5 results, tactical profile, set pieces, officials"}
         {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
       </button>
 
       {showDetails && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <Card icon={History} title="Recent Results & H2H">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-[#B7BAC3] tabular-nums">
-                {club.shortName}: <strong className="text-[#D2F865]">{h2hSummary.W}W</strong>{" "}
-                <strong className="text-white/75">{h2hSummary.D}D</strong>{" "}
-                <strong className="text-[#F26E7C]">{h2hSummary.L}L</strong>
-              </span>
-              <button
-                type="button"
-                onClick={() => setH2hHomeVenueOnly(!h2hHomeVenueOnly)}
-                aria-pressed={h2hHomeVenueOnly}
-                className={`text-[11px] px-2.5 py-1 rounded-full border cursor-pointer transition-colors ${
-                  h2hHomeVenueOnly
-                    ? "bg-[#D2F865]/15 border-[#D2F865]/35 text-[#D2F865]"
-                    : "border-white/12 text-[#8A8D96] hover:text-white"
-                }`}
-              >
-                At {venueName} only
-              </button>
-            </div>
-            {h2h.map((m, idx) => (
-              <div key={`${m.date}-${idx}`} className="flex items-center justify-between text-xs gap-2">
-                <span className="text-[#6F727C] shrink-0 w-[76px] truncate">{m.date}</span>
-                <span className="text-white/90 truncate flex-1">{m.fixture}</span>
-                <span className={`shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold tabular-nums ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>{m.score}</span>
+          <Card icon={History} title={`${homeTeam} · Last 5 Matches`}>
+            {realRecentHome.length > 0 ? (
+              realRecentHome.map((m, idx) => (
+                <div key={`rh-${idx}`} className="flex items-center justify-between text-xs gap-2">
+                  <span className="text-[#6F727C] shrink-0 w-[56px] truncate">{m.date}</span>
+                  <span className="text-white/90 truncate flex-1">
+                    {m.atVs} {m.opponent}
+                  </span>
+                  <span className={`shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold tabular-nums ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>
+                    {m.score}
+                  </span>
+                </div>
+              ))
+            ) : h2h.length > 0 ? (
+              h2h.map((m, idx) => (
+                <div key={`${m.date}-${idx}`} className="flex items-center justify-between text-xs gap-2">
+                  <span className="text-[#6F727C] shrink-0 w-[76px] truncate">{m.date}</span>
+                  <span className="text-white/90 truncate flex-1">{m.fixture}</span>
+                  <span className={`shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold tabular-nums ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>{m.score}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-[#8A8D96]">No recent match log published for {homeTeam}.</p>
+            )}
+          </Card>
+
+          <Card icon={History} title={`${awayTeam} · Last 5 Matches`}>
+            {realRecentAway.length > 0 ? (
+              realRecentAway.map((m, idx) => (
+                <div key={`ra-${idx}`} className="flex items-center justify-between text-xs gap-2">
+                  <span className="text-[#6F727C] shrink-0 w-[56px] truncate">{m.date}</span>
+                  <span className="text-white/90 truncate flex-1">
+                    {m.atVs} {m.opponent}
+                  </span>
+                  <span className={`shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-semibold tabular-nums ${RESULT_STYLES[m.result] || RESULT_STYLES.D}`}>
+                    {m.score}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-[#8A8D96]">No recent match log published for {awayTeam}.</p>
+            )}
+          </Card>
+
+          <Card icon={Flag} title="Match Officials & Set Pieces">
+            <div className="text-xs space-y-1.5">
+              <div className="flex justify-between gap-2">
+                <span className="text-[#8A8D96]">Referee</span>
+                <strong className="text-white font-medium text-right">
+                  {realReferee || "TBC (awaiting official sheet)"}
+                </strong>
               </div>
-            ))}
-          </Card>
-
-          <Card icon={Swords} title="Tactical mismatch">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-2xl font-light font-mono text-[#D2F865] tabular-nums">{pm.tactical?.ppda ?? activeMatch?.metrics?.ppda ?? 7.1}</span>
-              <span className="text-[11px] text-[#8A8D96]">{club.shortName} PPDA (lower = more pressing)</span>
+              {pm.officials?.var && (
+                <div className="flex justify-between gap-2">
+                  <span className="text-[#8A8D96]">VAR</span>
+                  <span className="text-white/85">{pm.officials.var}</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-2xl font-light font-mono text-white/90 tabular-nums">{pm.tactical?.opponentTurnovers ?? 13}</span>
-              <span className="text-[11px] text-[#8A8D96]">{awayTeam} turnovers per game under high press</span>
-            </div>
-            <p className="text-xs text-[#B7BAC3] leading-relaxed">
-              {pm.tactical?.takeaway || `${club.name} deploy ${club.manager}'s ${club.formation} (${club.tacticalStyle.toLowerCase()}) to disrupt ${awayTeam}'s build-up.`}
-            </p>
-          </Card>
-
-          <Card icon={Flag} title="Set pieces (xG per game)">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] text-[#8A8D96] font-medium">Set-piece model</span>
+            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-[11px] text-[#8A8D96] font-medium">Set-piece routines</span>
               <button
                 type="button"
                 onClick={() => setIsSetPieceOpen(true)}
@@ -520,64 +573,6 @@ export default function PreMatchPanel({
                 Inspect Routines
               </button>
             </div>
-            {[
-              { team: homeTeam, d: pm.setPieces?.home || { for: 0.36, against: 0.22 } },
-              { team: awayTeam, d: pm.setPieces?.away || { for: 0.28, against: 0.31 } },
-            ].map((row) => (
-              <div key={row.team} className="flex items-center justify-between text-xs">
-                <span className="text-white/85">{row.team}</span>
-                <span className="font-mono tabular-nums">
-                  <span className="text-[#D2F865]">{row.d?.for?.toFixed(2)}</span>
-                  <span className="text-white/35"> for · </span>
-                  <span className="text-[#F26E7C]">{row.d?.against?.toFixed(2)}</span>
-                  <span className="text-white/35"> against</span>
-                </span>
-              </div>
-            ))}
-            <p className="text-xs text-[#B7BAC3] leading-relaxed">
-              {pm.setPieces?.takeaway || `${club.name} generate high-value aerial deliveries targeting ${club.captain} inside the six-yard box.`}
-            </p>
-          </Card>
-
-          <Card icon={BatteryMedium} title="Rest & fixture load">
-            {[
-              { team: homeTeam, d: pm.rest?.home || { days: 6, last: "Previous PL Match" } },
-              { team: awayTeam, d: pm.rest?.away || { days: 5, last: "Previous PL Match" } },
-            ].map((row) => (
-              <div key={row.team} className="flex items-center justify-between text-xs gap-2">
-                <span className="text-white/85">{row.team}</span>
-                <span className="text-right tabular-nums">
-                  <strong className={row.d?.days <= 3 ? "text-[#F4BA5B]" : "text-white"}>{row.d?.days} days</strong>
-                  <span className="text-[#6F727C]"> · {row.d?.last}</span>
-                </span>
-              </div>
-            ))}
-            <p className="text-xs text-[#F4BA5B]/90 leading-relaxed">
-              {pm.rest?.flag || `${club.name} arrive with full tactical recovery ahead of kick-off at ${venueName}.`}
-            </p>
-          </Card>
-
-          <Card icon={Flag} title="Match officials">
-            <div className="text-xs space-y-1">
-              <div className="flex justify-between"><span className="text-[#8A8D96]">Referee</span><strong className="text-white font-medium">{pm.officials?.referee || "Michael Oliver"}</strong></div>
-              <div className="flex justify-between"><span className="text-[#8A8D96]">VAR</span><span className="text-white/85">{pm.officials?.var || "Stuart Attwell"}</span></div>
-              <div className="flex justify-between"><span className="text-[#8A8D96]">Cards per game</span><span className="font-mono text-[#F4BA5B] tabular-nums">{pm.officials?.cardsPerGame || "3.8"}</span></div>
-              <div className="flex justify-between"><span className="text-[#8A8D96]">Penalties per game</span><span className="font-mono text-white/85 tabular-nums">{pm.officials?.pensPerGame || "0.21"}</span></div>
-            </div>
-          </Card>
-
-          <Card icon={CloudRain} title="Conditions at kick-off">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-2xl font-light font-mono text-white tabular-nums">{weather.tempC}°C</span>
-              <span className="text-xs text-[#B7BAC3]">{weather.summary}</span>
-            </div>
-            <div className="text-xs text-[#8A8D96] tabular-nums">
-              Rain {weather.rainPct}% · Wind {weather.windKmh} km/h
-            </div>
-            <div className="text-xs text-[#8A8D96]">
-              {pm.pitch || `${venueName} · Hybrid grass`} · <span className="text-white/85">{pm.attendance || `${venueCapacity} · Capacity`}</span>
-            </div>
-            <p className="text-[10px] text-[#6F727C]">{weather.source}</p>
           </Card>
         </div>
       )}

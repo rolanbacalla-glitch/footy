@@ -215,6 +215,121 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
   };
 }
 
+function americanOddsToProb(ml) {
+  const n = Number(ml);
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n < 0 ? Math.abs(n) / (Math.abs(n) + 100) : 100 / (n + 100);
+}
+
+function parseSummaryPreMatch(summaryData, homeTeamId, awayTeamId, kickoffIso) {
+  if (!summaryData) return null;
+
+  const venueObj = summaryData.gameInfo?.venue || null;
+  const venue = venueObj
+    ? {
+        name: venueObj.fullName || null,
+        city: venueObj.address?.city || null,
+        country: venueObj.address?.country || null,
+        capacity: venueObj.capacity || null,
+      }
+    : null;
+
+  const officialsList = Array.isArray(summaryData.gameInfo?.officials)
+    ? summaryData.gameInfo.officials
+    : [];
+  const referee =
+    officialsList.find((o) =>
+      String(o.position?.displayName || o.position?.name || "")
+        .toLowerCase()
+        .includes("referee")
+    )?.displayName ||
+    officialsList[0]?.displayName ||
+    null;
+
+  // Real last-5 form & rest days from ESPN lastFiveGames
+  const l5 = Array.isArray(summaryData.lastFiveGames) ? summaryData.lastFiveGames : [];
+  const findTeamL5 = (tid, idx) =>
+    l5.find((t) => tid && String(t.team?.id) === String(tid)) || l5[idx] || null;
+
+  const parseL5 = (entry) => {
+    const evs = Array.isArray(entry?.events) ? entry.events : [];
+    const sortedAsc = [...evs].sort(
+      (a, b) => new Date(a.gameDate || 0).getTime() - new Date(b.gameDate || 0).getTime()
+    );
+    const results = sortedAsc
+      .map((e) => String(e.gameResult || "").toUpperCase())
+      .filter((r) => ["W", "D", "L"].includes(r));
+    const recentGames = [...sortedAsc].reverse().map((e) => ({
+      date: e.gameDate
+        ? new Date(e.gameDate).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+          })
+        : "",
+      rawDate: e.gameDate || null,
+      opponent: e.opponent?.displayName || e.opponent?.abbreviation || "Opponent",
+      score: e.score || "",
+      result: String(e.gameResult || "D").toUpperCase(),
+      atVs: e.atVs || "vs",
+    }));
+
+    let rest = null;
+    if (recentGames[0]?.rawDate && kickoffIso) {
+      const diffMs =
+        new Date(kickoffIso).getTime() - new Date(recentGames[0].rawDate).getTime();
+      const days = Math.max(0, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+      rest = {
+        days,
+        last: `${recentGames[0].atVs === "@" ? "at" : "vs"} ${recentGames[0].opponent} (${recentGames[0].score})`,
+      };
+    }
+
+    return { results, recentGames, rest };
+  };
+
+  const homeL5 = parseL5(findTeamL5(homeTeamId, 0));
+  const awayL5 = parseL5(findTeamL5(awayTeamId, 1));
+
+  // Real market-implied win probability from ESPN odds
+  let winProbability = null;
+  const firstOdds = Array.isArray(summaryData.odds) ? summaryData.odds[0] : null;
+  if (firstOdds) {
+    const pHome = americanOddsToProb(firstOdds.homeTeamOdds?.moneyLine);
+    const pAway = americanOddsToProb(firstOdds.awayTeamOdds?.moneyLine);
+    const pDraw = americanOddsToProb(firstOdds.drawOdds?.moneyLine);
+    if (pHome && pAway && pDraw) {
+      const total = pHome + pAway + pDraw;
+      const home = Math.round((pHome / total) * 100);
+      const draw = Math.round((pDraw / total) * 100);
+      const away = Math.max(1, 100 - home - draw);
+      winProbability = {
+        home,
+        draw,
+        away,
+        source: `${firstOdds.provider?.name || "Market"} live implied odds`,
+      };
+    }
+  }
+
+  return {
+    venue,
+    referee,
+    form: {
+      home: homeL5.results,
+      away: awayL5.results,
+    },
+    lastFive: {
+      home: homeL5.recentGames,
+      away: awayL5.recentGames,
+    },
+    rest: {
+      home: homeL5.rest,
+      away: awayL5.rest,
+    },
+    winProbability,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const teamId = searchParams.get("teamId") || "364";
@@ -520,6 +635,24 @@ export async function GET(request) {
           if (parsedLineups) {
             targetForLineups.lineups = parsedLineups;
           }
+          const parsedPreMatch = parseSummaryPreMatch(
+            summaryData,
+            targetForLineups.homeTeamId,
+            targetForLineups.awayTeamId,
+            targetForLineups.date
+          );
+          if (parsedPreMatch) {
+            targetForLineups.preMatchData = parsedPreMatch;
+            if (parsedPreMatch.venue?.city) {
+              targetForLineups.venueCity = parsedPreMatch.venue.city;
+            }
+            if (parsedPreMatch.venue?.country) {
+              targetForLineups.venueCountry = parsedPreMatch.venue.country;
+            }
+            if (parsedPreMatch.venue?.capacity && !targetForLineups.attendance) {
+              targetForLineups.venueCapacity = parsedPreMatch.venue.capacity;
+            }
+          }
         }
       } catch (lineupErr) {
         console.warn("Summary line-ups fetch error:", lineupErr.message);
@@ -541,6 +674,7 @@ export async function GET(request) {
     activeLiveMatch,
     matchdayFixture,
     matchLineups: activeLiveMatch?.lineups || matchdayFixture?.lineups || null,
+    matchPreMatch: activeLiveMatch?.preMatchData || matchdayFixture?.preMatchData || null,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {

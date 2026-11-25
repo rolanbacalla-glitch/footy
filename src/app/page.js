@@ -138,7 +138,7 @@ export default function FootballInsightsDashboard() {
             setSelectedMatchId((prev) =>
               prev && prev.startsWith("espn-") ? prev : live[0].id
             );
-          } else if (selectedClubId !== "364") {
+          } else {
             const firstMatch = up[0] || rec[0];
             if (firstMatch) {
               setSelectedMatchId((prev) =>
