@@ -420,9 +420,6 @@ export default function LiveScoreboard({
                 <Clock className="w-3.5 h-3.5 animate-pulse" />
                 {phase.id === "BUILD_UP" ? "MATCHDAY" : phase.label.toUpperCase()} • KICK-OFF{" "}
                 {kickoffTime}
-                <span className="text-white font-mono text-[10px] ml-1 bg-black/60 px-2 py-0.5 rounded-full border border-white/15 tabular-nums">
-                  {countdownSeconds > 0 ? `T-${formattedCountdown}` : "KICK-OFF IMMINENT"}
-                </span>
               </span>
             ) : isLive ? (
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF2636]/20 border border-[#FF2636]/40 text-[#FF4D5A] font-bold text-[11px] tracking-wide shadow-[0_0_12px_rgba(255,38,54,0.35)]">
