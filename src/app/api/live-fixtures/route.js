@@ -140,6 +140,57 @@ function parseMinuteOrder(minStr) {
   return Number(match[1]) + (match[2] ? Number(match[2]) / 100 : 0);
 }
 
+function parseSummaryAssists(summaryData, homeTeamId, awayTeamId, homeName, awayName) {
+  const keyEvents = Array.isArray(summaryData?.keyEvents) ? summaryData.keyEvents : [];
+  const homeAssists = [];
+  const awayAssists = [];
+
+  const normHome = String(homeName || "").toLowerCase();
+  const normAway = String(awayName || "").toLowerCase();
+
+  for (const ev of keyEvents) {
+    if (!ev?.scoringPlay || ev?.ownGoal) continue;
+    const min = ev?.clock?.displayValue || "";
+    const participants = Array.isArray(ev?.participants) ? ev.participants : [];
+    const scorerName =
+      participants[0]?.athlete?.displayName ||
+      participants[0]?.athlete?.shortName ||
+      "";
+    let assistPlayer =
+      participants[1]?.athlete?.displayName ||
+      participants[1]?.athlete?.shortName ||
+      null;
+
+    if (!assistPlayer && typeof ev?.text === "string") {
+      const match = ev.text.match(/Assisted by ([^.(]+)/i);
+      if (match?.[1]) {
+        assistPlayer = match[1].trim();
+      }
+    }
+    if (!assistPlayer) continue;
+
+    const evTeamId = ev?.team?.id ? String(ev.team.id) : null;
+    const evTeamName = String(ev?.team?.displayName || "").toLowerCase();
+    const isHome =
+      (evTeamId && homeTeamId && evTeamId === String(homeTeamId)) ||
+      (evTeamName && normHome && evTeamName === normHome);
+    const isAway =
+      (evTeamId && awayTeamId && evTeamId === String(awayTeamId)) ||
+      (evTeamName && normAway && evTeamName === normAway);
+
+    const entry = {
+      player: assistPlayer,
+      min,
+      forPlayer: scorerName || null,
+    };
+
+    if (isHome) homeAssists.push(entry);
+    else if (isAway) awayAssists.push(entry);
+  }
+
+  return { homeAssists, awayAssists };
+}
+
 function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, awayName) {
   const rosters = Array.isArray(summaryData?.rosters) ? summaryData.rosters : [];
   if (rosters.length === 0) return null;
@@ -658,6 +709,17 @@ export async function GET(request) {
         );
         if (summaryRes.ok) {
           const summaryData = await summaryRes.json();
+          const parsedAssists = parseSummaryAssists(
+            summaryData,
+            targetForLineups.homeTeamId,
+            targetForLineups.awayTeamId,
+            targetForLineups.homeTeam,
+            targetForLineups.awayTeam
+          );
+          if (parsedAssists) {
+            targetForLineups.homeAssists = parsedAssists.homeAssists;
+            targetForLineups.awayAssists = parsedAssists.awayAssists;
+          }
           const parsedLineups = parseSummaryLineups(
             summaryData,
             targetForLineups.homeTeamId,

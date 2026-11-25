@@ -416,6 +416,12 @@ export default function LiveScoreboard({
   const awayScorers = isMatchdayPreMatch
     ? []
     : liveMatchFromApi?.awayScorers || activeMatch?.awayScorers || [];
+  const homeAssists = isMatchdayPreMatch
+    ? []
+    : liveMatchFromApi?.homeAssists || activeMatch?.homeAssists || [];
+  const awayAssists = isMatchdayPreMatch
+    ? []
+    : liveMatchFromApi?.awayAssists || activeMatch?.awayAssists || [];
   const homeCards = isMatchdayPreMatch
     ? []
     : liveMatchFromApi?.homeCards || activeMatch?.homeCards || [];
@@ -589,148 +595,206 @@ export default function LiveScoreboard({
         </div>
 
         {/* ── Main Scoreboard Visual Display ── */}
-        <div className="grid grid-cols-1 md:grid-cols-7 items-center gap-4 py-4 sm:py-5">
-          {/* Home Team */}
-          <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-3 sm:gap-4 order-1">
-            <div className="text-left md:text-right">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
-                {homeTeam}
-              </h2>
-              <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                {homeInfo.manager}
-                {homeFormationDisplay && homeFormationDisplay !== "TBC"
-                  ? ` • ${homeFormationDisplay}`
-                  : ""}
-              </p>
-
-              {/* Scorers & Cards (In-Play / Full-Time) */}
-              {!isMatchdayPreMatch &&
-                (homeScorers.length > 0 || homeCards.length > 0) && (
-                  <div className="flex flex-wrap md:justify-end gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
-                    {homeScorers.map((s, i) => (
-                      <span key={`hs-${i}`} className="flex items-center gap-1">
-                        <span className="text-[#D2F865] font-bold">⚽</span>
-                        <strong className="text-white">{s.player}</strong>
-                        <span className="text-white/60 text-[11px]">
-                          {s.min}
-                          {s.isPenalty ? " (P)" : ""}
-                          {s.isOwnGoal ? " (OG)" : ""}
-                        </span>
-                      </span>
-                    ))}
-                    {homeCards.map((c, i) => (
-                      <span key={`hc-${i}`} className="flex items-center gap-1 text-[11px]">
-                        <span>{c.type === "red" ? "🟥" : "🟨"}</span>
-                        <span className="text-white/80">{c.player}</span>
-                        <span className="text-white/50">{c.min}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-            </div>
-            <ClubBadge
-              clubId={authoritativeMatch?.homeTeamId}
-              name={homeTeam}
-              shortName={authoritativeMatch?.homeShort || homeInfo.shortName}
-              logoUrl={authoritativeMatch?.homeLogo}
-              primaryColor={homeInfo.primaryColor}
-              secondaryColor={homeInfo.secondaryColor}
-              size="lg"
-              className="order-first md:order-last"
-            />
-          </div>
-
-          {/* Central Score & Countdown Display */}
-          <div className="md:col-span-1 flex flex-col items-center justify-center order-2 py-1">
-            <div className="flex items-center gap-2 sm:gap-3 bg-black/60 px-4 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/[0.14] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8),0_4px_20px_rgba(0,0,0,0.5)]">
-              <span
-                className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${
-                  isMatchdayPreMatch
-                    ? "text-white/35"
-                    : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
-                }`}
-              >
-                {homeScore}
-              </span>
-              <span className="text-xl sm:text-2xl font-bold text-white/30">:</span>
-              <span
-                className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums ${
-                  isMatchdayPreMatch
-                    ? "text-white/35"
-                    : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
-                }`}
-              >
-                {awayScore}
-              </span>
-            </div>
-
-            {isMatchdayPreMatch ? (
-              <div className="mt-2 flex flex-col items-center gap-0.5">
-                <span className="font-mono text-xs sm:text-sm font-bold text-[#D2F865] tabular-nums tracking-wider">
-                  {countdownSeconds > 0 ? formattedCountdown : "00:00:00"}
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/65">
-                  {countdownSeconds > 0 ? "To Kick-off" : "Kick-off Imminent"}
-                </span>
+        <div className="py-4 sm:py-5">
+          {/* Primary Aligned Lockup: Top-aligned Club Names + Aligned Badges + Score */}
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start gap-4 md:gap-6">
+            {/* Home Team */}
+            <div className="flex items-start justify-start md:justify-end gap-3 sm:gap-4 order-1">
+              <div className="flex flex-col items-start md:items-end text-left md:text-right min-w-0">
+                <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-none">
+                    {homeTeam}
+                  </h2>
+                </div>
+                <p className="text-[11px] text-[#8E8E93] mt-1 font-medium">
+                  {homeInfo.manager}
+                  {homeFormationDisplay && homeFormationDisplay !== "TBC"
+                    ? ` • ${homeFormationDisplay}`
+                    : ""}
+                </p>
               </div>
-            ) : (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-2 flex items-center gap-1.5">
-                {isLive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
-                )}
-                {isLive ? `${periodLabel} • ${liveClockDisplay}` : "Full-Time"}
-              </span>
-            )}
-          </div>
+              <div className="min-h-[48px] sm:min-h-[56px] flex items-center shrink-0 order-first md:order-last">
+                <ClubBadge
+                  clubId={authoritativeMatch?.homeTeamId}
+                  name={homeTeam}
+                  shortName={authoritativeMatch?.homeShort || homeInfo.shortName}
+                  logoUrl={authoritativeMatch?.homeLogo}
+                  primaryColor={homeInfo.primaryColor}
+                  secondaryColor={homeInfo.secondaryColor}
+                  size="lg"
+                />
+              </div>
+            </div>
 
-          {/* Away Team */}
-          <div className="md:col-span-3 flex items-center justify-start gap-3 sm:gap-4 order-3">
-            <ClubBadge
-              clubId={authoritativeMatch?.awayTeamId}
-              name={awayTeam}
-              shortName={authoritativeMatch?.awayShort || awayInfo.shortName}
-              logoUrl={authoritativeMatch?.awayLogo}
-              primaryColor={awayInfo.primaryColor}
-              secondaryColor={awayInfo.secondaryColor}
-              size="lg"
-            />
-            <div className="text-left">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
-                {awayTeam}
-              </h2>
-              <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                {awayInfo.manager}
-                {awayFormationDisplay && awayFormationDisplay !== "TBC"
-                  ? ` • ${awayFormationDisplay}`
-                  : ""}
-              </p>
+            {/* Central Score & Match Clock */}
+            <div className="flex flex-col items-center justify-start order-2">
+              <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
+                <div className="flex items-center gap-2 sm:gap-3 bg-black/60 px-4 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/[0.14] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8),0_4px_20px_rgba(0,0,0,0.5)]">
+                  <span
+                    className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
+                      isMatchdayPreMatch
+                        ? "text-white/35"
+                        : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
+                    }`}
+                  >
+                    {homeScore}
+                  </span>
+                  <span className="text-xl sm:text-2xl font-bold text-white/30 leading-none">:</span>
+                  <span
+                    className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
+                      isMatchdayPreMatch
+                        ? "text-white/35"
+                        : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
+                    }`}
+                  >
+                    {awayScore}
+                  </span>
+                </div>
+              </div>
 
-              {/* Scorers & Cards (In-Play / Full-Time) */}
-              {!isMatchdayPreMatch &&
-                (awayScorers.length > 0 || awayCards.length > 0) && (
-                  <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
-                    {awayScorers.map((s, i) => (
-                      <span key={`as-${i}`} className="flex items-center gap-1">
-                        <span className="text-[#D2F865] font-bold">⚽</span>
-                        <strong className="text-white">{s.player}</strong>
-                        <span className="text-white/60 text-[11px]">
-                          {s.min}
-                          {s.isPenalty ? " (P)" : ""}
-                          {s.isOwnGoal ? " (OG)" : ""}
-                        </span>
-                      </span>
-                    ))}
-                    {awayCards.map((c, i) => (
-                      <span key={`ac-${i}`} className="flex items-center gap-1 text-[11px]">
-                        <span>{c.type === "red" ? "🟥" : "🟨"}</span>
-                        <span className="text-white/80">{c.player}</span>
-                        <span className="text-white/50">{c.min}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
+              {isMatchdayPreMatch ? (
+                <div className="mt-2 flex flex-col items-center gap-0.5">
+                  <span className="font-mono text-xs sm:text-sm font-bold text-[#D2F865] tabular-nums tracking-wider">
+                    {countdownSeconds > 0 ? formattedCountdown : "00:00:00"}
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/65">
+                    {countdownSeconds > 0 ? "To Kick-off" : "Kick-off Imminent"}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-2 flex items-center gap-1.5">
+                  {isLive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
+                  )}
+                  {isLive ? `${periodLabel} • ${liveClockDisplay}` : "Full-Time"}
+                </span>
+              )}
+            </div>
+
+            {/* Away Team */}
+            <div className="flex items-start justify-start gap-3 sm:gap-4 order-3">
+              <div className="min-h-[48px] sm:min-h-[56px] flex items-center shrink-0">
+                <ClubBadge
+                  clubId={authoritativeMatch?.awayTeamId}
+                  name={awayTeam}
+                  shortName={authoritativeMatch?.awayShort || awayInfo.shortName}
+                  logoUrl={authoritativeMatch?.awayLogo}
+                  primaryColor={awayInfo.primaryColor}
+                  secondaryColor={awayInfo.secondaryColor}
+                  size="lg"
+                />
+              </div>
+              <div className="flex flex-col items-start text-left min-w-0">
+                <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-none">
+                    {awayTeam}
+                  </h2>
+                </div>
+                <p className="text-[11px] text-[#8E8E93] mt-1 font-medium">
+                  {awayInfo.manager}
+                  {awayFormationDisplay && awayFormationDisplay !== "TBC"
+                    ? ` • ${awayFormationDisplay}`
+                    : ""}
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* Dedicated Aligned Scorers & Cards Row (Keeps Scoreboard Lockup Perfectly Balanced) */}
+          {!isMatchdayPreMatch &&
+            (homeScorers.length > 0 ||
+              awayScorers.length > 0 ||
+              homeCards.length > 0 ||
+              awayCards.length > 0) && (
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-start gap-2 sm:gap-6 mt-3 pt-2.5 border-t border-white/[0.06] text-xs font-medium">
+                {/* Home Scorers & Cards */}
+                <div className="flex flex-col items-start sm:items-end gap-1 text-left sm:text-right">
+                  {homeScorers.map((s, i) => (
+                    <span key={`hs-${i}`} className="inline-flex items-center gap-1.5 text-[#EBEBF5]/95">
+                      <span className="text-[#D2F865] text-[11px]">⚽</span>
+                      <strong className="text-white font-semibold">{s.player}</strong>
+                      <span className="font-mono text-white/60 text-[11px] tabular-nums">
+                        ({s.min}
+                        {s.isPenalty ? " P" : ""}
+                        {s.isOwnGoal ? " OG" : ""})
+                      </span>
+                    </span>
+                  ))}
+                  {homeCards.map((c, i) => (
+                    <span key={`hc-${i}`} className="inline-flex items-center gap-1.5 text-[11px]">
+                      <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                      <span className="text-white/80">{c.player}</span>
+                      <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Balanced Centre Gutter */}
+                <div className="hidden sm:flex justify-center min-w-[104px] text-[10px] font-semibold uppercase tracking-wider text-white/40 pt-0.5">
+                  Goals
+                </div>
+
+                {/* Away Scorers & Cards */}
+                <div className="flex flex-col items-start gap-1 text-left">
+                  {awayScorers.map((s, i) => (
+                    <span key={`as-${i}`} className="inline-flex items-center gap-1.5 text-[#EBEBF5]/95">
+                      <span className="text-[#D2F865] text-[11px]">⚽</span>
+                      <strong className="text-white font-semibold">{s.player}</strong>
+                      <span className="font-mono text-white/60 text-[11px] tabular-nums">
+                        ({s.min}
+                        {s.isPenalty ? " P" : ""}
+                        {s.isOwnGoal ? " OG" : ""})
+                      </span>
+                    </span>
+                  ))}
+                  {awayCards.map((c, i) => (
+                    <span key={`ac-${i}`} className="inline-flex items-center gap-1.5 text-[11px]">
+                      <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                      <span className="text-white/80">{c.player}</span>
+                      <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* Dedicated Aligned Assists Row Underneath Scorers */}
+          {!isMatchdayPreMatch && (homeAssists.length > 0 || awayAssists.length > 0) && (
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-baseline gap-2 sm:gap-6 mt-2.5 pt-2.5 border-t border-white/[0.06] text-xs">
+              {/* Home Assists */}
+              <div className="flex flex-col items-start sm:items-end gap-1 text-left sm:text-right">
+                {homeAssists.map((a, i) => (
+                  <span key={`ha-${i}`} className="inline-flex items-center gap-1.5 text-white/80">
+                    <span>{a.player}</span>
+                    {a.min && (
+                      <span className="font-mono text-white/50 text-[11px] tabular-nums">
+                        ({a.min})
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              {/* Centred Assists Label */}
+              <div className="flex justify-start sm:justify-center min-w-[104px] text-[11px] font-semibold text-white/70 tracking-wide">
+                Assists
+              </div>
+
+              {/* Away Assists */}
+              <div className="flex flex-col items-start gap-1 text-left">
+                {awayAssists.map((a, i) => (
+                  <span key={`aa-${i}`} className="inline-flex items-center gap-1.5 text-white/80">
+                    <span>{a.player}</span>
+                    {a.min && (
+                      <span className="font-mono text-white/50 text-[11px] tabular-nums">
+                        ({a.min})
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Interactive Confirmed XI / Official Line-ups Panel ── */}
