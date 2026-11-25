@@ -463,7 +463,7 @@ export default function FootballInsightsDashboard() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="relative min-h-screen w-full bg-[#141518] text-[#F2F3F5] overflow-x-hidden">
+    <div className="relative min-h-screen w-full bg-[#141518] text-[#F2F3F5] overflow-x-clip">
       {/* Subtle Ambient Liquid Glass Backlight Pools (Low-intensity, calm atmospheric depth) */}
       <div
         aria-hidden="true"

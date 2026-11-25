@@ -123,8 +123,8 @@ export default function SidebarNav({
         </div>
       </aside>
 
-      {/* ─── Mobile Top Utility Bar (< md) ─── */}
-      <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-[#101114]/92 backdrop-blur-2xl border-b border-white/[0.07]">
+      {/* ─── Mobile Top Utility Bar (< md — fixed so it always follows scroll on mobile) ─── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-[#101114]/92 backdrop-blur-2xl border-b border-white/[0.07]">
         <button
           type="button"
           onClick={() => setActiveTab("boot-room")}
@@ -156,6 +156,8 @@ export default function SidebarNav({
           </button>
         </div>
       </div>
+      {/* Spacer matching fixed mobile header height so page content starts cleanly below it */}
+      <div className="md:hidden h-[65px] shrink-0" aria-hidden="true" />
 
       {/* ─── Mobile Navigation Drawer ─── */}
       {mobileOpen && (
