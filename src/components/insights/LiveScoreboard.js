@@ -615,14 +615,9 @@ export default function LiveScoreboard({
           {/* Home Team */}
           <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-3 sm:gap-4 order-1">
             <div className="text-left md:text-right">
-              <div className="flex items-center md:justify-end gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#E31B23]/25 text-[#FF4D5A] border border-[#E31B23]/35">
-                  HOME
-                </span>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
-                  {homeTeam}
-                </h2>
-              </div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
+                {homeTeam}
+              </h2>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
                 {homeInfo.manager}
                 {homeFormationDisplay && homeFormationDisplay !== "TBC"
@@ -722,14 +717,9 @@ export default function LiveScoreboard({
               size="lg"
             />
             <div className="text-left">
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
-                  {awayTeam}
-                </h2>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/10 text-white/70 border border-white/15">
-                  AWAY
-                </span>
-              </div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
+                {awayTeam}
+              </h2>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
                 {awayInfo.manager}
                 {awayFormationDisplay && awayFormationDisplay !== "TBC"
