@@ -77,7 +77,7 @@ export default function LiveMatchTicker({ selectedClubId, onSelectClub }) {
               type="button"
               disabled={!clickableClubId}
               onClick={() => clickableClubId && onSelectClub && onSelectClub(clickableClubId)}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs shrink-0 transition-colors ${
+              className={`min-h-[40px] flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs shrink-0 transition-colors ${
                 isSelected
                   ? "bg-[#FF2636]/15 border-[#FF4D5A]/50 text-white"
                   : "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-white/90"

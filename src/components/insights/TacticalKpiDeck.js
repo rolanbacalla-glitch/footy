@@ -135,35 +135,35 @@ export default function TacticalKpiDeck({
       aria-label="Match performance indicators"
       className="space-y-4"
     >
-      {/* Top Row: Signature 4 Stacked Atmospheric Glass KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* Top Row: Signature 4 Stacked Atmospheric Glass KPI Cards (2x2 on mobile for glanceability) */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         {kpiCards.map((card) => {
           const Icon = card.icon;
           return (
             <div key={card.id}>
               <div
-                className={`stacked-kpi-card ${card.washClass} p-5 flex flex-col justify-between min-h-[168px]`}
+                className={`stacked-kpi-card ${card.washClass} p-3.5 sm:p-5 flex flex-col justify-between min-h-[136px] sm:min-h-[168px]`}
               >
                 {/* Top circular frosted icon well */}
-                <div className="w-9 h-9 rounded-full bg-black/55 border border-white/10 flex items-center justify-center text-white/90">
-                  <Icon className="w-4 h-4" strokeWidth={1.8} />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/55 border border-white/10 flex items-center justify-center text-white/90">
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.8} />
                 </div>
 
                 {/* Label & oversized light geometric numeral */}
-                <div className="mt-5">
-                  <div className="text-[11px] font-medium tracking-[0.06em] uppercase text-white/75 leading-snug">
+                <div className="mt-3 sm:mt-5">
+                  <div className="text-[10px] sm:text-[11px] font-medium tracking-[0.05em] sm:tracking-[0.06em] uppercase text-white/75 leading-snug">
                     {card.label}
                   </div>
-                  <div className="text-[11px] text-white/45 mt-0.5">
+                  <div className="text-[10px] sm:text-[11px] text-white/45 mt-0.5 truncate">
                     {card.sublabel}
                   </div>
 
-                  <div className="flex items-baseline justify-between gap-2 mt-3.5">
-                    <span className="font-display text-3xl sm:text-[36px] font-light tracking-[-0.03em] text-white tabular-nums leading-none">
+                  <div className="flex items-baseline justify-between gap-1.5 sm:gap-2 mt-2.5 sm:mt-3.5">
+                    <span className="font-display text-2xl sm:text-[36px] font-light tracking-[-0.03em] text-white tabular-nums leading-none">
                       {card.value}
                     </span>
                     <span
-                      className={`text-xs font-medium tabular-nums ${
+                      className={`text-[11px] sm:text-xs font-medium tabular-nums ${
                         card.deltaPositive
                           ? "text-[#A7E87A]"
                           : "text-[#F2858E]"

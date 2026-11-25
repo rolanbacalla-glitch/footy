@@ -595,25 +595,28 @@ export default function LiveScoreboard({
         </div>
 
         {/* ── Main Scoreboard Visual Display ── */}
-        <div className="py-4 sm:py-5">
-          {/* Primary Aligned Lockup: Top-aligned Club Names + Aligned Badges + Score */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start gap-4 md:gap-6">
+        <div className="py-3.5 sm:py-5">
+          {/* Primary Aligned Lockup: Compact 3-col horizontal on mobile (FotMob/Apple Sports style), Top-aligned Club Names + Badges + Score on desktop */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2 sm:gap-4 md:gap-6">
             {/* Home Team */}
-            <div className="flex items-start justify-start md:justify-end gap-3 sm:gap-4 order-1">
-              <div className="flex flex-col items-start md:items-end text-left md:text-right min-w-0">
-                <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-none">
+            <div className="flex flex-col md:flex-row items-center md:items-start justify-start md:justify-end gap-1.5 sm:gap-3 md:gap-4 order-1 min-w-0">
+              <div className="flex flex-col items-center md:items-end text-center md:text-right min-w-0 w-full md:w-auto">
+                <div className="md:min-h-[56px] flex items-center justify-center md:justify-end">
+                  <h2 className="text-sm sm:text-xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-tight md:leading-none text-balance">
                     {homeTeam}
                   </h2>
                 </div>
-                <p className="text-[11px] text-[#8E8E93] mt-1 font-medium">
-                  {homeInfo.manager}
-                  {homeFormationDisplay && homeFormationDisplay !== "TBC"
-                    ? ` • ${homeFormationDisplay}`
-                    : ""}
+                <p className="text-[10px] sm:text-[11px] text-[#8E8E93] mt-0.5 md:mt-1 font-medium truncate max-w-full">
+                  <span className="hidden sm:inline">{homeInfo.manager}</span>
+                  {homeFormationDisplay && homeFormationDisplay !== "TBC" ? (
+                    <>
+                      <span className="hidden sm:inline"> • </span>
+                      <span>{homeFormationDisplay}</span>
+                    </>
+                  ) : null}
                 </p>
               </div>
-              <div className="min-h-[48px] sm:min-h-[56px] flex items-center shrink-0 order-first md:order-last">
+              <div className="min-h-[40px] sm:min-h-[48px] md:min-h-[56px] flex items-center shrink-0 order-first md:order-last">
                 <ClubBadge
                   clubId={authoritativeMatch?.homeTeamId}
                   name={homeTeam}
@@ -627,11 +630,11 @@ export default function LiveScoreboard({
             </div>
 
             {/* Central Score & Match Clock */}
-            <div className="flex flex-col items-center justify-start order-2">
-              <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
-                <div className="flex items-center gap-2 sm:gap-3 bg-black/60 px-4 sm:px-5 py-1.5 sm:py-2 rounded-2xl border border-white/[0.14] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8),0_4px_20px_rgba(0,0,0,0.5)]">
+            <div className="flex flex-col items-center justify-start order-2 shrink-0">
+              <div className="min-h-[44px] sm:min-h-[48px] md:min-h-[56px] flex items-center">
+                <div className="flex items-center gap-1.5 sm:gap-3 bg-black/60 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/[0.14] shadow-[inset_0_2px_8px_rgba(0,0,0,0.8),0_4px_20px_rgba(0,0,0,0.5)]">
                   <span
-                    className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
+                    className={`text-2xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
                       isMatchdayPreMatch
                         ? "text-white/35"
                         : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
@@ -639,9 +642,9 @@ export default function LiveScoreboard({
                   >
                     {homeScore}
                   </span>
-                  <span className="text-xl sm:text-2xl font-bold text-white/30 leading-none">:</span>
+                  <span className="text-lg sm:text-2xl font-bold text-white/30 leading-none">:</span>
                   <span
-                    className={`text-3xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
+                    className={`text-2xl sm:text-4xl md:text-5xl font-black font-mono tabular-nums leading-none ${
                       isMatchdayPreMatch
                         ? "text-white/35"
                         : "text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]"
@@ -653,16 +656,16 @@ export default function LiveScoreboard({
               </div>
 
               {isMatchdayPreMatch ? (
-                <div className="mt-2 flex flex-col items-center gap-0.5">
-                  <span className="font-mono text-xs sm:text-sm font-bold text-[#D2F865] tabular-nums tracking-wider">
+                <div className="mt-1.5 sm:mt-2 flex flex-col items-center gap-0.5">
+                  <span className="font-mono text-[11px] sm:text-sm font-bold text-[#D2F865] tabular-nums tracking-wider">
                     {countdownSeconds > 0 ? formattedCountdown : "00:00:00"}
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/65">
+                  <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-white/65">
                     {countdownSeconds > 0 ? "To Kick-off" : "Kick-off Imminent"}
                   </span>
                 </div>
               ) : (
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-2 flex items-center gap-1.5">
+                <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-1.5 sm:mt-2 flex items-center gap-1.5 whitespace-nowrap">
                   {isLive && (
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FF2636] animate-ping" />
                   )}
@@ -672,8 +675,8 @@ export default function LiveScoreboard({
             </div>
 
             {/* Away Team */}
-            <div className="flex items-start justify-start gap-3 sm:gap-4 order-3">
-              <div className="min-h-[48px] sm:min-h-[56px] flex items-center shrink-0">
+            <div className="flex flex-col md:flex-row items-center md:items-start justify-start gap-1.5 sm:gap-3 md:gap-4 order-3 min-w-0">
+              <div className="min-h-[40px] sm:min-h-[48px] md:min-h-[56px] flex items-center shrink-0">
                 <ClubBadge
                   clubId={authoritativeMatch?.awayTeamId}
                   name={awayTeam}
@@ -684,36 +687,39 @@ export default function LiveScoreboard({
                   size="lg"
                 />
               </div>
-              <div className="flex flex-col items-start text-left min-w-0">
-                <div className="min-h-[48px] sm:min-h-[56px] flex items-center">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-none">
+              <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0 w-full md:w-auto">
+                <div className="md:min-h-[56px] flex items-center justify-center md:justify-start">
+                  <h2 className="text-sm sm:text-xl md:text-3xl font-extrabold text-white tracking-[-0.02em] leading-tight md:leading-none text-balance">
                     {awayTeam}
                   </h2>
                 </div>
-                <p className="text-[11px] text-[#8E8E93] mt-1 font-medium">
-                  {awayInfo.manager}
-                  {awayFormationDisplay && awayFormationDisplay !== "TBC"
-                    ? ` • ${awayFormationDisplay}`
-                    : ""}
+                <p className="text-[10px] sm:text-[11px] text-[#8E8E93] mt-0.5 md:mt-1 font-medium truncate max-w-full">
+                  <span className="hidden sm:inline">{awayInfo.manager}</span>
+                  {awayFormationDisplay && awayFormationDisplay !== "TBC" ? (
+                    <>
+                      <span className="hidden sm:inline"> • </span>
+                      <span>{awayFormationDisplay}</span>
+                    </>
+                  ) : null}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Dedicated Aligned Scorers & Cards Row (Keeps Scoreboard Lockup Perfectly Balanced) */}
+          {/* Dedicated Aligned Scorers & Cards Row (Stays 3-column on mobile so Home vs Away is unambiguous) */}
           {!isMatchdayPreMatch &&
             (homeScorers.length > 0 ||
               awayScorers.length > 0 ||
               homeCards.length > 0 ||
               awayCards.length > 0) && (
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-start gap-2 sm:gap-6 mt-3 pt-2.5 border-t border-white/[0.06] text-xs font-medium">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2 sm:gap-6 mt-3 pt-2.5 border-t border-white/[0.06] text-[11px] sm:text-xs font-medium">
                 {/* Home Scorers & Cards */}
-                <div className="flex flex-col items-start sm:items-end gap-1 text-left sm:text-right">
+                <div className="flex flex-col items-end gap-1 text-right min-w-0">
                   {homeScorers.map((s, i) => (
-                    <span key={`hs-${i}`} className="inline-flex items-center gap-1.5 text-[#EBEBF5]/95">
-                      <span className="text-[#D2F865] text-[11px]">⚽</span>
-                      <strong className="text-white font-semibold">{s.player}</strong>
-                      <span className="font-mono text-white/60 text-[11px] tabular-nums">
+                    <span key={`hs-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95">
+                      <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
+                      <strong className="text-white font-semibold truncate max-w-[115px] sm:max-w-none">{s.player}</strong>
+                      <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
                         ({s.min}
                         {s.isPenalty ? " P" : ""}
                         {s.isOwnGoal ? " OG" : ""})
@@ -721,26 +727,26 @@ export default function LiveScoreboard({
                     </span>
                   ))}
                   {homeCards.map((c, i) => (
-                    <span key={`hc-${i}`} className="inline-flex items-center gap-1.5 text-[11px]">
+                    <span key={`hc-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 text-[10px] sm:text-[11px]">
                       <span>{c.type === "red" ? "🟥" : "🟨"}</span>
-                      <span className="text-white/80">{c.player}</span>
+                      <span className="text-white/80 truncate max-w-[115px] sm:max-w-none">{c.player}</span>
                       <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
                     </span>
                   ))}
                 </div>
 
                 {/* Balanced Centre Gutter */}
-                <div className="hidden sm:flex justify-center min-w-[104px] text-[10px] font-semibold uppercase tracking-wider text-white/40 pt-0.5">
+                <div className="flex justify-center min-w-[44px] sm:min-w-[104px] text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-white/40 pt-0.5">
                   Goals
                 </div>
 
                 {/* Away Scorers & Cards */}
-                <div className="flex flex-col items-start gap-1 text-left">
+                <div className="flex flex-col items-start gap-1 text-left min-w-0">
                   {awayScorers.map((s, i) => (
-                    <span key={`as-${i}`} className="inline-flex items-center gap-1.5 text-[#EBEBF5]/95">
-                      <span className="text-[#D2F865] text-[11px]">⚽</span>
-                      <strong className="text-white font-semibold">{s.player}</strong>
-                      <span className="font-mono text-white/60 text-[11px] tabular-nums">
+                    <span key={`as-${i}`} className="inline-flex flex-wrap items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95">
+                      <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
+                      <strong className="text-white font-semibold truncate max-w-[115px] sm:max-w-none">{s.player}</strong>
+                      <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
                         ({s.min}
                         {s.isPenalty ? " P" : ""}
                         {s.isOwnGoal ? " OG" : ""})
@@ -748,9 +754,9 @@ export default function LiveScoreboard({
                     </span>
                   ))}
                   {awayCards.map((c, i) => (
-                    <span key={`ac-${i}`} className="inline-flex items-center gap-1.5 text-[11px]">
+                    <span key={`ac-${i}`} className="inline-flex flex-wrap items-center gap-1 text-[10px] sm:text-[11px]">
                       <span>{c.type === "red" ? "🟥" : "🟨"}</span>
-                      <span className="text-white/80">{c.player}</span>
+                      <span className="text-white/80 truncate max-w-[115px] sm:max-w-none">{c.player}</span>
                       <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
                     </span>
                   ))}
@@ -760,14 +766,14 @@ export default function LiveScoreboard({
 
           {/* Dedicated Aligned Assists Row Underneath Scorers */}
           {!isMatchdayPreMatch && (homeAssists.length > 0 || awayAssists.length > 0) && (
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-baseline gap-2 sm:gap-6 mt-2.5 pt-2.5 border-t border-white/[0.06] text-xs">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-baseline gap-2 sm:gap-6 mt-2.5 pt-2.5 border-t border-white/[0.06] text-[11px] sm:text-xs">
               {/* Home Assists */}
-              <div className="flex flex-col items-start sm:items-end gap-1 text-left sm:text-right">
+              <div className="flex flex-col items-end gap-1 text-right min-w-0">
                 {homeAssists.map((a, i) => (
-                  <span key={`ha-${i}`} className="inline-flex items-center gap-1.5 text-white/80">
-                    <span>{a.player}</span>
+                  <span key={`ha-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 sm:gap-1.5 text-white/80">
+                    <span className="truncate max-w-[115px] sm:max-w-none">{a.player}</span>
                     {a.min && (
-                      <span className="font-mono text-white/50 text-[11px] tabular-nums">
+                      <span className="font-mono text-white/50 text-[10px] sm:text-[11px] tabular-nums">
                         ({a.min})
                       </span>
                     )}
@@ -776,17 +782,17 @@ export default function LiveScoreboard({
               </div>
 
               {/* Centred Assists Label */}
-              <div className="flex justify-start sm:justify-center min-w-[104px] text-[11px] font-semibold text-white/70 tracking-wide">
+              <div className="flex justify-center min-w-[44px] sm:min-w-[104px] text-[10px] sm:text-[11px] font-semibold text-white/70 tracking-wide">
                 Assists
               </div>
 
               {/* Away Assists */}
-              <div className="flex flex-col items-start gap-1 text-left">
+              <div className="flex flex-col items-start gap-1 text-left min-w-0">
                 {awayAssists.map((a, i) => (
-                  <span key={`aa-${i}`} className="inline-flex items-center gap-1.5 text-white/80">
-                    <span>{a.player}</span>
+                  <span key={`aa-${i}`} className="inline-flex flex-wrap items-center gap-1 sm:gap-1.5 text-white/80">
+                    <span className="truncate max-w-[115px] sm:max-w-none">{a.player}</span>
                     {a.min && (
-                      <span className="font-mono text-white/50 text-[11px] tabular-nums">
+                      <span className="font-mono text-white/50 text-[10px] sm:text-[11px] tabular-nums">
                         ({a.min})
                       </span>
                     )}

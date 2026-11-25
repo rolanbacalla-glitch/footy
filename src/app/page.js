@@ -482,9 +482,9 @@ export default function FootballInsightsDashboard() {
         onOpenCalendar={() => setIsCalendarOpen(true)}
       />
 
-      {/* 2. Main Fluid Workspace Canvas (Offset cleanly for the 76px desktop rail) */}
+      {/* 2. Main Fluid Workspace Canvas (Offset cleanly for the 76px desktop rail & mobile bottom tab bar) */}
       <main className="relative z-10 md:pl-[76px] min-h-screen flex flex-col">
-        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 flex flex-col gap-6">
+        <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-24 md:py-8 flex-1 flex flex-col gap-4 sm:gap-6">
           {/* Clean Workspace Header Row: Title + Subtitle (Left) & Club Selector Pill (Right) */}
           <WorkspaceHeader
             activeTab={activeTab}

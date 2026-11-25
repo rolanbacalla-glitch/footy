@@ -129,11 +129,11 @@ export default function SidebarNav({
       </aside>
 
       {/* ─── Mobile Top Utility Bar (< md — fixed so it always follows scroll on mobile) ─── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-[#101114]/92 backdrop-blur-2xl border-b border-white/[0.07]">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3.5 py-2.5 bg-[#101114]/92 backdrop-blur-2xl border-b border-white/[0.07]">
         <button
           type="button"
           onClick={() => setActiveTab("boot-room")}
-          className="flex items-center gap-2.5 cursor-pointer"
+          className="flex items-center gap-2 cursor-pointer min-h-[44px]"
           aria-label="Football Insights — Match Centre"
         >
           <FootballLogo className="w-7 h-7" />
@@ -143,6 +143,21 @@ export default function SidebarNav({
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("standings")}
+            aria-label={`Active club: ${selectedClub?.name || "Liverpool"}`}
+            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.05] border border-white/[0.08] cursor-pointer"
+          >
+            <ClubBadge
+              clubId={selectedClub?.id}
+              name={selectedClub?.name || "Liverpool"}
+              shortName={selectedClub?.shortName || "LIV"}
+              primaryColor={selectedClub?.primaryColor}
+              secondaryColor={selectedClub?.secondaryColor}
+              size="xs"
+            />
+          </button>
           <button
             type="button"
             onClick={onOpenCalendar}
@@ -162,7 +177,52 @@ export default function SidebarNav({
         </div>
       </div>
       {/* Spacer matching fixed mobile header height so page content starts cleanly below it */}
-      <div className="md:hidden h-[65px] shrink-0" aria-hidden="true" />
+      <div className="md:hidden h-[60px] shrink-0" aria-hidden="true" />
+
+      {/* ─── Mobile Thumb-Zone Bottom Tab Bar (< md — FotMob / Apple Sports ergonomic pattern) ─── */}
+      <nav
+        aria-label="Mobile workspace navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#101114]/94 backdrop-blur-2xl border-t border-white/[0.08] px-1.5 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="grid grid-cols-5 gap-1">
+          {NAV_WORKSPACES.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              activeTab === item.id ||
+              (item.id === "match-archives" && activeTab === "time-machine");
+            const shortLabel =
+              item.id === "boot-room"
+                ? "Match"
+                : item.id === "standings"
+                  ? "Table"
+                  : item.id === "club-news"
+                    ? "News"
+                    : item.id === "match-archives"
+                      ? "Archive"
+                      : "Scout";
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+                className={`min-h-[48px] flex flex-col items-center justify-center gap-1 rounded-xl px-1 transition-colors cursor-pointer ${
+                  isActive
+                    ? "bg-[#D2F865]/15 text-[#D2F865]"
+                    : "text-[#8A8D96] active:bg-white/[0.06]"
+                }`}
+              >
+                <Icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+                <span className="text-[10px] font-medium leading-none tracking-tight">
+                  {shortLabel}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* ─── Mobile Navigation Drawer ─── */}
       {mobileOpen && (

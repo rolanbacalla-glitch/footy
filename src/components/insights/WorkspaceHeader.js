@@ -70,19 +70,19 @@ export default function WorkspaceHeader({
     });
 
   return (
-    <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-1">
+    <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 pb-0.5 sm:pb-1">
       {/* Left: Crisp Display Title + Quiet Subtitle (Matches reference "Stats / MONTHLY UPDATES") */}
       <div className="min-w-0">
-        <h1 className="font-display text-2xl sm:text-[32px] font-semibold tracking-[-0.025em] text-white leading-tight text-balance">
+        <h1 className="font-display text-xl sm:text-[32px] font-semibold tracking-[-0.025em] text-white leading-tight text-balance">
           {meta.title}
         </h1>
-        <p className="text-xs sm:text-[13px] text-[#8A8D96] mt-1 tracking-wide">
-          {meta.subtitle}
-          <span aria-hidden="true" className="mx-2 text-white/20">
+        <p className="text-[11px] sm:text-[13px] text-[#8A8D96] mt-0.5 sm:mt-1 tracking-wide leading-snug">
+          <span className="hidden sm:inline">{meta.subtitle}</span>
+          <span aria-hidden="true" className="hidden sm:inline mx-2 text-white/20">
             ·
           </span>
           <span className="text-[#D4D6DC]/80">{selectedClub.manager}</span>
-          <span aria-hidden="true" className="mx-2 text-white/20">
+          <span aria-hidden="true" className="mx-1.5 sm:mx-2 text-white/20">
             ·
           </span>
           <span className="font-mono text-[#8A8D96]">{selectedClub.formation}</span>
@@ -90,14 +90,14 @@ export default function WorkspaceHeader({
       </div>
 
       {/* Right: Clean Obsidian Glass Club Selector Pill (Matches reference "iOS App Project ⌄") */}
-      <div className="relative shrink-0" ref={dropdownRef}>
+      <div className="relative w-full sm:w-auto shrink-0" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-label={`Selected club: ${selectedClub.name}. Change Premier League club.`}
-          className="min-h-[44px] flex items-center justify-between gap-4 pl-4 pr-4 py-2 rounded-full bg-[#0E0F12]/90 hover:bg-[#16181D] border border-white/[0.09] hover:border-white/[0.16] backdrop-blur-xl text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition-all cursor-pointer min-w-[205px]"
+          className="w-full sm:w-auto min-h-[44px] flex items-center justify-between gap-4 pl-4 pr-4 py-2 rounded-full bg-[#0E0F12]/90 hover:bg-[#16181D] border border-white/[0.09] hover:border-white/[0.16] backdrop-blur-xl text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition-all cursor-pointer sm:min-w-[205px]"
         >
           <span className="flex items-center gap-2.5 truncate">
             <ClubBadge
@@ -121,7 +121,7 @@ export default function WorkspaceHeader({
           <div
             role="listbox"
             aria-label="Premier League clubs"
-            className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-[22px] bg-[#14151A]/95 backdrop-blur-2xl border border-white/[0.12] p-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.85)] z-50 animate-fade-in"
+            className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2.5 w-full sm:w-80 rounded-[22px] bg-[#14151A]/95 backdrop-blur-2xl border border-white/[0.12] p-2.5 shadow-[0_24px_60px_rgba(0,0,0,0.85)] z-50 animate-fade-in"
           >
             <div className="relative mb-2">
               <Search className="w-3.5 h-3.5 text-[#8A8D96] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
