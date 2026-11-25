@@ -53,9 +53,22 @@ function formatOffsetTimeUk(isoDate, minusMinutes) {
   }
 }
 
+function isMatchHalfTime(match) {
+  if (!match) return false;
+  if (match.isHalfTime) return true;
+  if (String(match.statusName || "").toUpperCase() === "STATUS_HALFTIME") return true;
+  const combined = `${match.displayClock || ""} ${match.shortDetail || ""} ${match.statusText || ""}`.toUpperCase();
+  return (
+    /\bHT\b/.test(combined) ||
+    combined.includes("HALFTIME") ||
+    combined.includes("HALF-TIME") ||
+    combined.includes("HALF TIME")
+  );
+}
+
 function formatPeriodLabel(match) {
+  if (isMatchHalfTime(match)) return "HT";
   const clock = String(match?.displayClock || match?.shortDetail || "").toUpperCase();
-  if (clock === "HT" || clock.includes("HALF")) return "Half-Time";
   if (clock === "FT" || clock.includes("FULL")) return "Full-Time";
   if (match?.period === 1) return "1st Half";
   if (match?.period === 2) return "2nd Half";
@@ -664,6 +677,10 @@ export default function LiveScoreboard({
                     {countdownSeconds > 0 ? "To Kick-off" : "Kick-off Imminent"}
                   </span>
                 </div>
+              ) : isMatchHalfTime(liveMatchFromApi || activeMatch) ? (
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-white/80 mt-1.5 sm:mt-2 px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/[0.1]">
+                  HT
+                </span>
               ) : (
                 <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#FF4D5A] mt-1.5 sm:mt-2 flex items-center gap-1.5 whitespace-nowrap">
                   {isLive && (

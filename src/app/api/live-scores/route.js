@@ -43,6 +43,14 @@ export async function GET() {
         const home = comp?.competitors?.find((c) => c.homeAway === "home");
         const away = comp?.competitors?.find((c) => c.homeAway === "away");
         const state = comp?.status?.type?.state || e.status?.type?.state || "pre";
+        const statusName = comp?.status?.type?.name || e.status?.type?.name || "";
+        const shortDetail = comp?.status?.type?.shortDetail || e.status?.type?.shortDetail || null;
+        const statusDetail = comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled";
+        const isHalfTime =
+          statusName === "STATUS_HALFTIME" ||
+          String(shortDetail || "").toUpperCase() === "HT" ||
+          String(statusDetail || "").toLowerCase().includes("halftime") ||
+          String(statusDetail || "").toLowerCase().includes("half-time");
         const isLive = state === "in";
 
         matches.push({
@@ -52,12 +60,14 @@ export async function GET() {
           isEuropean: compDef.isEuropean,
           state,
           isLive,
-          displayClock:
-            comp?.status?.displayClock ||
-            e.status?.displayClock ||
-            comp?.status?.type?.shortDetail ||
-            null,
-          statusText: comp?.status?.type?.shortDetail || comp?.status?.type?.detail || "Scheduled",
+          isHalfTime,
+          displayClock: isHalfTime
+            ? "HT"
+            : comp?.status?.displayClock ||
+              e.status?.displayClock ||
+              shortDetail ||
+              null,
+          statusText: isHalfTime ? "HT" : shortDetail || statusDetail,
           date: e.date,
           homeTeamId: home?.team?.id ? String(home.team.id) : null,
           awayTeamId: away?.team?.id ? String(away.team.id) : null,

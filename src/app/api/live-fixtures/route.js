@@ -557,15 +557,24 @@ export async function GET(request) {
         const home = comp?.competitors?.find((c) => c.homeAway === "home");
         const away = comp?.competitors?.find((c) => c.homeAway === "away");
         const state = comp?.status?.type?.state || e.status?.type?.state || "pre";
-        const isLive = state === "in";
-        const displayClock =
-          comp?.status?.displayClock ||
-          e.status?.displayClock ||
-          comp?.status?.type?.shortDetail ||
-          null;
-        const period = comp?.status?.period ?? e.status?.period ?? null;
+        const statusName = comp?.status?.type?.name || e.status?.type?.name || "";
         const shortDetail =
           comp?.status?.type?.shortDetail || e.status?.type?.shortDetail || null;
+        const statusDetail =
+          comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled";
+        const isHalfTime =
+          statusName === "STATUS_HALFTIME" ||
+          String(shortDetail || "").toUpperCase() === "HT" ||
+          String(statusDetail || "").toLowerCase().includes("halftime") ||
+          String(statusDetail || "").toLowerCase().includes("half-time");
+        const isLive = state === "in";
+        const displayClock = isHalfTime
+          ? "HT"
+          : comp?.status?.displayClock ||
+            e.status?.displayClock ||
+            shortDetail ||
+            null;
+        const period = comp?.status?.period ?? e.status?.period ?? null;
         const broadcasts = (comp?.broadcasts || []).flatMap(
           (b) => b.media?.shortName || b.names || []
         );
@@ -588,12 +597,14 @@ export async function GET(request) {
           name: e.name,
           date: e.date,
           state,
+          statusName,
           isLive,
+          isHalfTime,
           isMatchday: state === "pre" && isSameUtcOrLocalDay(e.date),
           period,
           displayClock,
           shortDetail,
-          statusText: comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled",
+          statusText: statusDetail,
           competition: e.league?.name || compDef.label,
           competitionCode: compDef.code,
           competitionSlug: compDef.slug,
