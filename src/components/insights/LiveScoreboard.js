@@ -475,18 +475,7 @@ export default function LiveScoreboard({
                 {phase.id === "BUILD_UP" ? "MATCHDAY" : phase.label.toUpperCase()} • KICK-OFF{" "}
                 {kickoffTime}
               </span>
-            ) : isLive ? (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF2636]/20 border border-[#FF2636]/40 text-[#FF4D5A] font-bold text-[11px] tracking-wide shadow-[0_0_12px_rgba(255,38,54,0.35)]">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF2636]" />
-                </span>
-                LIVE • {liveClockDisplay}
-                <span className="text-white/75 font-mono text-[10px] uppercase">
-                  ({periodLabel})
-                </span>
-              </span>
-            ) : isFinished ? (
+            ) : isLive ? null : isFinished ? (
               <span className="px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white font-bold text-[11px] tracking-wide">
                 FULL-TIME
               </span>
@@ -518,13 +507,6 @@ export default function LiveScoreboard({
           </div>
 
           <div className="flex items-center gap-2 text-[11px] flex-wrap">
-            {broadcastChannel && (
-              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.1] text-white/85 font-medium">
-                <Tv className="w-3 h-3 text-[#637AE0]" />
-                <span>{broadcastChannel}</span>
-              </span>
-            )}
-
             {!isEuropean && selectedRank && (
               <span className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#8E8E93]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#30D158]" />
@@ -580,33 +562,29 @@ export default function LiveScoreboard({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={() => setExpandedStats(!expandedStats)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer border ${
-                expandedStats
-                  ? "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30 shadow-[0_0_10px_rgba(255,38,54,0.15)]"
-                  : "bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border-white/[0.08]"
-              }`}
-              aria-label={
-                expandedStats ? "Collapse match details" : "Expand match details"
-              }
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-wider">
-                {isMatchdayPreMatch
-                  ? expandedStats
-                    ? "Hide Pre-Match Hub"
-                    : "Pre-Match Hub"
-                  : expandedStats
-                    ? "Hide Live Stats"
-                    : "Live Stats"}
-              </span>
-              {expandedStats ? (
-                <ChevronUp className="w-3 h-3" />
-              ) : (
-                <ChevronDown className="w-3 h-3" />
-              )}
-            </button>
+            {isMatchdayPreMatch && (
+              <button
+                type="button"
+                onClick={() => setExpandedStats(!expandedStats)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer border ${
+                  expandedStats
+                    ? "bg-[#FF2636]/15 text-[#FF6961] border-[#FF2636]/30 shadow-[0_0_10px_rgba(255,38,54,0.15)]"
+                    : "bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border-white/[0.08]"
+                }`}
+                aria-label={
+                  expandedStats ? "Collapse pre-match hub" : "Expand pre-match hub"
+                }
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                  {expandedStats ? "Hide Pre-Match Hub" : "Pre-Match Hub"}
+                </span>
+                {expandedStats ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -1048,8 +1026,8 @@ export default function LiveScoreboard({
           </div>
         )}
 
-        {/* ── Expandable Pre-Match Hub OR Live Match Telemetry ── */}
-        {expandedStats && (
+        {/* ── Expandable Pre-Match Hub OR Always-On Live Match Telemetry ── */}
+        {(isLive || expandedStats) && (
           <div className="pt-3 border-t border-white/[0.08] space-y-3">
             {isMatchdayPreMatch ? (
               <PreMatchPanel
