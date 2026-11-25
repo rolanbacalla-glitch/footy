@@ -142,15 +142,41 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
       return { teamName: fallbackName, formation: null, starters: [], substitutes: [] };
     }
     const items = Array.isArray(entry.roster) ? entry.roster : [];
-    const mapPlayer = (p) => ({
-      id: p.athlete?.id ? String(p.athlete.id) : `${p.jersey || ""}-${p.athlete?.displayName || "player"}`,
-      name: p.athlete?.displayName || p.athlete?.shortName || "Player",
-      shortName: p.athlete?.shortName || p.athlete?.displayName || "Player",
-      jersey: p.jersey ? String(p.jersey) : "",
-      position: p.position?.abbreviation || p.position?.name || "",
-      formationPlace: Number(p.formationPlace) || 99,
-      isCaptain: Boolean(p.captain),
-    });
+    const mapPlayer = (p) => {
+      const plays = Array.isArray(p.plays) ? p.plays : [];
+      const goals = [];
+      const yellowCards = [];
+      let redCard = null;
+      let subMin = null;
+
+      for (const pl of plays) {
+        const min = pl.clock?.displayValue || "";
+        if (pl.scoringPlay) goals.push(min || "Goal");
+        if (pl.yellowCard) yellowCards.push(min || "");
+        if (pl.redCard) redCard = min || "RC";
+        if (pl.substitution && min) subMin = min;
+      }
+
+      const subbedIn = Boolean(p.subbedIn);
+      const subbedOut = Boolean(p.subbedOut);
+
+      return {
+        id: p.athlete?.id ? String(p.athlete.id) : `${p.jersey || ""}-${p.athlete?.displayName || "player"}`,
+        name: p.athlete?.displayName || p.athlete?.shortName || "Player",
+        shortName: p.athlete?.shortName || p.athlete?.displayName || "Player",
+        jersey: p.jersey ? String(p.jersey) : "",
+        position: p.position?.abbreviation || p.position?.name || "",
+        formationPlace: Number(p.formationPlace) || 99,
+        isCaptain: Boolean(p.captain),
+        goals,
+        yellowCards,
+        redCard,
+        subbedIn,
+        subbedOut,
+        subbedInMin: subbedIn ? subMin || "" : null,
+        subbedOutMin: subbedOut ? subMin || "" : null,
+      };
+    };
 
     const starters = items
       .filter((p) => p.starter === true)

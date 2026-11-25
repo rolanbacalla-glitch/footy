@@ -747,15 +747,35 @@ export default function LiveScoreboard({
                     : "Matchday Team Sheets"}
                 </h3>
               </div>
-              <span
-                className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase border ${
-                  hasOfficialLineups
-                    ? "bg-[#30D158]/15 text-[#30D158] border-[#30D158]/35"
-                    : "bg-[#F4BA5B]/15 text-[#F4BA5B] border-[#F4BA5B]/35"
-                }`}
-              >
-                {hasOfficialLineups ? "OFFICIAL FEED" : "AWAITING OFFICIAL FEED"}
-              </span>
+              <div className="flex items-center gap-3 flex-wrap">
+                {!isMatchdayPreMatch && hasOfficialLineups && (
+                  <div className="hidden sm:flex items-center gap-2.5 text-[10px] text-[#8E8E93] font-medium">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block w-2 h-2.5 rounded-[1.5px] bg-[#FACC15]" />
+                      Yellow
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block w-2 h-2.5 rounded-[1.5px] bg-[#EF4444]" />
+                      Red
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[#30D158]">
+                      ↑ Sub On
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[#F26E7C]">
+                      ↓ Sub Off
+                    </span>
+                  </div>
+                )}
+                <span
+                  className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase border ${
+                    hasOfficialLineups
+                      ? "bg-[#30D158]/15 text-[#30D158] border-[#30D158]/35"
+                      : "bg-[#F4BA5B]/15 text-[#F4BA5B] border-[#F4BA5B]/35"
+                  }`}
+                >
+                  {hasOfficialLineups ? "OFFICIAL FEED" : "AWAITING OFFICIAL FEED"}
+                </span>
+              </div>
             </div>
 
             {hasOfficialLineups ? (
@@ -804,31 +824,81 @@ export default function LiveScoreboard({
                     </div>
 
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {(team?.starters || []).map((p) => (
-                        <li
-                          key={p.id}
-                          className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-black/35 border border-white/[0.05] text-xs"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-mono text-[11px] font-bold text-white/60 w-5 text-right tabular-nums shrink-0">
-                              {p.jersey || "·"}
-                            </span>
-                            <span className="text-white font-medium truncate">
-                              {p.name}
-                              {p.isCaptain && (
-                                <span className="ml-1 text-[10px] font-bold text-[#D2F865]">
-                                  (C)
+                      {(team?.starters || []).map((p) => {
+                        const hasRed = Boolean(p.redCard);
+                        const hasYellow = (p.yellowCards?.length || 0) > 0;
+                        const hasGoals = (p.goals?.length || 0) > 0;
+                        const isSubbedOut = Boolean(p.subbedOut);
+
+                        return (
+                          <li
+                            key={p.id}
+                            className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border text-xs transition-opacity ${
+                              hasRed
+                                ? "bg-[#EF4444]/10 border-[#EF4444]/35"
+                                : "bg-black/35 border-white/[0.05]"
+                            } ${isSubbedOut ? "opacity-70" : ""}`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-mono text-[11px] font-bold text-white/60 w-5 text-right tabular-nums shrink-0">
+                                {p.jersey || "·"}
+                              </span>
+                              <span className="text-white font-medium truncate">
+                                {p.name}
+                                {p.isCaptain && (
+                                  <span className="ml-1 text-[10px] font-bold text-[#D2F865]">
+                                    (C)
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {hasGoals && (
+                                <span
+                                  title={`Goal: ${p.goals.join(", ")}`}
+                                  className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#D2F865] tabular-nums"
+                                >
+                                  <span>⚽</span>
+                                  <span>{p.goals.length > 1 ? `×${p.goals.length}` : p.goals[0]}</span>
                                 </span>
                               )}
-                            </span>
-                          </div>
-                          {p.position && (
-                            <span className="font-mono text-[10px] text-[#8E8E93] uppercase shrink-0">
-                              {p.position}
-                            </span>
-                          )}
-                        </li>
-                      ))}
+                              {hasYellow && (
+                                <span
+                                  title={`Yellow card${p.yellowCards[0] ? ` (${p.yellowCards.join(", ")})` : ""}`}
+                                  className="inline-flex items-center gap-0.5 font-mono text-[10px] text-[#FACC15] tabular-nums"
+                                >
+                                  <span className="inline-block w-2 h-3 rounded-[2px] bg-[#FACC15] shadow-[0_0_6px_rgba(250,204,21,0.4)]" />
+                                  {p.yellowCards[0] && <span>{p.yellowCards[0]}</span>}
+                                </span>
+                              )}
+                              {hasRed && (
+                                <span
+                                  title={`Red card (${p.redCard})`}
+                                  className="inline-flex items-center gap-0.5 font-mono text-[10px] text-[#EF4444] font-bold tabular-nums"
+                                >
+                                  <span className="inline-block w-2 h-3 rounded-[2px] bg-[#EF4444] shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+                                  {p.redCard !== "RC" && <span>{p.redCard}</span>}
+                                </span>
+                              )}
+                              {isSubbedOut && (
+                                <span
+                                  title={`Substituted off${p.subbedOutMin ? ` (${p.subbedOutMin})` : ""}`}
+                                  className="inline-flex items-center gap-0.5 font-mono text-[10px] font-semibold text-[#F26E7C] tabular-nums"
+                                >
+                                  <span>↓</span>
+                                  {p.subbedOutMin && <span>{p.subbedOutMin}</span>}
+                                </span>
+                              )}
+                              {p.position && (
+                                <span className="font-mono text-[10px] text-[#8E8E93] uppercase">
+                                  {p.position}
+                                </span>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     {team?.substitutes?.length > 0 && (
@@ -837,19 +907,58 @@ export default function LiveScoreboard({
                           Substitutes ({team.substitutes.length})
                         </span>
                         <div className="flex flex-wrap gap-1.5">
-                          {team.substitutes.map((s) => (
-                            <span
-                              key={s.id}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/75"
-                            >
-                              {s.jersey && (
-                                <span className="font-mono text-[10px] text-white/45 tabular-nums">
-                                  #{s.jersey}
-                                </span>
-                              )}
-                              <span>{s.shortName || s.name}</span>
-                            </span>
-                          ))}
+                          {team.substitutes.map((s) => {
+                            const cameOn = Boolean(s.subbedIn);
+                            const hasRed = Boolean(s.redCard);
+                            const hasYellow = (s.yellowCards?.length || 0) > 0;
+                            const hasGoals = (s.goals?.length || 0) > 0;
+
+                            return (
+                              <span
+                                key={s.id}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[11px] ${
+                                  hasRed
+                                    ? "bg-[#EF4444]/15 border-[#EF4444]/40 text-white"
+                                    : cameOn
+                                      ? "bg-[#30D158]/10 border-[#30D158]/35 text-white"
+                                      : "bg-white/[0.04] border-white/[0.06] text-white/75"
+                                }`}
+                              >
+                                {s.jersey && (
+                                  <span className="font-mono text-[10px] text-white/45 tabular-nums">
+                                    #{s.jersey}
+                                  </span>
+                                )}
+                                <span>{s.shortName || s.name}</span>
+                                {cameOn && (
+                                  <span
+                                    title={`Substituted on${s.subbedInMin ? ` (${s.subbedInMin})` : ""}`}
+                                    className="inline-flex items-center gap-0.5 font-mono text-[10px] font-semibold text-[#30D158] tabular-nums"
+                                  >
+                                    <span>↑</span>
+                                    {s.subbedInMin && <span>{s.subbedInMin}</span>}
+                                  </span>
+                                )}
+                                {hasGoals && (
+                                  <span className="font-mono text-[10px] font-bold text-[#D2F865] tabular-nums">
+                                    ⚽{s.goals.length > 1 ? `×${s.goals.length}` : s.goals[0]}
+                                  </span>
+                                )}
+                                {hasYellow && (
+                                  <span
+                                    title={`Yellow card${s.yellowCards[0] ? ` (${s.yellowCards.join(", ")})` : ""}`}
+                                    className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#FACC15]"
+                                  />
+                                )}
+                                {hasRed && (
+                                  <span
+                                    title={`Red card (${s.redCard})`}
+                                    className="inline-block w-1.5 h-2.5 rounded-[1.5px] bg-[#EF4444]"
+                                  />
+                                )}
+                              </span>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
