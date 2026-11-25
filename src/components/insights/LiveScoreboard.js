@@ -6,6 +6,7 @@ import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 import {
   Clock,
   Tv,
+  Users,
   Zap,
   Volume2,
   ChevronDown,
@@ -77,6 +78,7 @@ export default function LiveScoreboard({
   const [liveFactData, setLiveFactData] = useState(initialLiveFactData);
   const [previewOffset, setPreviewOffset] = useState(null);
   const [expandedStats, setExpandedStats] = useState(false);
+  const [showLineups, setShowLineups] = useState(false);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
 
   useEffect(() => {
@@ -208,6 +210,9 @@ export default function LiveScoreboard({
   };
 
   const authoritativeMatch = liveMatchFromApi || matchdayFromApi || null;
+  const officialLineups =
+    authoritativeMatch?.lineups || liveFactData?.matchLineups || null;
+  const hasOfficialLineups = Boolean(officialLineups?.isConfirmed);
 
   const homeTeam = authoritativeMatch?.homeTeam || activeMatch?.homeTeam || club.name;
   const awayTeam =
@@ -216,18 +221,36 @@ export default function LiveScoreboard({
     activeMatch?.opponent ||
     "Opponent";
 
-  const homeInfo = getTeamManagerInfo(homeTeam) || club;
-  const awayInfo = getTeamManagerInfo(awayTeam) || {
-    name: awayTeam,
-    shortName: (awayTeam || "OPP").slice(0, 3).toUpperCase(),
+  const isClubHome =
+    String(authoritativeMatch?.homeTeamId || "") === String(club.id) ||
+    homeTeam.toLowerCase() === club.name.toLowerCase();
+  const isClubAway =
+    String(authoritativeMatch?.awayTeamId || "") === String(club.id) ||
+    awayTeam.toLowerCase() === club.name.toLowerCase();
+
+  const makeNeutralTeamInfo = (name, officialFormation) => ({
+    name,
+    shortName: (name || "OPP").slice(0, 3).toUpperCase(),
     manager: "Head Coach",
-    formation: "4-2-3-1",
+    formation: officialFormation || "TBC",
     stadium: "Stadium",
     city: "",
     capacity: "",
     mainStand: "Main Stand",
     anthem: "Club Anthem",
-  };
+  });
+
+  const homeInfo =
+    (isClubHome ? club : getTeamManagerInfo(homeTeam)) ||
+    makeNeutralTeamInfo(homeTeam, officialLineups?.home?.formation);
+  const awayInfo =
+    (isClubAway ? club : getTeamManagerInfo(awayTeam)) ||
+    makeNeutralTeamInfo(awayTeam, officialLineups?.away?.formation);
+
+  const homeFormationDisplay =
+    officialLineups?.home?.formation || homeInfo.formation;
+  const awayFormationDisplay =
+    officialLineups?.away?.formation || awayInfo.formation;
 
   const venueName =
     authoritativeMatch?.venue || activeMatch?.venue || homeInfo.stadium || club.stadium;
@@ -494,6 +517,38 @@ export default function LiveScoreboard({
               </strong>
             </span>
 
+            {(hasOfficialLineups || lineupConfirmed || isLive) && (
+              <button
+                type="button"
+                onClick={() => setShowLineups((prev) => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer border ${
+                  showLineups
+                    ? "bg-[#30D158]/20 text-[#30D158] border-[#30D158]/40 shadow-[0_0_10px_rgba(48,209,88,0.18)]"
+                    : hasOfficialLineups
+                      ? "bg-[#30D158]/10 hover:bg-[#30D158]/20 text-[#30D158] border-[#30D158]/30"
+                      : "bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white border-white/[0.08]"
+                }`}
+                aria-expanded={showLineups}
+                aria-label={showLineups ? "Hide match line-ups" : "View match line-ups"}
+              >
+                <Users className="w-3 h-3" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                  {hasOfficialLineups
+                    ? showLineups
+                      ? "Hide Confirmed XI"
+                      : "Confirmed XI"
+                    : showLineups
+                      ? "Hide Line-ups"
+                      : "Line-ups"}
+                </span>
+                {showLineups ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setExpandedStats(!expandedStats)}
@@ -538,24 +593,39 @@ export default function LiveScoreboard({
                 </h2>
               </div>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                {homeInfo.manager} • {homeInfo.formation}
+                {homeInfo.manager}
+                {homeFormationDisplay && homeFormationDisplay !== "TBC"
+                  ? ` • ${homeFormationDisplay}`
+                  : ""}
               </p>
 
               {/* Status / Scorers / Cards */}
               {isMatchdayPreMatch ? (
-                <div className="flex items-center md:justify-end gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      lineupConfirmed
-                        ? "bg-[#30D158]"
-                        : "border border-white/60 border-dashed"
-                    } animate-pulse`}
-                  />
-                  <span>
-                    {lineupConfirmed
-                      ? "Confirmed XI"
-                      : "Predicted XI • Official line-ups at T-75m"}
-                  </span>
+                <div className="flex items-center md:justify-end mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowLineups((prev) => !prev)}
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
+                      hasOfficialLineups
+                        ? "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158] hover:bg-[#30D158]/25"
+                        : "bg-white/[0.04] border-white/[0.1] text-white/80 hover:bg-white/[0.1]"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        hasOfficialLineups
+                          ? "bg-[#30D158]"
+                          : "border border-white/60 border-dashed"
+                      } animate-pulse`}
+                    />
+                    <span>
+                      {hasOfficialLineups
+                        ? `Confirmed XI · ${showLineups ? "Hide" : "View"}`
+                        : lineupConfirmed
+                          ? `Awaiting Official XI · ${showLineups ? "Hide" : "View"}`
+                          : "Predicted XI · Official at T-60m"}
+                    </span>
+                  </button>
                 </div>
               ) : (
                 (homeScorers.length > 0 || homeCards.length > 0) && (
@@ -639,24 +709,39 @@ export default function LiveScoreboard({
                 </span>
               </div>
               <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
-                {awayInfo.manager} • {awayInfo.formation}
+                {awayInfo.manager}
+                {awayFormationDisplay && awayFormationDisplay !== "TBC"
+                  ? ` • ${awayFormationDisplay}`
+                  : ""}
               </p>
 
               {/* Status / Scorers / Cards */}
               {isMatchdayPreMatch ? (
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-white/80">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      lineupConfirmed
-                        ? "bg-[#30D158]"
-                        : "border border-white/60 border-dashed"
-                    } animate-pulse`}
-                  />
-                  <span>
-                    {lineupConfirmed
-                      ? "Confirmed XI"
-                      : "Predicted XI • Official line-ups at T-75m"}
-                  </span>
+                <div className="flex items-center mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowLineups((prev) => !prev)}
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
+                      hasOfficialLineups
+                        ? "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158] hover:bg-[#30D158]/25"
+                        : "bg-white/[0.04] border-white/[0.1] text-white/80 hover:bg-white/[0.1]"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        hasOfficialLineups
+                          ? "bg-[#30D158]"
+                          : "border border-white/60 border-dashed"
+                      } animate-pulse`}
+                    />
+                    <span>
+                      {hasOfficialLineups
+                        ? `Confirmed XI · ${showLineups ? "Hide" : "View"}`
+                        : lineupConfirmed
+                          ? `Awaiting Official XI · ${showLineups ? "Hide" : "View"}`
+                          : "Predicted XI · Official at T-60m"}
+                    </span>
+                  </button>
                 </div>
               ) : (
                 (awayScorers.length > 0 || awayCards.length > 0) && (
@@ -685,6 +770,153 @@ export default function LiveScoreboard({
             </div>
           </div>
         </div>
+
+        {/* ── Interactive Confirmed XI / Official Line-ups Panel ── */}
+        {showLineups && (
+          <div className="pt-3.5 pb-1 border-t border-white/[0.08] space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#30D158]" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                  {hasOfficialLineups
+                    ? "Official Confirmed Starting XI & Substitutes"
+                    : "Matchday Team Sheets"}
+                </h3>
+              </div>
+              <span
+                className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-bold uppercase border ${
+                  hasOfficialLineups
+                    ? "bg-[#30D158]/15 text-[#30D158] border-[#30D158]/35"
+                    : "bg-[#F4BA5B]/15 text-[#F4BA5B] border-[#F4BA5B]/35"
+                }`}
+              >
+                {hasOfficialLineups ? "OFFICIAL FEED" : "AWAITING OFFICIAL FEED"}
+              </span>
+            </div>
+
+            {hasOfficialLineups ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  {
+                    side: "HOME",
+                    team: officialLineups.home,
+                    fallbackName: homeTeam,
+                    badgeClass:
+                      "bg-[#E31B23]/25 text-[#FF4D5A] border-[#E31B23]/35",
+                  },
+                  {
+                    side: "AWAY",
+                    team: officialLineups.away,
+                    fallbackName: awayTeam,
+                    badgeClass: "bg-white/10 text-white/80 border-white/15",
+                  },
+                ].map(({ side, team, fallbackName, badgeClass }) => (
+                  <div
+                    key={side}
+                    className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-3.5 space-y-3"
+                  >
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0 ${badgeClass}`}
+                        >
+                          {side}
+                        </span>
+                        <span className="text-sm font-bold text-white truncate">
+                          {team?.teamName || fallbackName}
+                        </span>
+                      </div>
+                      {team?.formation && (
+                        <span className="font-mono text-[11px] font-bold text-[#D2F865] bg-[#D2F865]/10 border border-[#D2F865]/25 px-2 py-0.5 rounded-md shrink-0">
+                          {team.formation}
+                        </span>
+                      )}
+                    </div>
+
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {(team?.starters || []).map((p) => (
+                        <li
+                          key={p.id}
+                          className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-black/35 border border-white/[0.05] text-xs"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-[11px] font-bold text-white/60 w-5 text-right tabular-nums shrink-0">
+                              {p.jersey || "·"}
+                            </span>
+                            <span className="text-white font-medium truncate">
+                              {p.name}
+                              {p.isCaptain && (
+                                <span className="ml-1 text-[10px] font-bold text-[#D2F865]">
+                                  (C)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          {p.position && (
+                            <span className="font-mono text-[10px] text-[#8E8E93] uppercase shrink-0">
+                              {p.position}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {team?.substitutes?.length > 0 && (
+                      <div className="pt-2 border-t border-white/[0.06]">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-1.5">
+                          Substitutes ({team.substitutes.length})
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {team.substitutes.map((s) => (
+                            <span
+                              key={s.id}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/75"
+                            >
+                              {s.jersey && (
+                                <span className="font-mono text-[10px] text-white/45 tabular-nums">
+                                  #{s.jersey}
+                                </span>
+                              )}
+                              <span>{s.shortName || s.name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-4 text-xs text-[#B7BAC3] space-y-2">
+                <p>
+                  Official starting XIs have not been published by the match feed yet.
+                  This scoreboard checks automatically every 45 seconds and will populate
+                  both starting line-ups, formations, and substitutes as soon as they are released.
+                </p>
+                {activeMatch?.startingXI?.length > 0 && (
+                  <div className="pt-2 border-t border-white/[0.06]">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] block mb-2">
+                      {club.name} Projected XI (Pre-Confirmation)
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {activeMatch.startingXI.map((p) => (
+                        <span
+                          key={p.id || p.name}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/40 border border-white/[0.06] text-[11px] text-white/85"
+                        >
+                          <span className="font-mono text-[10px] text-[#D2F865]">
+                            {p.pos}
+                          </span>
+                          <span>{p.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Expandable Pre-Match Hub OR Live Match Telemetry ── */}
         {expandedStats && (

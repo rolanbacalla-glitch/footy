@@ -133,6 +133,62 @@ function parseTeamStats(home, away) {
   };
 }
 
+function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, awayName) {
+  const rosters = Array.isArray(summaryData?.rosters) ? summaryData.rosters : [];
+  if (rosters.length === 0) return null;
+
+  const parseTeamRoster = (entry, fallbackName) => {
+    if (!entry) {
+      return { teamName: fallbackName, formation: null, starters: [], substitutes: [] };
+    }
+    const items = Array.isArray(entry.roster) ? entry.roster : [];
+    const mapPlayer = (p) => ({
+      id: p.athlete?.id ? String(p.athlete.id) : `${p.jersey || ""}-${p.athlete?.displayName || "player"}`,
+      name: p.athlete?.displayName || p.athlete?.shortName || "Player",
+      shortName: p.athlete?.shortName || p.athlete?.displayName || "Player",
+      jersey: p.jersey ? String(p.jersey) : "",
+      position: p.position?.abbreviation || p.position?.name || "",
+      formationPlace: Number(p.formationPlace) || 99,
+      isCaptain: Boolean(p.captain),
+    });
+
+    const starters = items
+      .filter((p) => p.starter === true)
+      .map(mapPlayer)
+      .sort((a, b) => a.formationPlace - b.formationPlace);
+    const substitutes = items
+      .filter((p) => p.starter !== true)
+      .map(mapPlayer);
+
+    return {
+      teamName: entry.team?.displayName || fallbackName,
+      formation: entry.formation || null,
+      starters,
+      substitutes,
+    };
+  };
+
+  const homeEntry =
+    rosters.find((r) => r.homeAway === "home") ||
+    rosters.find((r) => homeTeamId && String(r.team?.id) === String(homeTeamId)) ||
+    rosters[0];
+  const awayEntry =
+    rosters.find((r) => r.homeAway === "away") ||
+    rosters.find((r) => awayTeamId && String(r.team?.id) === String(awayTeamId)) ||
+    rosters[1];
+
+  const home = parseTeamRoster(homeEntry, homeName);
+  const away = parseTeamRoster(awayEntry, awayName);
+  const isConfirmed = home.starters.length >= 11 && away.starters.length >= 11;
+
+  return {
+    isConfirmed,
+    hasAny: home.starters.length > 0 || away.starters.length > 0,
+    home,
+    away,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const teamId = searchParams.get("teamId") || "364";
@@ -307,6 +363,7 @@ export async function GET(request) {
           statusText: comp?.status?.type?.detail || e.status?.type?.detail || "Scheduled",
           competition: e.league?.name || compDef.label,
           competitionCode: compDef.code,
+          competitionSlug: compDef.slug,
           isEuropean: compDef.isEuropean,
           broadcast:
             broadcasts[0] || (compDef.isEuropean ? "TNT Sports" : "Sky Sports"),
@@ -374,6 +431,13 @@ export async function GET(request) {
             : liveNextEvent.competition?.toLowerCase().includes("conference")
               ? "UECL"
               : "PL",
+        competitionSlug: liveNextEvent.competition?.toLowerCase().includes("champions")
+          ? "uefa.champions"
+          : liveNextEvent.competition?.toLowerCase().includes("europa")
+            ? "uefa.europa"
+            : liveNextEvent.competition?.toLowerCase().includes("conference")
+              ? "uefa.europa.conf"
+              : "eng.1",
         isEuropean: !liveNextEvent.competition?.toLowerCase().includes("premier"),
         broadcast: liveNextEvent.broadcast,
         attendance: null,
@@ -394,6 +458,31 @@ export async function GET(request) {
         liveStats: null,
       };
     }
+    // 6. Fetch official match line-ups (Confirmed XI + Substitutes) for active live or today's matchday fixture
+    const targetForLineups = activeLiveMatch || matchdayFixture;
+    if (targetForLineups?.rawEventId && targetForLineups?.competitionSlug) {
+      try {
+        const summaryRes = await fetch(
+          `https://site.api.espn.com/apis/site/v2/sports/soccer/${targetForLineups.competitionSlug}/summary?event=${encodeURIComponent(targetForLineups.rawEventId)}`,
+          { next: { revalidate: 30 } }
+        );
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          const parsedLineups = parseSummaryLineups(
+            summaryData,
+            targetForLineups.homeTeamId,
+            targetForLineups.awayTeamId,
+            targetForLineups.homeTeam,
+            targetForLineups.awayTeam
+          );
+          if (parsedLineups) {
+            targetForLineups.lineups = parsedLineups;
+          }
+        }
+      } catch (lineupErr) {
+        console.warn("Summary line-ups fetch error:", lineupErr.message);
+      }
+    }
   } catch (err) {
     console.warn("Live sports feed fetch error:", err.message);
     dataSource = "fallback_cache";
@@ -409,6 +498,7 @@ export async function GET(request) {
     formation: clubInfo.formation,
     activeLiveMatch,
     matchdayFixture,
+    matchLineups: activeLiveMatch?.lineups || matchdayFixture?.lineups || null,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {
