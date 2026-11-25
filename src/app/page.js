@@ -429,27 +429,19 @@ export default function FootballInsightsDashboard() {
 
   const isMatchdayToday = Boolean(
     !isTodayLive &&
-      ((liveFactData?.matchdayFixture?.date &&
+      ((liveFactData?.matchdayFixture?.state === "pre" &&
+        liveFactData?.matchdayFixture?.date &&
         isSameCalendarDay(liveFactData.matchdayFixture.date)) ||
         (liveSchedule.upcoming?.[0]?.date &&
           isSameCalendarDay(liveSchedule.upcoming[0].date)) ||
         (liveFactData?.nextFixture?.state === "pre" &&
-          isSameCalendarDay(liveFactData?.nextFixture?.date)))
+          liveFactData?.nextFixture?.date &&
+          isSameCalendarDay(liveFactData.nextFixture.date)))
   );
 
-  const isTodayCompleted = Boolean(
-    !isTodayLive &&
-      !isMatchdayToday &&
-      ((liveSchedule.recent?.[0]?.date &&
-        isSameCalendarDay(liveSchedule.recent[0].date)) ||
-        (liveFactData?.recentMatch?.date &&
-          isSameCalendarDay(liveFactData.recentMatch.date)))
-  );
-
-  // Only display the scoreboard on the day of the match (pre-match, live, or full-time today); hide on all other days
-  const shouldShowScoreboard = Boolean(
-    isTodayLive || isMatchdayToday || isTodayCompleted
-  );
+  // Only display the scoreboard on matchday when the match is live or still upcoming today;
+  // once full-time is reached and the next fixture is on a future day, hide the scoreboard.
+  const shouldShowScoreboard = Boolean(isTodayLive || isMatchdayToday);
 
   const matchdayKickoffIso =
     liveFactData?.matchdayFixture?.date ||
