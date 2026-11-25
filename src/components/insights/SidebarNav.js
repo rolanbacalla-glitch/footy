@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import FootballLogo from "./FootballLogo";
+import ClubBadge from "./ClubBadge";
 import { APPLE_SPRING } from "./SlidingSegmentedTabs";
 
 export const NAV_WORKSPACES = [
@@ -113,12 +114,16 @@ export default function SidebarNav({
             onClick={() => setActiveTab("standings")}
             title={`${selectedClub?.name || "Liverpool"} · ${selectedClub?.manager || ""}`}
             aria-label={`Active club: ${selectedClub?.name || "Liverpool"}`}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-mono font-bold text-white border border-white/15 shadow-inner transition-transform hover:scale-105 cursor-pointer"
-            style={{
-              background: `linear-gradient(145deg, ${selectedClub?.primaryColor || "#4C63B6"}, #1A1C22)`,
-            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all hover:scale-105 cursor-pointer"
           >
-            {(selectedClub?.shortName || "LIV").slice(0, 3)}
+            <ClubBadge
+              clubId={selectedClub?.id}
+              name={selectedClub?.name || "Liverpool"}
+              shortName={selectedClub?.shortName || "LIV"}
+              primaryColor={selectedClub?.primaryColor}
+              secondaryColor={selectedClub?.secondaryColor}
+              size="sm"
+            />
           </button>
         </div>
       </aside>
