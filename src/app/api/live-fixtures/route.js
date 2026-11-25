@@ -448,6 +448,7 @@ export async function GET(request) {
 
   let liveMatches = [];
   let activeLiveMatch = null;
+  let recentFullTimeMatch = null;
   let matchdayFixture = null;
   let standings = { selected: null, opponent: null };
   let liveNextEvent = null;
@@ -669,6 +670,20 @@ export async function GET(request) {
 
         if (isLive && involvesSelectedClub) {
           activeLiveMatch = parsedMatch;
+        } else if (state === "post" && involvesSelectedClub && e.date) {
+          const kickoffMs = new Date(e.date).getTime();
+          const nowMs = Date.now();
+          if (!Number.isNaN(kickoffMs)) {
+            const matchDurationMins = (period || 2) >= 3 ? 155 : 115;
+            const postMatchHideAt = kickoffMs + (matchDurationMins + 60) * 60 * 1000;
+            if (nowMs >= kickoffMs && nowMs <= postMatchHideAt) {
+              recentFullTimeMatch = {
+                ...parsedMatch,
+                isPostMatchWindow: true,
+                hideAtIso: new Date(postMatchHideAt).toISOString(),
+              };
+            }
+          }
         } else if (
           !matchdayFixture &&
           state === "pre" &&
@@ -737,8 +752,8 @@ export async function GET(request) {
         liveStats: null,
       };
     }
-    // 6. Fetch official match line-ups (Confirmed XI + Substitutes) for active live or today's matchday fixture
-    const targetForLineups = activeLiveMatch || matchdayFixture;
+    // 6. Fetch official match line-ups (Confirmed XI + Substitutes) for active live, recent full-time (1h window), or today's matchday fixture
+    const targetForLineups = activeLiveMatch || recentFullTimeMatch || matchdayFixture;
     if (targetForLineups?.rawEventId && targetForLineups?.competitionSlug) {
       try {
         const summaryRes = await fetch(
@@ -805,9 +820,18 @@ export async function GET(request) {
     manager: clubInfo.manager,
     formation: clubInfo.formation,
     activeLiveMatch,
+    recentFullTimeMatch,
     matchdayFixture,
-    matchLineups: activeLiveMatch?.lineups || matchdayFixture?.lineups || null,
-    matchPreMatch: activeLiveMatch?.preMatchData || matchdayFixture?.preMatchData || null,
+    matchLineups:
+      activeLiveMatch?.lineups ||
+      recentFullTimeMatch?.lineups ||
+      matchdayFixture?.lineups ||
+      null,
+    matchPreMatch:
+      activeLiveMatch?.preMatchData ||
+      recentFullTimeMatch?.preMatchData ||
+      matchdayFixture?.preMatchData ||
+      null,
     nextFixture: liveNextEvent,
     standings,
     rosterSummary: {

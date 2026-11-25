@@ -419,6 +419,27 @@ export default function FootballInsightsDashboard() {
     };
   })();
 
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const recentFullTimeMatch = liveFactData?.recentFullTimeMatch || null;
+  const recentFullTimeHideMs = recentFullTimeMatch?.hideAtIso
+    ? new Date(recentFullTimeMatch.hideAtIso).getTime()
+    : null;
+
+  useEffect(() => {
+    if (!recentFullTimeHideMs || Number.isNaN(recentFullTimeHideMs)) return;
+    const remaining = recentFullTimeHideMs - Date.now();
+    if (remaining <= 0) return;
+    const timer = setTimeout(() => setNowMs(Date.now()), remaining + 1000);
+    return () => clearTimeout(timer);
+  }, [recentFullTimeHideMs]);
+
+  const isWithinPostMatchHour = Boolean(
+    recentFullTimeMatch &&
+      recentFullTimeHideMs &&
+      !Number.isNaN(recentFullTimeHideMs) &&
+      nowMs <= recentFullTimeHideMs
+  );
+
   const isTodayLive = Boolean(
     (activeMatch?.isLive &&
       (!activeMatch?.kickoffIso || isSameCalendarDay(activeMatch.kickoffIso))) ||
@@ -429,6 +450,7 @@ export default function FootballInsightsDashboard() {
 
   const isMatchdayToday = Boolean(
     !isTodayLive &&
+      !isWithinPostMatchHour &&
       ((liveFactData?.matchdayFixture?.state === "pre" &&
         liveFactData?.matchdayFixture?.date &&
         isSameCalendarDay(liveFactData.matchdayFixture.date)) ||
@@ -439,9 +461,10 @@ export default function FootballInsightsDashboard() {
           isSameCalendarDay(liveFactData.nextFixture.date)))
   );
 
-  // Only display the scoreboard on matchday when the match is live or still upcoming today;
-  // once full-time is reached and the next fixture is on a future day, hide the scoreboard.
-  const shouldShowScoreboard = Boolean(isTodayLive || isMatchdayToday);
+  // Display scoreboard on matchday (upcoming today, live, or for 1 hour after full-time); hide on all other days
+  const shouldShowScoreboard = Boolean(
+    isTodayLive || isMatchdayToday || isWithinPostMatchHour
+  );
 
   const matchdayKickoffIso =
     liveFactData?.matchdayFixture?.date ||

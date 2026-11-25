@@ -150,13 +150,17 @@ export default function LiveScoreboard({
     getTeamManagerInfo("364");
 
   const liveMatchFromApi = liveFactData?.activeLiveMatch || null;
+  const recentFullTimeFromApi = liveFactData?.recentFullTimeMatch || null;
+  const matchFromApi = liveMatchFromApi || recentFullTimeFromApi || null;
   const matchdayFromApi = liveFactData?.matchdayFixture || null;
 
   const isLive = Boolean(
     activeMatch?.type === "LIVE" || activeMatch?.isLive || liveMatchFromApi?.isLive
   );
+  const isPostMatchFullTime = !isLive && Boolean(recentFullTimeFromApi);
   const isMatchdayPreMatch =
     !isLive &&
+    !isPostMatchFullTime &&
     Boolean(
       matchdayFromApi ||
         activeMatch?.isMatchdayToday ||
@@ -164,10 +168,12 @@ export default function LiveScoreboard({
         activeMatch?.status === "PRE_MATCH" ||
         (activeMatch?.isMatchday && !activeMatch?.isLive)
     );
-  const isFinished = !isLive && !isMatchdayPreMatch && activeMatch?.type === "RECENT";
+  const isFinished =
+    !isLive && (isPostMatchFullTime || (!isMatchdayPreMatch && activeMatch?.type === "RECENT"));
 
   const kickoffIso =
     liveMatchFromApi?.date ||
+    recentFullTimeFromApi?.date ||
     matchdayFromApi?.date ||
     activeMatch?.kickoffIso ||
     liveFactData?.nextFixture?.date ||
@@ -268,7 +274,7 @@ export default function LiveScoreboard({
     setCountdownSeconds(real !== null ? real : 0);
   };
 
-  const authoritativeMatch = liveMatchFromApi || matchdayFromApi || null;
+  const authoritativeMatch = liveMatchFromApi || recentFullTimeFromApi || matchdayFromApi || null;
   const officialLineups =
     authoritativeMatch?.lineups || liveFactData?.matchLineups || null;
   const hasOfficialLineups = Boolean(officialLineups?.isConfirmed);
@@ -459,33 +465,33 @@ export default function LiveScoreboard({
 
   const homeScore = isMatchdayPreMatch
     ? 0
-    : (liveMatchFromApi?.homeScore ??
+    : (matchFromApi?.homeScore ??
       activeMatch?.homeScore ??
       (isLive ? 0 : activeMatch?.score?.split("-")[0]?.trim() || 0));
   const awayScore = isMatchdayPreMatch
     ? 0
-    : (liveMatchFromApi?.awayScore ??
+    : (matchFromApi?.awayScore ??
       activeMatch?.awayScore ??
       (isLive ? 0 : activeMatch?.score?.split("-")[1]?.trim() || 0));
 
   const homeScorers = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.homeScorers || activeMatch?.homeScorers || [];
+    : matchFromApi?.homeScorers || activeMatch?.homeScorers || [];
   const awayScorers = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.awayScorers || activeMatch?.awayScorers || [];
+    : matchFromApi?.awayScorers || activeMatch?.awayScorers || [];
   const homeAssists = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.homeAssists || activeMatch?.homeAssists || [];
+    : matchFromApi?.homeAssists || activeMatch?.homeAssists || [];
   const awayAssists = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.awayAssists || activeMatch?.awayAssists || [];
+    : matchFromApi?.awayAssists || activeMatch?.awayAssists || [];
   const homeCards = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.homeCards || activeMatch?.homeCards || [];
+    : matchFromApi?.homeCards || activeMatch?.homeCards || [];
   const awayCards = isMatchdayPreMatch
     ? []
-    : liveMatchFromApi?.awayCards || activeMatch?.awayCards || [];
+    : matchFromApi?.awayCards || activeMatch?.awayCards || [];
   const groupedHomeScorers = groupScorers(homeScorers);
   const groupedAwayScorers = groupScorers(awayScorers);
   const groupedHomeAssists = groupAssists(homeAssists);
@@ -497,7 +503,7 @@ export default function LiveScoreboard({
     (c) => c?.type === "red" && c?.player && c.player !== "Player"
   );
 
-  const realStats = liveMatchFromApi?.liveStats || activeMatch?.liveStats || null;
+  const realStats = matchFromApi?.liveStats || activeMatch?.liveStats || null;
   const possession = realStats?.possession || null;
   const shots = realStats?.shots || null;
   const shotsOnTarget = realStats?.shotsOnTarget || null;
@@ -1172,8 +1178,8 @@ export default function LiveScoreboard({
           </div>
         )}
 
-        {/* ── Expandable Pre-Match Hub OR Always-On Live Match Telemetry ── */}
-        {(isLive || expandedStats) && (
+        {/* ── Expandable Pre-Match Hub OR Always-On Live / Full-Time Match Telemetry ── */}
+        {(isLive || isFinished || expandedStats) && (
           <div className="pt-3 border-t border-white/[0.08] space-y-3">
             {isMatchdayPreMatch ? (
               <PreMatchPanel
