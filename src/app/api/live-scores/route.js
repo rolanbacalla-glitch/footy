@@ -61,6 +61,12 @@ export async function GET() {
           date: e.date,
           homeTeamId: home?.team?.id ? String(home.team.id) : null,
           awayTeamId: away?.team?.id ? String(away.team.id) : null,
+          homeLogo:
+            home?.team?.logo ||
+            (home?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${home.team.id}.png` : null),
+          awayLogo:
+            away?.team?.logo ||
+            (away?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${away.team.id}.png` : null),
           homeTeam: home?.team?.displayName || "Home",
           awayTeam: away?.team?.displayName || "Away",
           homeShort: home?.team?.abbreviation || (home?.team?.displayName || "HOM").slice(0, 3).toUpperCase(),

@@ -79,6 +79,11 @@ export async function GET(request) {
         const isSelectedClubHome = String(home.team?.id) === String(teamId);
         const opponent = isSelectedClubHome ? awayName : homeName;
         const opponentId = isSelectedClubHome ? away.team?.id : home.team?.id;
+        const opponentComp = isSelectedClubHome ? away : home;
+        const opponentLogo =
+          opponentComp.team?.logos?.[0]?.href ||
+          opponentComp.team?.logo ||
+          (opponentId ? `https://a.espncdn.com/i/teamlogos/soccer/500/${opponentId}.png` : null);
 
         const dateIso = ev.date;
         const state = comp.status?.type?.state || (isUpcoming ? "pre" : "post");
@@ -106,6 +111,7 @@ export async function GET(request) {
           clubId: teamId,
           opponent,
           opponentId,
+          opponentLogo,
           isHome: isSelectedClubHome,
           venue:
             comp.venue?.fullName ||

@@ -92,13 +92,13 @@ export default function LiveMatchTicker({ selectedClubId, onSelectClub }) {
               >
                 {m.competitionCode}
               </span>
-              <ClubBadge clubId={m.homeTeamId} name={m.homeTeam} shortName={m.homeShort} size="xs" />
+              <ClubBadge clubId={m.homeTeamId} name={m.homeTeam} shortName={m.homeShort} logoUrl={m.homeLogo} size="xs" />
               <span className="font-semibold">{m.homeShort}</span>
               <span className="font-mono font-bold text-white tabular-nums">
                 {m.homeScore}–{m.awayScore}
               </span>
               <span className="font-semibold">{m.awayShort}</span>
-              <ClubBadge clubId={m.awayTeamId} name={m.awayTeam} shortName={m.awayShort} size="xs" />
+              <ClubBadge clubId={m.awayTeamId} name={m.awayTeam} shortName={m.awayShort} logoUrl={m.awayLogo} size="xs" />
               <span className="font-mono text-[10px] text-[#FF4D5A] tabular-nums">
                 {m.displayClock || "LIVE"}
               </span>

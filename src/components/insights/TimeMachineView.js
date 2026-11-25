@@ -239,6 +239,8 @@ export default function TimeMachineView({
         id: rm.id || `archive-${idx}`,
         title: `${clubName} ${isHome ? "vs" : "at"} ${rm.opponent}`,
         opponent: rm.opponent,
+        opponentId: rm.opponentId || null,
+        opponentLogo: rm.opponentLogo || null,
         isHome,
         outcome,
         selfGoals,
@@ -390,7 +392,12 @@ export default function TimeMachineView({
                       <h3 className="font-display text-base font-semibold text-white tracking-tight truncate">
                         {match.title}
                       </h3>
-                      <ClubBadge name={match.opponent} size="xs" />
+                      <ClubBadge
+                        clubId={match.opponentId}
+                        name={match.opponent}
+                        logoUrl={match.opponentLogo}
+                        size="xs"
+                      />
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded-full border font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 ${style.badge}`}

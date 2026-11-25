@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId } from "react";
+import React, { useId, useState, useEffect } from "react";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 
 /**
@@ -97,7 +97,7 @@ function deriveShortCode(name) {
   return (words[0] || name).slice(0, 3).toUpperCase();
 }
 
-function resolveBadgeMeta(clubId, name, shortName, primaryColor, secondaryColor) {
+function resolveBadgeMeta(clubId, name, shortName, primaryColor, secondaryColor, logoUrl) {
   const info =
     (clubId ? getTeamManagerInfo(String(clubId)) : null) ||
     (name ? getTeamManagerInfo(name) : null);
@@ -113,36 +113,67 @@ function resolveBadgeMeta(clubId, name, shortName, primaryColor, secondaryColor)
   const primary = primaryColor || info?.primaryColor || euro?.primary || fallback.primary;
   const secondary = secondaryColor || info?.secondaryColor || euro?.secondary || fallback.secondary;
   const code = (shortName || info?.shortName || euro?.short || deriveShortCode(name)).slice(0, 3).toUpperCase();
+  const resolvedId = clubId || info?.id || null;
+  const officialLogo =
+    logoUrl ||
+    (resolvedId && /^\d+$/.test(String(resolvedId))
+      ? `https://a.espncdn.com/i/teamlogos/soccer/500/${resolvedId}.png`
+      : null);
 
-  return { primary, secondary, code };
+  return { primary, secondary, code, officialLogo };
 }
 
 const SIZE_MAP = {
   xs: { width: 20, height: 22, fontSize: 11.5 },
   sm: { width: 26, height: 28, fontSize: 11 },
   md: { width: 34, height: 38, fontSize: 11 },
-  lg: { width: 44, height: 48, fontSize: 11 },
-  xl: { width: 52, height: 56, fontSize: 11 },
+  lg: { width: 46, height: 46, fontSize: 11 },
+  xl: { width: 54, height: 54, fontSize: 11 },
 };
 
 export default function ClubBadge({
   clubId,
   name,
   shortName,
+  logoUrl,
   primaryColor,
   secondaryColor,
   size = "md",
   className = "",
 }) {
   const uid = useId().replace(/:/g, "");
-  const { primary, secondary, code } = resolveBadgeMeta(
+  const { primary, secondary, code, officialLogo } = resolveBadgeMeta(
     clubId,
     name,
     shortName,
     primaryColor,
-    secondaryColor
+    secondaryColor,
+    logoUrl
   );
+  const [imgFailed, setImgFailed] = useState(false);
+
+  useEffect(() => {
+    setImgFailed(false);
+  }, [officialLogo]);
+
   const dims = SIZE_MAP[size] || SIZE_MAP.md;
+
+  if (officialLogo && !imgFailed) {
+    return (
+      <img
+        src={officialLogo}
+        alt={`${name || code} official badge`}
+        width={dims.width}
+        height={dims.height}
+        loading="lazy"
+        decoding="async"
+        onError={() => setImgFailed(true)}
+        style={{ width: dims.width, height: dims.height }}
+        className={`object-contain shrink-0 select-none drop-shadow-[0_3px_10px_rgba(0,0,0,0.45)] ${className}`}
+      />
+    );
+  }
+
   const textColor = isLightHex(primary) ? "#0B0D11" : "#FFFFFF";
   const clipId = `shield-clip-${uid}`;
   const sheenId = `shield-sheen-${uid}`;

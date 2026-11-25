@@ -255,6 +255,14 @@ export async function GET(request) {
           opponentId: nextOpponentId,
           homeTeam: homeComp?.team?.displayName || "Home",
           awayTeam: awayComp?.team?.displayName || "Away",
+          homeLogo:
+            homeComp?.team?.logos?.[0]?.href ||
+            homeComp?.team?.logo ||
+            (homeComp?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${homeComp.team.id}.png` : null),
+          awayLogo:
+            awayComp?.team?.logos?.[0]?.href ||
+            awayComp?.team?.logo ||
+            (awayComp?.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${awayComp.team.id}.png` : null),
         };
       }
     }
@@ -370,6 +378,12 @@ export async function GET(request) {
           attendance: comp?.attendance || null,
           homeTeamId,
           awayTeamId,
+          homeLogo:
+            home?.team?.logo ||
+            (homeTeamId ? `https://a.espncdn.com/i/teamlogos/soccer/500/${homeTeamId}.png` : null),
+          awayLogo:
+            away?.team?.logo ||
+            (awayTeamId ? `https://a.espncdn.com/i/teamlogos/soccer/500/${awayTeamId}.png` : null),
           homeTeam: homeName,
           awayTeam: awayName,
           homeShort: home?.team?.abbreviation || homeName.slice(0, 3).toUpperCase(),
@@ -443,6 +457,8 @@ export async function GET(request) {
         attendance: null,
         homeTeamId: liveNextEvent.isHome ? String(teamId) : String(liveNextEvent.opponentId || ""),
         awayTeamId: liveNextEvent.isHome ? String(liveNextEvent.opponentId || "") : String(teamId),
+        homeLogo: liveNextEvent.homeLogo || null,
+        awayLogo: liveNextEvent.awayLogo || null,
         homeTeam: liveNextEvent.homeTeam,
         awayTeam: liveNextEvent.awayTeam,
         homeShort: (liveNextEvent.homeTeam || "HOM").slice(0, 3).toUpperCase(),

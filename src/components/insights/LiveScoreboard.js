@@ -657,6 +657,7 @@ export default function LiveScoreboard({
               clubId={authoritativeMatch?.homeTeamId}
               name={homeTeam}
               shortName={authoritativeMatch?.homeShort || homeInfo.shortName}
+              logoUrl={authoritativeMatch?.homeLogo}
               primaryColor={homeInfo.primaryColor}
               secondaryColor={homeInfo.secondaryColor}
               size="lg"
@@ -713,6 +714,7 @@ export default function LiveScoreboard({
               clubId={authoritativeMatch?.awayTeamId}
               name={awayTeam}
               shortName={authoritativeMatch?.awayShort || awayInfo.shortName}
+              logoUrl={authoritativeMatch?.awayLogo}
               primaryColor={awayInfo.primaryColor}
               secondaryColor={awayInfo.secondaryColor}
               size="lg"
@@ -836,7 +838,9 @@ export default function LiveScoreboard({
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
                       <div className="flex items-center gap-2 min-w-0">
                         <ClubBadge
+                          clubId={side === "HOME" ? authoritativeMatch?.homeTeamId : authoritativeMatch?.awayTeamId}
                           name={team?.teamName || fallbackName}
+                          logoUrl={side === "HOME" ? authoritativeMatch?.homeLogo : authoritativeMatch?.awayLogo}
                           size="xs"
                         />
                         <span
