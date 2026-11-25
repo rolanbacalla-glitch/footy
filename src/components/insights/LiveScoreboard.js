@@ -600,35 +600,8 @@ export default function LiveScoreboard({
                   : ""}
               </p>
 
-              {/* Status / Scorers / Cards */}
-              {isMatchdayPreMatch ? (
-                <div className="flex items-center md:justify-end mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowLineups((prev) => !prev)}
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
-                      hasOfficialLineups
-                        ? "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158] hover:bg-[#30D158]/25"
-                        : "bg-white/[0.04] border-white/[0.1] text-white/80 hover:bg-white/[0.1]"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        hasOfficialLineups
-                          ? "bg-[#30D158]"
-                          : "border border-white/60 border-dashed"
-                      } animate-pulse`}
-                    />
-                    <span>
-                      {hasOfficialLineups
-                        ? `Confirmed XI · ${showLineups ? "Hide" : "View"}`
-                        : lineupConfirmed
-                          ? `Awaiting Official XI · ${showLineups ? "Hide" : "View"}`
-                          : "Predicted XI · Official at T-60m"}
-                    </span>
-                  </button>
-                </div>
-              ) : (
+              {/* Scorers & Cards (In-Play / Full-Time) */}
+              {!isMatchdayPreMatch &&
                 (homeScorers.length > 0 || homeCards.length > 0) && (
                   <div className="flex flex-wrap md:justify-end gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
                     {homeScorers.map((s, i) => (
@@ -650,8 +623,7 @@ export default function LiveScoreboard({
                       </span>
                     ))}
                   </div>
-                )
-              )}
+                )}
             </div>
             <ClubBadge
               clubId={authoritativeMatch?.homeTeamId}
@@ -735,35 +707,8 @@ export default function LiveScoreboard({
                   : ""}
               </p>
 
-              {/* Status / Scorers / Cards */}
-              {isMatchdayPreMatch ? (
-                <div className="flex items-center mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowLineups((prev) => !prev)}
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
-                      hasOfficialLineups
-                        ? "bg-[#30D158]/15 border-[#30D158]/35 text-[#30D158] hover:bg-[#30D158]/25"
-                        : "bg-white/[0.04] border-white/[0.1] text-white/80 hover:bg-white/[0.1]"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        hasOfficialLineups
-                          ? "bg-[#30D158]"
-                          : "border border-white/60 border-dashed"
-                      } animate-pulse`}
-                    />
-                    <span>
-                      {hasOfficialLineups
-                        ? `Confirmed XI · ${showLineups ? "Hide" : "View"}`
-                        : lineupConfirmed
-                          ? `Awaiting Official XI · ${showLineups ? "Hide" : "View"}`
-                          : "Predicted XI · Official at T-60m"}
-                    </span>
-                  </button>
-                </div>
-              ) : (
+              {/* Scorers & Cards (In-Play / Full-Time) */}
+              {!isMatchdayPreMatch &&
                 (awayScorers.length > 0 || awayCards.length > 0) && (
                   <div className="flex flex-wrap gap-x-2.5 gap-y-1 mt-2 text-xs text-[#EBEBF5]/90 font-medium">
                     {awayScorers.map((s, i) => (
@@ -785,8 +730,7 @@ export default function LiveScoreboard({
                       </span>
                     ))}
                   </div>
-                )
-              )}
+                )}
             </div>
           </div>
         </div>
