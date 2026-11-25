@@ -788,8 +788,7 @@ export default function LiveScoreboard({
                 {/* Home Scorers & Red Cards */}
                 <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-right min-w-0">
                   {groupedHomeScorers.map((s, i) => (
-                    <span key={`hs-${i}`} className="inline-flex items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95 whitespace-nowrap">
-                      <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
+                    <span key={`hs-${i}`} className="inline-flex items-center gap-1 text-[#EBEBF5]/95 whitespace-nowrap">
                       <strong className="text-white font-semibold">{s.player}</strong>
                       {s.minutes.length > 0 && (
                         <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
@@ -815,8 +814,7 @@ export default function LiveScoreboard({
                 {/* Away Scorers & Red Cards */}
                 <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-1 text-left min-w-0">
                   {groupedAwayScorers.map((s, i) => (
-                    <span key={`as-${i}`} className="inline-flex items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95 whitespace-nowrap">
-                      <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
+                    <span key={`as-${i}`} className="inline-flex items-center gap-1 text-[#EBEBF5]/95 whitespace-nowrap">
                       <strong className="text-white font-semibold">{s.player}</strong>
                       {s.minutes.length > 0 && (
                         <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
