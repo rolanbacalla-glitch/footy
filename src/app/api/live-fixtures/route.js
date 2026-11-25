@@ -195,19 +195,31 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
   const rosters = Array.isArray(summaryData?.rosters) ? summaryData.rosters : [];
   if (rosters.length === 0) return null;
 
-  // Build fallback substitution minute lookup from keyEvents when roster plays omit clock values
+  // Build lookup maps from keyEvents:
+  // - subMinByAthleteId: fallback substitution minutes when roster plays omit clock values
+  // - goalMinutesByAthleteId: true goalscorers only (participants[0]) so assisters (participants[1]) are never tagged with a goal icon
   const subMinByAthleteId = new Map();
+  const goalMinutesByAthleteId = new Map();
   const keyEvents = Array.isArray(summaryData?.keyEvents) ? summaryData.keyEvents : [];
   for (const ev of keyEvents) {
     const typeText = String(ev?.type?.text || "").toLowerCase();
-    if (!typeText.includes("substitution")) continue;
     const min = ev?.clock?.displayValue || "";
-    if (!min) continue;
     const participants = Array.isArray(ev?.participants) ? ev.participants : [];
-    for (const part of participants) {
-      const aid = part?.athlete?.id ? String(part.athlete.id) : null;
-      if (aid && !subMinByAthleteId.has(aid)) {
-        subMinByAthleteId.set(aid, min);
+
+    if (ev?.scoringPlay && !ev?.ownGoal) {
+      const scorerId = participants[0]?.athlete?.id ? String(participants[0].athlete.id) : null;
+      if (scorerId) {
+        if (!goalMinutesByAthleteId.has(scorerId)) goalMinutesByAthleteId.set(scorerId, []);
+        goalMinutesByAthleteId.get(scorerId).push(min || "Goal");
+      }
+    }
+
+    if (typeText.includes("substitution") && min) {
+      for (const part of participants) {
+        const aid = part?.athlete?.id ? String(part.athlete.id) : null;
+        if (aid && !subMinByAthleteId.has(aid)) {
+          subMinByAthleteId.set(aid, min);
+        }
       }
     }
   }
@@ -219,20 +231,35 @@ function parseSummaryLineups(summaryData, homeTeamId, awayTeamId, homeName, away
     const items = Array.isArray(entry.roster) ? entry.roster : [];
     const mapPlayer = (p) => {
       const plays = Array.isArray(p.plays) ? p.plays : [];
-      const goals = [];
+      const stats = Array.isArray(p.stats) ? p.stats : [];
+      const totalGoalsStat = Number(
+        stats.find((st) => st?.name === "totalGoals")?.displayValue ?? NaN
+      );
+      const scoringPlayMins = [];
       const yellowCards = [];
       let redCard = null;
       let subMin = null;
 
       for (const pl of plays) {
         const min = pl.clock?.displayValue || "";
-        if (pl.scoringPlay) goals.push(min || "Goal");
+        if (pl.scoringPlay) scoringPlayMins.push(min || "Goal");
         if (pl.yellowCard) yellowCards.push(min || "");
         if (pl.redCard) redCard = min || "RC";
         if (pl.substitution && min) subMin = min;
       }
 
       const athleteId = p.athlete?.id ? String(p.athlete.id) : null;
+      const keyEventGoals = athleteId ? goalMinutesByAthleteId.get(athleteId) : null;
+      // ESPN attaches scoringPlay to BOTH scorer and assister in roster.plays;
+      // use keyEvents participants[0] first, and only fall back to plays when totalGoals > 0.
+      const goals =
+        keyEventGoals && keyEventGoals.length > 0
+          ? keyEventGoals
+          : !Number.isNaN(totalGoalsStat)
+            ? totalGoalsStat > 0
+              ? scoringPlayMins.slice(0, totalGoalsStat)
+              : []
+            : [];
       const resolvedSubMin = subMin || (athleteId ? subMinByAthleteId.get(athleteId) : null) || null;
       const subbedIn = Boolean(p.subbedIn);
       const subbedOut = Boolean(p.subbedOut);
