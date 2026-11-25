@@ -83,6 +83,51 @@ function formatLiveClock(rawClock) {
   return trimmed;
 }
 
+function groupScorers(scorers = []) {
+  const map = new Map();
+  for (const s of scorers) {
+    const name = String(s?.player || "").trim();
+    if (!name || name === "Player") continue;
+    const key = `${name.toLowerCase()}::${Boolean(s.isOwnGoal)}`;
+    const minuteLabel = [
+      s.min || "",
+      s.isPenalty ? "pen" : "",
+      s.isOwnGoal ? "og" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    if (!map.has(key)) {
+      map.set(key, {
+        player: name,
+        isOwnGoal: Boolean(s.isOwnGoal),
+        minutes: minuteLabel ? [minuteLabel] : [],
+      });
+    } else if (minuteLabel) {
+      map.get(key).minutes.push(minuteLabel);
+    }
+  }
+  return Array.from(map.values());
+}
+
+function groupAssists(assists = []) {
+  const map = new Map();
+  for (const a of assists) {
+    const name = String(a?.player || "").trim();
+    if (!name || name === "Player") continue;
+    const key = name.toLowerCase();
+    if (!map.has(key)) {
+      map.set(key, {
+        player: name,
+        minutes: a.min ? [a.min] : [],
+      });
+    } else if (a.min) {
+      map.get(key).minutes.push(a.min);
+    }
+  }
+  return Array.from(map.values());
+}
+
 export default function LiveScoreboard({
   activeMatch,
   selectedClub,
@@ -441,6 +486,16 @@ export default function LiveScoreboard({
   const awayCards = isMatchdayPreMatch
     ? []
     : liveMatchFromApi?.awayCards || activeMatch?.awayCards || [];
+  const groupedHomeScorers = groupScorers(homeScorers);
+  const groupedAwayScorers = groupScorers(awayScorers);
+  const groupedHomeAssists = groupAssists(homeAssists);
+  const groupedAwayAssists = groupAssists(awayAssists);
+  const homeRedCards = homeCards.filter(
+    (c) => c?.type === "red" && c?.player && c.player !== "Player"
+  );
+  const awayRedCards = awayCards.filter(
+    (c) => c?.type === "red" && c?.player && c.player !== "Player"
+  );
 
   const realStats = liveMatchFromApi?.liveStats || activeMatch?.liveStats || null;
   const possession = realStats?.possession || null;
@@ -723,31 +778,31 @@ export default function LiveScoreboard({
             </div>
           </div>
 
-          {/* Dedicated Aligned Scorers & Cards Row (Stays 3-column on mobile so Home vs Away is unambiguous) */}
+          {/* Dedicated Aligned Scorers & Red Cards Row (Grouped by player, BBC Sport / PL standard) */}
           {!isMatchdayPreMatch &&
-            (homeScorers.length > 0 ||
-              awayScorers.length > 0 ||
-              homeCards.length > 0 ||
-              awayCards.length > 0) && (
+            (groupedHomeScorers.length > 0 ||
+              groupedAwayScorers.length > 0 ||
+              homeRedCards.length > 0 ||
+              awayRedCards.length > 0) && (
               <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-2 sm:gap-6 mt-3 pt-2.5 border-t border-white/[0.06] text-[11px] sm:text-xs font-medium">
-                {/* Home Scorers & Cards */}
+                {/* Home Scorers & Red Cards */}
                 <div className="flex flex-col items-end gap-1 text-right min-w-0">
-                  {homeScorers.map((s, i) => (
+                  {groupedHomeScorers.map((s, i) => (
                     <span key={`hs-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95">
                       <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
                       <strong className="text-white font-semibold truncate max-w-[115px] sm:max-w-none">{s.player}</strong>
-                      <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
-                        ({s.min}
-                        {s.isPenalty ? " P" : ""}
-                        {s.isOwnGoal ? " OG" : ""})
-                      </span>
+                      {s.minutes.length > 0 && (
+                        <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
+                          ({s.minutes.join(", ")})
+                        </span>
+                      )}
                     </span>
                   ))}
-                  {homeCards.map((c, i) => (
+                  {homeRedCards.map((c, i) => (
                     <span key={`hc-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 text-[10px] sm:text-[11px]">
-                      <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                      <span>🟥</span>
                       <span className="text-white/80 truncate max-w-[115px] sm:max-w-none">{c.player}</span>
-                      <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
+                      {c.min && <span className="font-mono text-white/50 tabular-nums">({c.min})</span>}
                     </span>
                   ))}
                 </div>
@@ -757,41 +812,41 @@ export default function LiveScoreboard({
                   Goals
                 </div>
 
-                {/* Away Scorers & Cards */}
+                {/* Away Scorers & Red Cards */}
                 <div className="flex flex-col items-start gap-1 text-left min-w-0">
-                  {awayScorers.map((s, i) => (
+                  {groupedAwayScorers.map((s, i) => (
                     <span key={`as-${i}`} className="inline-flex flex-wrap items-center gap-1 sm:gap-1.5 text-[#EBEBF5]/95">
                       <span className="text-[#D2F865] text-[10px] sm:text-[11px]">⚽</span>
                       <strong className="text-white font-semibold truncate max-w-[115px] sm:max-w-none">{s.player}</strong>
-                      <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
-                        ({s.min}
-                        {s.isPenalty ? " P" : ""}
-                        {s.isOwnGoal ? " OG" : ""})
-                      </span>
+                      {s.minutes.length > 0 && (
+                        <span className="font-mono text-white/60 text-[10px] sm:text-[11px] tabular-nums">
+                          ({s.minutes.join(", ")})
+                        </span>
+                      )}
                     </span>
                   ))}
-                  {awayCards.map((c, i) => (
+                  {awayRedCards.map((c, i) => (
                     <span key={`ac-${i}`} className="inline-flex flex-wrap items-center gap-1 text-[10px] sm:text-[11px]">
-                      <span>{c.type === "red" ? "🟥" : "🟨"}</span>
+                      <span>🟥</span>
                       <span className="text-white/80 truncate max-w-[115px] sm:max-w-none">{c.player}</span>
-                      <span className="font-mono text-white/50 tabular-nums">({c.min})</span>
+                      {c.min && <span className="font-mono text-white/50 tabular-nums">({c.min})</span>}
                     </span>
                   ))}
                 </div>
               </div>
             )}
 
-          {/* Dedicated Aligned Assists Row Underneath Scorers */}
-          {!isMatchdayPreMatch && (homeAssists.length > 0 || awayAssists.length > 0) && (
+          {/* Dedicated Aligned Assists Row Underneath Scorers (Grouped by player) */}
+          {!isMatchdayPreMatch && (groupedHomeAssists.length > 0 || groupedAwayAssists.length > 0) && (
             <div className="grid grid-cols-[1fr_auto_1fr] items-baseline gap-2 sm:gap-6 mt-2.5 pt-2.5 border-t border-white/[0.06] text-[11px] sm:text-xs">
               {/* Home Assists */}
               <div className="flex flex-col items-end gap-1 text-right min-w-0">
-                {homeAssists.map((a, i) => (
+                {groupedHomeAssists.map((a, i) => (
                   <span key={`ha-${i}`} className="inline-flex flex-wrap justify-end items-center gap-1 sm:gap-1.5 text-white/80">
                     <span className="truncate max-w-[115px] sm:max-w-none">{a.player}</span>
-                    {a.min && (
+                    {a.minutes.length > 0 && (
                       <span className="font-mono text-white/50 text-[10px] sm:text-[11px] tabular-nums">
-                        ({a.min})
+                        ({a.minutes.join(", ")})
                       </span>
                     )}
                   </span>
@@ -805,12 +860,12 @@ export default function LiveScoreboard({
 
               {/* Away Assists */}
               <div className="flex flex-col items-start gap-1 text-left min-w-0">
-                {awayAssists.map((a, i) => (
+                {groupedAwayAssists.map((a, i) => (
                   <span key={`aa-${i}`} className="inline-flex flex-wrap items-center gap-1 sm:gap-1.5 text-white/80">
                     <span className="truncate max-w-[115px] sm:max-w-none">{a.player}</span>
-                    {a.min && (
+                    {a.minutes.length > 0 && (
                       <span className="font-mono text-white/50 text-[10px] sm:text-[11px] tabular-nums">
-                        ({a.min})
+                        ({a.minutes.join(", ")})
                       </span>
                     )}
                   </span>
