@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Check, Search } from "lucide-react";
 import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
+import ClubBadge from "./ClubBadge";
 
 const WORKSPACE_META = {
   "boot-room": {
@@ -99,9 +100,13 @@ export default function WorkspaceHeader({
           className="min-h-[44px] flex items-center justify-between gap-4 pl-4 pr-4 py-2 rounded-full bg-[#0E0F12]/90 hover:bg-[#16181D] border border-white/[0.09] hover:border-white/[0.16] backdrop-blur-xl text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.65)] transition-all cursor-pointer min-w-[205px]"
         >
           <span className="flex items-center gap-2.5 truncate">
-            <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: selectedClub.primaryColor || "#D2F865" }}
+            <ClubBadge
+              clubId={selectedClub.id}
+              name={selectedClub.name}
+              shortName={selectedClub.shortName}
+              primaryColor={selectedClub.primaryColor}
+              secondaryColor={selectedClub.secondaryColor}
+              size="xs"
             />
             <span className="truncate whitespace-nowrap">{selectedClub.name}</span>
           </span>
@@ -150,12 +155,14 @@ export default function WorkspaceHeader({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span
-                        className="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-[9px] font-bold text-white shrink-0 border border-white/15"
-                        style={{ backgroundColor: club.primaryColor || "#2B2D35" }}
-                      >
-                        {club.shortName?.slice(0, 3)}
-                      </span>
+                      <ClubBadge
+                        clubId={club.id}
+                        name={club.name}
+                        shortName={club.shortName}
+                        primaryColor={club.primaryColor}
+                        secondaryColor={club.secondaryColor}
+                        size="sm"
+                      />
                       <div className="min-w-0">
                         <div className="text-xs font-medium text-white truncate">
                           {club.name}

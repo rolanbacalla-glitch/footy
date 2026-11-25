@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { PREMIER_LEAGUE_MANAGERS } from "../../data/premierLeagueManagers";
 import { SlidingSegmentedTabs } from "./SlidingSegmentedTabs";
+import ClubBadge from "./ClubBadge";
 
 export default function StandingsTable({ selectedClubId = "364", onSelectClub }) {
   const [standings, setStandings] = useState([]);
@@ -266,30 +267,35 @@ export default function StandingsTable({ selectedClubId = "364", onSelectClub })
 
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2.5">
-                        <span
-                          className={`text-sm ${
-                            isSelected ? "font-semibold text-white" : "font-medium text-white/90"
-                          }`}
-                        >
-                          {team.name}
-                        </span>
-                        {zoneLabel && (
-                          <span className="text-[10px] font-mono text-[#6F727C]">
-                            {zoneLabel}
-                          </span>
-                        )}
-                      </div>
-                      {team.manager && (
-                        <div className="text-[11px] text-[#8A8D96] mt-0.5">
-                          {team.manager}
-                          {team.formation && (
-                            <span className="font-mono text-[#6F727C]">
-                              {" "}
-                              · {team.formation}
+                        <ClubBadge clubId={team.id} name={team.name} shortName={team.shortName} size="sm" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-sm ${
+                                isSelected ? "font-semibold text-white" : "font-medium text-white/90"
+                              }`}
+                            >
+                              {team.name}
                             </span>
+                            {zoneLabel && (
+                              <span className="text-[10px] font-mono text-[#6F727C]">
+                                {zoneLabel}
+                              </span>
+                            )}
+                          </div>
+                          {team.manager && (
+                            <div className="text-[11px] text-[#8A8D96] mt-0.5">
+                              {team.manager}
+                              {team.formation && (
+                                <span className="font-mono text-[#6F727C]">
+                                  {" "}
+                                  · {team.formation}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
+                      </div>
                     </td>
 
                     <td className="py-3 px-2 text-right font-mono tabular-nums text-xs text-[#8A8D96]">

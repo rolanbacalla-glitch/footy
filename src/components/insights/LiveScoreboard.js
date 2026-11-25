@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import PreMatchPanel, { getMatchdayPhase, isLineupConfirmed } from "./PreMatchPanel";
+import ClubBadge from "./ClubBadge";
 import { getTeamManagerInfo } from "../../data/premierLeagueManagers";
 import {
   Clock,
@@ -584,7 +585,7 @@ export default function LiveScoreboard({
           {/* Home Team */}
           <div className="md:col-span-3 flex items-center justify-start md:justify-end gap-3 sm:gap-4 order-1">
             <div className="text-left md:text-right">
-              <div className="flex items-center md:justify-end gap-1.5">
+              <div className="flex items-center md:justify-end gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#E31B23]/25 text-[#FF4D5A] border border-[#E31B23]/35">
                   HOME
                 </span>
@@ -652,6 +653,15 @@ export default function LiveScoreboard({
                 )
               )}
             </div>
+            <ClubBadge
+              clubId={authoritativeMatch?.homeTeamId}
+              name={homeTeam}
+              shortName={authoritativeMatch?.homeShort || homeInfo.shortName}
+              primaryColor={homeInfo.primaryColor}
+              secondaryColor={homeInfo.secondaryColor}
+              size="lg"
+              className="order-first md:order-last"
+            />
           </div>
 
           {/* Central Score & Countdown Display */}
@@ -699,6 +709,14 @@ export default function LiveScoreboard({
 
           {/* Away Team */}
           <div className="md:col-span-3 flex items-center justify-start gap-3 sm:gap-4 order-3">
+            <ClubBadge
+              clubId={authoritativeMatch?.awayTeamId}
+              name={awayTeam}
+              shortName={authoritativeMatch?.awayShort || awayInfo.shortName}
+              primaryColor={awayInfo.primaryColor}
+              secondaryColor={awayInfo.secondaryColor}
+              size="lg"
+            />
             <div className="text-left">
               <div className="flex items-center gap-1.5">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-[-0.02em]">
@@ -817,6 +835,10 @@ export default function LiveScoreboard({
                   >
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
                       <div className="flex items-center gap-2 min-w-0">
+                        <ClubBadge
+                          name={team?.teamName || fallbackName}
+                          size="xs"
+                        />
                         <span
                           className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0 ${badgeClass}`}
                         >

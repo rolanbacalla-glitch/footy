@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import ClubBadge from "./ClubBadge";
 
 export const HISTORIC_MATCHES = [
   {
@@ -377,9 +378,20 @@ export default function TimeMachineView({
                   </div>
 
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-display text-base font-semibold text-white tracking-tight">
-                      {match.title}
-                    </h3>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ClubBadge
+                        clubId={selectedClub?.id}
+                        name={clubName}
+                        shortName={clubShort}
+                        primaryColor={selectedClub?.primaryColor}
+                        secondaryColor={selectedClub?.secondaryColor}
+                        size="sm"
+                      />
+                      <h3 className="font-display text-base font-semibold text-white tracking-tight truncate">
+                        {match.title}
+                      </h3>
+                      <ClubBadge name={match.opponent} size="xs" />
+                    </div>
                     <span
                       className={`px-2 py-0.5 rounded-full border font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 ${style.badge}`}
                     >
