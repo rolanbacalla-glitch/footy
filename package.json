@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "check:teams": "node scripts/sync-teams.mjs --check",
-    "sync:teams": "node scripts/sync-teams.mjs --write"
+    "sync:teams": "node scripts/sync-teams.mjs --write",
+    "check:live": "node scripts/check-live-data.mjs",
+    "check:daily": "npm run check:teams && npm run check:live"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
