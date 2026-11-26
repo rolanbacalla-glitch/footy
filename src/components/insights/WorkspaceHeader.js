@@ -30,6 +30,10 @@ const WORKSPACE_META = {
     title: "Transfer Scout",
     subtitle: "Recruitment radar & pressing profile filters",
   },
+  fixtures: {
+    title: "Fixtures & Results",
+    subtitle: "Full-season Premier League & UEFA competition calendar",
+  },
 };
 
 export default function WorkspaceHeader({

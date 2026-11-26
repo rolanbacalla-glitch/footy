@@ -16,7 +16,7 @@ import PostMatchTacticalArchive from "../components/insights/PostMatchTacticalAr
 import TimeMachineView from "../components/insights/TimeMachineView";
 import TransferScoutView from "../components/insights/TransferScoutView";
 import PlayerDossierDrawer from "../components/insights/PlayerDossierDrawer";
-import FixturesCalendarModal from "../components/insights/FixturesCalendarModal";
+import FixturesView from "../components/insights/FixturesView";
 import Footer from "../components/insights/Footer";
 import {
   MATCHDAY_PHASES,
@@ -32,6 +32,7 @@ const VALID_TABS = [
   "club-news",
   "match-archives",
   "transfer-scout",
+  "fixtures",
 ];
 
 function isSameCalendarDay(isoDate) {
@@ -51,6 +52,7 @@ function resolveTabName(raw) {
   const clean = String(raw).replace(/^#/, "").toLowerCase().trim();
   if (VALID_TABS.includes(clean)) return clean;
   if (clean === "table" || clean === "league-table") return "standings";
+  if (clean === "calendar" || clean === "schedule") return "fixtures";
   if (clean === "time-machine" || clean === "archives" || clean === "archive")
     return "match-archives";
   if (clean === "news" || clean === "clubnews") return "club-news";
@@ -102,7 +104,6 @@ export default function FootballInsightsDashboard() {
   const [liveSchedule, setLiveSchedule] = useState({ live: [], upcoming: [], recent: [] });
   const [clubContextMatch, setClubContextMatch] = useState(null);
   const [liveFactData, setLiveFactData] = useState(null);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const currentPhase = getMatchdayPhase(countdownSeconds);
 
@@ -511,7 +512,7 @@ export default function FootballInsightsDashboard() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         selectedClub={selectedClub}
-        onOpenCalendar={() => setIsCalendarOpen(true)}
+        onOpenCalendar={() => setActiveTab("fixtures")}
       />
 
       {/* 2. Main Fluid Workspace Canvas (Offset cleanly for the 76px desktop rail & mobile bottom tab bar) */}
@@ -591,7 +592,7 @@ export default function FootballInsightsDashboard() {
                     setSelectedMatchId(id);
                     setSelectedPlayer(null);
                   }}
-                  onOpenCalendar={() => setIsCalendarOpen(true)}
+                  onOpenCalendar={() => setActiveTab("fixtures")}
                   matchdayPhase={currentPhase.id}
                   onSelectPhasePreview={handleSelectPhaseById}
                 />
@@ -634,6 +635,19 @@ export default function FootballInsightsDashboard() {
               activeMatch={activeMatch}
             />
           )}
+
+          {/* ═══ TAB 6: FULL-PAGE FIXTURES & RESULTS CALENDAR ═══ */}
+          {activeTab === "fixtures" && (
+            <FixturesView
+              selectedClub={selectedClub}
+              liveSchedule={liveSchedule}
+              onSelectFixture={(id) => {
+                setSelectedMatchId(id);
+                setSelectedPlayer(null);
+                setActiveTab("boot-room");
+              }}
+            />
+          )}
           </SlidingTabPanel>
 
           {/* Quiet Utility Footer */}
@@ -647,18 +661,6 @@ export default function FootballInsightsDashboard() {
         selectedClub={selectedClub}
         isOpen={Boolean(selectedPlayer)}
         onClose={() => setSelectedPlayer(null)}
-      />
-
-      {/* Full Season Fixtures Calendar Modal */}
-      <FixturesCalendarModal
-        isOpen={isCalendarOpen}
-        onClose={() => setIsCalendarOpen(false)}
-        fixtures={liveSchedule.upcoming}
-        onSelectFixture={(id) => {
-          setSelectedMatchId(id);
-          setSelectedPlayer(null);
-        }}
-        clubName={selectedClub.name}
       />
     </div>
     </MotionConfig>

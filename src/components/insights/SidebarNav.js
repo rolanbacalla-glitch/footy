@@ -103,10 +103,15 @@ export default function SidebarNav({
             type="button"
             onClick={onOpenCalendar}
             aria-label="Open full fixture schedule"
+            aria-current={activeTab === "fixtures" ? "page" : undefined}
             title="Full Fixture Schedule"
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-[#8A8D96] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
+              activeTab === "fixtures"
+                ? "bg-[#D2F865] text-[#0E100C] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_6px_20px_-4px_rgba(210,248,101,0.45)]"
+                : "text-[#8A8D96] hover:text-white hover:bg-white/[0.06]"
+            }`}
           >
-            <Calendar className="w-[18px] h-[18px]" strokeWidth={1.8} />
+            <Calendar className="w-[18px] h-[18px]" strokeWidth={activeTab === "fixtures" ? 2.2 : 1.8} />
           </button>
 
           <button
@@ -162,7 +167,12 @@ export default function SidebarNav({
             type="button"
             onClick={onOpenCalendar}
             aria-label="Open fixtures calendar"
-            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.05] border border-white/[0.08] text-[#D4D6DC] cursor-pointer"
+            aria-current={activeTab === "fixtures" ? "page" : undefined}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center border cursor-pointer transition-colors ${
+              activeTab === "fixtures"
+                ? "bg-[#D2F865]/20 border-[#D2F865]/40 text-[#D2F865]"
+                : "bg-white/[0.05] border-white/[0.08] text-[#D4D6DC]"
+            }`}
           >
             <Calendar className="w-4 h-4" />
           </button>
