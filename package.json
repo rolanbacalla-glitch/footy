@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:teams": "node scripts/sync-teams.mjs --check",
+    "sync:teams": "node scripts/sync-teams.mjs --write"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",

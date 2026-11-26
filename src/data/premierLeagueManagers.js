@@ -2,7 +2,7 @@
 // Source: Official Premier League & FA Registrations, corroborated via Wikipedia & live club announcements
 // Zero trademarked club crests or copyrighted logos used.
 
-import { getEuropeanClubInfo } from "./europeanClubs";
+import { getEuropeanClubInfo } from "./europeanClubs.js";
 
 export const PREMIER_LEAGUE_MANAGERS = {
   // Arsenal (359)
