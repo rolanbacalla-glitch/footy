@@ -180,12 +180,17 @@ export default function LiveScoreboard({
     const computed = computeSecondsUntilKickoff(kickoffIso);
     return computed !== null ? computed : 0;
   });
+  const [previewOffset, setPreviewOffset] = useState(null);
+  const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
+  const [showLineups, setShowLineups] = useState(false);
+  const [expandedStats, setExpandedStats] = useState(false);
 
-  const checkLiveFacts = async () => {
+  const clubIdForFetch = club?.id || activeMatch?.teamId || "364";
+
+  const checkLiveFacts = useCallback(async () => {
     if (typeof document !== "undefined" && document.hidden) return;
-    const teamId = club?.id || activeMatch?.teamId || "364";
     try {
-      const res = await fetch(`/api/live-fixtures?teamId=${encodeURIComponent(teamId)}`);
+      const res = await fetch(`/api/live-fixtures?teamId=${encodeURIComponent(clubIdForFetch)}`);
       if (res.ok) {
         const json = await res.json();
         setLiveFactData(json);
@@ -193,7 +198,7 @@ export default function LiveScoreboard({
     } catch {
       // Silent fallback
     }
-  };
+  }, [clubIdForFetch]);
 
   // Adaptive Live Fact-Checking Polling scoped to the selected club
   useEffect(() => {
