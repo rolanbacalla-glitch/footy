@@ -1246,9 +1246,9 @@ export default function LiveScoreboard({
                   </div>
                 )}
 
-                {/* Real Live Match Stats Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
+                {/* Real Live Match Stats Strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-3 sm:gap-y-0 sm:divide-x divide-white/[0.07] pt-3 border-t border-white/[0.06]">
+                  <div className="px-2 text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Shots (On Target)
                     </span>
@@ -1263,7 +1263,7 @@ export default function LiveScoreboard({
                     </div>
                   </div>
 
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
+                  <div className="px-2 text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Corner Kicks
                     </span>
@@ -1274,7 +1274,7 @@ export default function LiveScoreboard({
                     </div>
                   </div>
 
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
+                  <div className="px-2 text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Fouls
                     </span>
@@ -1285,7 +1285,7 @@ export default function LiveScoreboard({
                     </div>
                   </div>
 
-                  <div className="apple-tile p-2.5 rounded-xl border border-white/[0.06] text-center">
+                  <div className="px-2 text-center">
                     <span className="text-[10px] text-[#8E8E93] font-medium block uppercase tracking-wider">
                       Goalkeeper Saves
                     </span>

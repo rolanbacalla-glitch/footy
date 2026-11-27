@@ -479,7 +479,7 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
               </div>
             </div>
 
-            <div className="glass-tile p-4 mt-5">
+            <div className="mt-5 pt-4 border-t border-white/[0.07]">
               <div className="flex items-center gap-2 text-xs font-medium text-white">
                 <Zap className="w-3.5 h-3.5 text-[#D2F865]" />
                 <span>Tactical Instruction</span>
@@ -489,39 +489,41 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
               </p>
             </div>
 
-            <div className="mt-4 glass-tile p-4 text-center">
+            <div className="mt-5 pt-4 border-t border-white/[0.07] text-center">
               <span className="text-[11px] text-[#8A8D96] block mb-2">
                 Per-90 Tactical Profile · {liveData?.isLive ? "Live ESPN Synced" : "Benchmark Model"}
               </span>
               {renderRadar(profile.radar)}
             </div>
 
-            <div className="mt-5 space-y-2">
-              <span className="text-xs font-medium text-[#8A8D96] block">
+            <div className="mt-5 pt-4 border-t border-white/[0.07]">
+              <span className="text-xs font-medium text-[#8A8D96] block mb-2">
                 Key Performance Indicators
               </span>
-              {profile.metrics.map((m, idx) => (
-                <div
-                  key={idx}
-                  className="glass-tile px-3.5 py-2.5 flex items-center justify-between"
-                >
-                  <div>
-                    <span className="text-xs text-white font-medium block">
-                      {m.label}
-                    </span>
-                    <span className="text-[11px] text-[#8A8D96]">
-                      {m.benchmark}
+              <div className="divide-y divide-white/[0.06]">
+                {profile.metrics.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="py-2.5 first:pt-1 last:pb-1 flex items-center justify-between gap-2"
+                  >
+                    <div>
+                      <span className="text-xs text-white font-medium block">
+                        {m.label}
+                      </span>
+                      <span className="text-[11px] text-[#8A8D96]">
+                        {m.benchmark}
+                      </span>
+                    </div>
+                    <span className="font-mono font-semibold text-sm text-[#D2F865] tabular-nums shrink-0">
+                      {m.value}
                     </span>
                   </div>
-                  <span className="font-mono font-semibold text-sm text-[#D2F865] tabular-nums">
-                    {m.value}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="glass-tile p-2.5">
+            <div className="mt-5 pt-4 border-t border-white/[0.07] grid grid-cols-3 divide-x divide-white/[0.06] text-center">
+              <div className="px-2">
                 <span className="text-[10px] text-[#8A8D96] block">
                   {displayStarts ? `${displayStarts} Starts` : "Minutes"}
                 </span>
@@ -529,7 +531,7 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
                   {displayMinutes}&apos;
                 </span>
               </div>
-              <div className="glass-tile p-2.5">
+              <div className="px-2">
                 <span className="text-[10px] text-[#8A8D96] block">
                   OBV Metric
                 </span>
@@ -537,7 +539,7 @@ export default function PlayerDossierDrawer({ player, selectedClub, isOpen, onCl
                   +{(player.obv || 0.65).toFixed(2)}
                 </span>
               </div>
-              <div className="glass-tile p-2.5">
+              <div className="px-2">
                 <span className="text-[10px] text-[#8A8D96] block">
                   Discipline
                 </span>

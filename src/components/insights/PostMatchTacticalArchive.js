@@ -214,7 +214,7 @@ export default function PostMatchTacticalArchive({ match, selectedClub }) {
         </div>
 
         {/* Selected Shot Inspector */}
-        <div className="lg:col-span-4 glass-tile p-5 flex flex-col justify-between">
+        <div className="lg:col-span-4 lg:border-l lg:border-white/[0.06] lg:pl-6 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/[0.06] flex flex-col justify-between">
           {selectedShot ? (
             <div>
               <div className="flex items-center justify-between text-xs text-[#8A8D96]">

@@ -501,8 +501,8 @@ export default function TimeMachineView({
 
       {/* Right 4 Cols: OBV Leaderboard */}
       <div className="xl:col-span-4 space-y-5">
-        <div className="glass-card p-5 grid grid-cols-2 gap-3">
-          <div className="glass-tile p-4">
+        <div className="glass-card p-5 grid grid-cols-2 divide-x divide-white/[0.07]">
+          <div className="pr-4">
             <span className="text-[11px] text-[#8A8D96] block">
               Defensive PPDA
             </span>
@@ -510,7 +510,7 @@ export default function TimeMachineView({
               {selectedMatch.ppda}
             </span>
           </div>
-          <div className="glass-tile p-4">
+          <div className="pl-4">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] text-[#8A8D96] block">Final Score</span>
               <span
@@ -525,17 +525,17 @@ export default function TimeMachineView({
           </div>
         </div>
 
-        <div className="glass-card p-5 space-y-3.5">
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-5 space-y-3">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
             <h3 className="font-display text-sm font-semibold text-white">
               On-Ball Value Leaders
             </h3>
             <span className="text-[11px] text-[#8A8D96]">Net OBV</span>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="divide-y divide-white/[0.06]">
             {selectedMatch.topPerformers.map((player, idx) => (
-              <div key={idx} className="glass-tile p-3.5 space-y-1">
+              <div key={idx} className="py-3 first:pt-0.5 last:pb-0 space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-white">
                     {idx + 1}. {player.name}

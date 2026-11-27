@@ -408,11 +408,11 @@ export default function ClubNewsView({ selectedClubId = "364" }) {
           </div>
         </div>
 
-        <div className="glass-card p-5 space-y-3.5">
-          <h3 className="font-display text-sm font-semibold text-white">
+        <div className="glass-card p-5 space-y-3">
+          <h3 className="font-display text-sm font-semibold text-white pb-2 border-b border-white/[0.06]">
             Syndication Sources
           </h3>
-          <div className="space-y-2">
+          <div className="divide-y divide-white/[0.06]">
             {(
               payload?.sourcesStatus || [
                 { id: "google-news", name: "Google News UK", ok: true },
@@ -422,10 +422,18 @@ export default function ClubNewsView({ selectedClubId = "364" }) {
             ).map((s) => (
               <div
                 key={s.id}
-                className="glass-tile px-3.5 py-2.5 flex items-center justify-between text-xs"
+                className="py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2 text-xs"
               >
-                <span className="text-white font-medium">{s.name}</span>
-                <span className="font-mono text-[11px] text-[#8A8D96] tabular-nums">
+                <span className="inline-flex items-center gap-2 text-white font-medium min-w-0 truncate">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      s.ok ? "bg-[#D2F865]" : "bg-[#F26E7C]"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{s.name}</span>
+                </span>
+                <span className="font-mono text-[11px] text-[#8A8D96] tabular-nums shrink-0">
                   {s.ok
                     ? typeof s.count === "number"
                       ? `${s.count} stories`
@@ -435,7 +443,7 @@ export default function ClubNewsView({ selectedClubId = "364" }) {
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-[#6F727C] leading-relaxed">
+          <p className="text-[11px] text-[#6F727C] leading-relaxed pt-2 border-t border-white/[0.06]">
             Headlines are aggregated directly from open UK sports RSS feeds with automatic 3-minute refreshes.
           </p>
         </div>

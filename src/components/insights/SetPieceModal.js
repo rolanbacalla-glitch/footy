@@ -97,9 +97,9 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
-          <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
-            <span className="text-xs text-[#8A8D96] pl-3">Delivery Side</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pb-3 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-[#8A8D96]">Delivery Side</span>
             <SlidingSegmentedTabs
               tabs={[
                 { id: "left", label: "Left" },
@@ -113,8 +113,8 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
             />
           </div>
 
-          <div className="glass-tile p-1.5 rounded-full flex items-center justify-between">
-            <span className="text-xs text-[#8A8D96] pl-3">Trajectory</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-[#8A8D96]">Trajectory</span>
             <SlidingSegmentedTabs
               tabs={[
                 { id: "inswinger", label: "Inswinger" },
@@ -211,9 +211,9 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
             <span className="text-[11px] text-[#8A8D96]">Geometric GNN</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             {receiverProbabilities.map((r, i) => (
-              <div key={i} className="apple-tile p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+              <div key={i} className="py-1.5 border-b border-white/[0.06] flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-semibold text-white truncate">{r.player}</span>
                   <span className="text-xs font-bold font-mono" style={{ color: r.colour }}>
@@ -236,7 +236,7 @@ export default function SetPieceModal({ isOpen, onClose, activeMatch, selectedCl
         </div>
 
         {/* Defensive Marking Scheme Breakdown */}
-        <div className="apple-tile p-3 rounded-xl border border-white/[0.06] text-xs">
+        <div className="pt-3.5 border-t border-white/[0.07] text-xs">
           <div className="flex items-center justify-between mb-1.5">
             <span className="font-semibold text-white flex items-center gap-1.5">
               <ShieldAlert className="w-3.5 h-3.5 text-white/70" />

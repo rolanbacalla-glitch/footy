@@ -126,8 +126,8 @@ export default function MomentumChart({
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-xs mb-3">
-            <div className="apple-tile p-2.5 rounded-[14px]">
+          <div className="grid grid-cols-3 divide-x divide-white/[0.07] text-xs mb-3 py-1 border-y border-white/[0.06]">
+            <div className="pr-2.5">
               <span className="text-[10px] text-[#8E8E93] font-medium block">
                 On-Ball Value
               </span>
@@ -135,7 +135,7 @@ export default function MomentumChart({
                 +{selectedPlayer.obv.toFixed(2)}
               </span>
             </div>
-            <div className="apple-tile p-2.5 rounded-[14px]">
+            <div className="px-2.5">
               <span className="text-[10px] text-[#8E8E93] font-medium block">
                 Touches / Pass
               </span>
@@ -143,7 +143,7 @@ export default function MomentumChart({
                 {selectedPlayer.touches} / {selectedPlayer.passes}
               </span>
             </div>
-            <div className="apple-tile p-2.5 rounded-[14px]">
+            <div className="pl-2.5">
               <span className="text-[10px] text-[#8E8E93] font-medium block">
                 Accuracy
               </span>
@@ -154,16 +154,16 @@ export default function MomentumChart({
           </div>
 
           {playerConnections.length > 0 && (
-            <div className="pt-2.5 border-t border-white/[0.08]">
-              <span className="text-[11px] font-semibold text-[#8E8E93] flex items-center gap-1.5 mb-2">
+            <div className="pt-1">
+              <span className="text-[11px] font-semibold text-[#8E8E93] flex items-center gap-1.5 mb-1.5">
                 <ArrowRightLeft className="w-3.5 h-3.5 text-[#E31B23]" />
                 Primary Passing Combinations
               </span>
-              <div className="space-y-1.5">
+              <div className="divide-y divide-white/[0.06]">
                 {playerConnections.slice(0, 3).map((conn, idx) => (
                   <div
                     key={idx}
-                    className="apple-tile flex items-center justify-between text-[11px] px-3 py-2 rounded-xl"
+                    className="flex items-center justify-between text-[11px] py-2 first:pt-1 last:pb-0"
                   >
                     <span className="text-white font-medium">
                       #{conn.partnerNumber} {conn.partnerName}{" "}
@@ -329,9 +329,9 @@ export default function MomentumChart({
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 text-xs">
-          {/* Card 1: Total Team xG */}
-          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-xs pt-2 border-t border-white/[0.06]">
+          {/* Metric 1: Total Team xG */}
+          <div className="pb-3 border-b border-white/[0.06]">
             <span className="text-[#8E8E93] text-[11px] font-medium block">
               Total Team xG
             </span>
@@ -348,28 +348,28 @@ export default function MomentumChart({
             </span>
           </div>
 
-          {/* Card 2: Signature Crimson Glassmorphic Highlight Card for Field Tilt */}
-          <div className="glass-crimson-card glass-shimmer p-3 rounded-[16px] text-white flex flex-col justify-between">
+          {/* Metric 2: Field Tilt */}
+          <div className="pb-3 border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
-              <span className="text-white/85 text-[11px] font-semibold uppercase tracking-[0.05em] block drop-shadow-sm">
+              <span className="text-[#FF4D5A] text-[11px] font-semibold uppercase tracking-[0.05em] block">
                 Field Tilt
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 border border-white/30 text-white shadow-inner">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-white/70">
                 Dominance
               </span>
             </div>
-            <div className="flex items-baseline gap-1 my-0.5">
-              <span className="text-[26px] font-extrabold tracking-tight text-white tabular-nums drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="text-[22px] font-bold tracking-tight text-white tabular-nums">
                 {metrics.fieldTilt}%
               </span>
             </div>
-            <span className="text-[10px] text-white/95 font-medium block drop-shadow-sm truncate">
+            <span className="text-[10px] text-[#8E8E93] font-medium block truncate mt-0.5">
               {stadiumName} Territorial Domination
             </span>
           </div>
 
-          {/* Card 3: Defensive PPDA */}
-          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+          {/* Metric 3: Defensive PPDA */}
+          <div>
             <span className="text-[#8E8E93] text-[11px] font-medium block">
               Defensive PPDA
             </span>
@@ -384,8 +384,8 @@ export default function MomentumChart({
             </span>
           </div>
 
-          {/* Card 4: Counter-Press Regains */}
-          <div className="apple-tile p-3 rounded-[16px] border border-white/[0.06]">
+          {/* Metric 4: Counter-Press Regains */}
+          <div>
             <span className="text-[#8E8E93] text-[11px] font-medium block">
               Counter-Press
             </span>

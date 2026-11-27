@@ -268,7 +268,7 @@ const NEWS_STYLES = {
 
 function Card({ icon: Icon, title, children, className = "" }) {
   return (
-    <div className={`glass-tile p-4 flex flex-col gap-2.5 min-w-0 ${className}`}>
+    <div className={`pt-4 border-t border-white/[0.07] flex flex-col gap-2.5 min-w-0 ${className}`}>
       <div className="flex items-center gap-2 text-xs font-medium text-[#8A8D96]">
         <Icon className="w-3.5 h-3.5 text-[#D2F865]" strokeWidth={2} />
         {title}
@@ -380,7 +380,7 @@ export default function PreMatchPanel({
     <div className="space-y-4">
       {/* Win probability (only shown when real odds or fixture model exist) */}
       {wp && (
-        <div className="glass-tile p-4">
+        <div className="pb-4 border-b border-white/[0.07]">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-2 text-xs font-medium text-white">
               <Target className="w-3.5 h-3.5 text-[#D2F865]" />
@@ -578,7 +578,7 @@ export default function PreMatchPanel({
       )}
 
       {/* Matchday schedule timeline */}
-      <div className="glass-tile p-4 transition-all duration-300">
+      <div className="pt-4 border-t border-white/[0.07] transition-all duration-300">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <span className="text-xs font-medium text-white">
             {venueName} Matchday Schedule

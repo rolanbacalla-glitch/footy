@@ -67,7 +67,7 @@ export default function TacticalRadarCard({ activeMatch, selectedClub }) {
   const oppPath = `${oppPoints.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(" ")} Z`;
 
   return (
-    <div className="glass-tile p-4 sm:p-5">
+    <div className="py-2">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-[#D2F865]/15 border border-[#D2F865]/30 flex items-center justify-center text-[#D2F865]">
