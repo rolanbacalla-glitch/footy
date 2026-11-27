@@ -22,40 +22,206 @@ function setContextCache(key, value) {
 }
 
 // Formation slot pitch coordinates (x: 0-105 left->right attacking, y: 0-68 top->bottom)
-const FORMATION_COORDS = [
-  { x: 11, y: 34, defaultPos: "GK" },   // 0: Goalkeeper
-  { x: 28, y: 56, defaultPos: "RB" },   // 1: Right Back
-  { x: 24, y: 42, defaultPos: "RCB" },  // 2: Right Centre-Back
-  { x: 24, y: 26, defaultPos: "LCB" },  // 3: Left Centre-Back
-  { x: 28, y: 12, defaultPos: "LB" },   // 4: Left Back
-  { x: 44, y: 43, defaultPos: "RDM" },  // 5: Right Defensive Mid
-  { x: 44, y: 25, defaultPos: "LDM" },  // 6: Left Defensive Mid
-  { x: 64, y: 34, defaultPos: "CAM" },  // 7: Attacking Mid / Free 8
-  { x: 76, y: 54, defaultPos: "RW" },   // 8: Right Wing
-  { x: 85, y: 34, defaultPos: "ST" },   // 9: Centre Forward
-  { x: 76, y: 14, defaultPos: "LW" },   // 10: Left Wing
-];
+// NOTE: y=0..15 is LEFT flank (top), y=34 is CENTRAL, y=53..68 is RIGHT flank (bottom)
+const FORMATION_TEMPLATES = {
+  "4-2-3-1": {
+    slots: [
+      { x: 11, y: 34, defaultPos: "GK", abbrs: ["G", "GK"], places: [1] },
+      { x: 28, y: 56, defaultPos: "RB", abbrs: ["RB", "RWB"], places: [2] },
+      { x: 24, y: 42, defaultPos: "RCB", abbrs: ["CD-R", "RCB"], places: [5] },
+      { x: 24, y: 26, defaultPos: "LCB", abbrs: ["CD-L", "LCB"], places: [6] },
+      { x: 28, y: 12, defaultPos: "LB", abbrs: ["LB", "LWB"], places: [3] },
+      { x: 44, y: 43, defaultPos: "RDM", abbrs: ["RM", "RDM", "CM-R", "DM-R"], places: [8] },
+      { x: 44, y: 25, defaultPos: "LDM", abbrs: ["LM", "LDM", "CM-L", "DM-L"], places: [4] },
+      { x: 64, y: 34, defaultPos: "CAM", abbrs: ["AM", "CAM", "CM"], places: [10] },
+      { x: 76, y: 54, defaultPos: "RW", abbrs: ["AM-R", "RW", "RF"], places: [7] },
+      { x: 85, y: 34, defaultPos: "ST", abbrs: ["F", "ST", "CF"], places: [9] },
+      { x: 76, y: 14, defaultPos: "LW", abbrs: ["AM-L", "LW", "LF"], places: [11] },
+    ],
+    links: [
+      [0, 2, 16], [0, 3, 18],
+      [2, 3, 31], [2, 1, 24], [3, 4, 25],
+      [2, 5, 22], [3, 6, 24],
+      [1, 5, 19], [4, 6, 20],
+      [5, 6, 27], [5, 7, 21], [6, 7, 23],
+      [1, 8, 22], [4, 10, 21],
+      [7, 8, 18], [7, 10, 19], [7, 9, 17],
+      [8, 9, 14], [10, 9, 15],
+    ],
+  },
+  "4-3-3": {
+    slots: [
+      { x: 11, y: 34, defaultPos: "GK", abbrs: ["G", "GK"], places: [1] },
+      { x: 28, y: 56, defaultPos: "RB", abbrs: ["RB", "RWB"], places: [2] },
+      { x: 24, y: 42, defaultPos: "RCB", abbrs: ["CD-R", "RCB"], places: [5] },
+      { x: 24, y: 26, defaultPos: "LCB", abbrs: ["CD-L", "LCB"], places: [6] },
+      { x: 28, y: 12, defaultPos: "LB", abbrs: ["LB", "LWB"], places: [3] },
+      { x: 56, y: 47, defaultPos: "RCM", abbrs: ["RM", "CM-R"], places: [7] },
+      { x: 56, y: 21, defaultPos: "LCM", abbrs: ["LM", "CM-L"], places: [8] },
+      { x: 43, y: 34, defaultPos: "DM", abbrs: ["CM", "DM", "CDM"], places: [4] },
+      { x: 77, y: 54, defaultPos: "RW", abbrs: ["RF", "AM-R", "RW"], places: [10] },
+      { x: 85, y: 34, defaultPos: "ST", abbrs: ["F", "ST", "CF"], places: [9] },
+      { x: 77, y: 14, defaultPos: "LW", abbrs: ["LF", "AM-L", "LW"], places: [11] },
+    ],
+    links: [
+      [0, 2, 16], [0, 3, 18],
+      [2, 3, 30], [2, 1, 24], [3, 4, 25],
+      [2, 7, 24], [3, 7, 26],
+      [1, 5, 22], [4, 6, 23],
+      [7, 5, 25], [7, 6, 26],
+      [5, 8, 22], [6, 10, 23],
+      [1, 8, 19], [4, 10, 20],
+      [5, 9, 17], [6, 9, 18],
+      [8, 9, 16], [10, 9, 17],
+    ],
+  },
+  "3-4-2-1": {
+    slots: [
+      { x: 11, y: 34, defaultPos: "GK", abbrs: ["G", "GK"], places: [1] },
+      { x: 48, y: 57, defaultPos: "RWB", abbrs: ["RM", "RWB", "RB"], places: [2] },
+      { x: 24, y: 48, defaultPos: "RCB", abbrs: ["CD-R", "RCB"], places: [6] },
+      { x: 24, y: 20, defaultPos: "LCB", abbrs: ["CD-L", "LCB"], places: [4] },
+      { x: 48, y: 11, defaultPos: "LWB", abbrs: ["LM", "LWB", "LB"], places: [3] },
+      { x: 45, y: 42, defaultPos: "RCM", abbrs: ["CM-R", "RDM"], places: [7] },
+      { x: 45, y: 26, defaultPos: "LCM", abbrs: ["CM-L", "LDM"], places: [8] },
+      { x: 21, y: 34, defaultPos: "CB", abbrs: ["CD", "CB"], places: [5] },
+      { x: 69, y: 47, defaultPos: "RAM", abbrs: ["CF-R", "AM-R", "RF", "RW"], places: [10] },
+      { x: 85, y: 34, defaultPos: "ST", abbrs: ["F", "ST", "CF"], places: [9] },
+      { x: 69, y: 21, defaultPos: "LAM", abbrs: ["CF-L", "AM-L", "LF", "LW"], places: [11] },
+    ],
+    links: [
+      [0, 7, 18], [0, 2, 14], [0, 3, 14],
+      [7, 2, 26], [7, 3, 27],
+      [2, 1, 21], [3, 4, 22],
+      [2, 5, 22], [3, 6, 23], [7, 5, 19], [7, 6, 19],
+      [5, 6, 28], [1, 5, 20], [4, 6, 21],
+      [1, 8, 22], [4, 10, 23],
+      [5, 8, 21], [6, 10, 22],
+      [8, 10, 17], [8, 9, 18], [10, 9, 19],
+    ],
+  },
+  "4-4-2": {
+    slots: [
+      { x: 11, y: 34, defaultPos: "GK", abbrs: ["G", "GK"], places: [1] },
+      { x: 28, y: 56, defaultPos: "RB", abbrs: ["RB", "RWB"], places: [2] },
+      { x: 24, y: 42, defaultPos: "RCB", abbrs: ["CD-R", "RCB"], places: [5] },
+      { x: 24, y: 26, defaultPos: "LCB", abbrs: ["CD-L", "LCB"], places: [6] },
+      { x: 28, y: 12, defaultPos: "LB", abbrs: ["LB", "LWB"], places: [3] },
+      { x: 50, y: 41, defaultPos: "RCM", abbrs: ["CM-R", "RDM"], places: [8] },
+      { x: 50, y: 27, defaultPos: "LCM", abbrs: ["CM-L", "LDM"], places: [4] },
+      { x: 56, y: 55, defaultPos: "RM", abbrs: ["RM", "AM-R", "RW"], places: [7] },
+      { x: 82, y: 42, defaultPos: "RST", abbrs: ["CF-R", "RF", "F"], places: [9] },
+      { x: 82, y: 26, defaultPos: "LST", abbrs: ["CF-L", "LF", "ST"], places: [10] },
+      { x: 56, y: 13, defaultPos: "LM", abbrs: ["LM", "AM-L", "LW"], places: [11] },
+    ],
+    links: [
+      [0, 2, 16], [0, 3, 18],
+      [2, 3, 30], [2, 1, 24], [3, 4, 25],
+      [2, 5, 22], [3, 6, 23],
+      [1, 7, 24], [4, 10, 25],
+      [5, 6, 28], [5, 7, 21], [6, 10, 22],
+      [5, 8, 19], [6, 9, 20],
+      [7, 8, 18], [10, 9, 19], [8, 9, 17],
+    ],
+  },
+  "3-5-2": {
+    slots: [
+      { x: 11, y: 34, defaultPos: "GK", abbrs: ["G", "GK"], places: [1] },
+      { x: 48, y: 57, defaultPos: "RWB", abbrs: ["RWB", "RB", "RM"], places: [2] },
+      { x: 24, y: 48, defaultPos: "RCB", abbrs: ["CD-R", "RCB"], places: [6] },
+      { x: 24, y: 20, defaultPos: "LCB", abbrs: ["CD-L", "LCB"], places: [4] },
+      { x: 48, y: 11, defaultPos: "LWB", abbrs: ["LWB", "LB", "LM"], places: [3] },
+      { x: 53, y: 44, defaultPos: "RCM", abbrs: ["CM-R", "AM-R"], places: [8] },
+      { x: 53, y: 24, defaultPos: "LCM", abbrs: ["CM-L", "AM-L"], places: [7] },
+      { x: 21, y: 34, defaultPos: "CB", abbrs: ["CD", "CB"], places: [5] },
+      { x: 43, y: 34, defaultPos: "DM", abbrs: ["CM", "DM"], places: [11] },
+      { x: 82, y: 42, defaultPos: "RST", abbrs: ["CF-R", "RF", "F"], places: [9] },
+      { x: 82, y: 26, defaultPos: "LST", abbrs: ["CF-L", "LF", "ST"], places: [10] },
+    ],
+    links: [
+      [0, 7, 17], [0, 2, 14], [0, 3, 14],
+      [7, 2, 26], [7, 3, 27], [7, 8, 25],
+      [2, 1, 21], [3, 4, 22],
+      [8, 5, 24], [8, 6, 25],
+      [1, 5, 20], [4, 6, 21], [5, 6, 23],
+      [5, 9, 19], [6, 10, 20],
+      [1, 9, 16], [4, 10, 17], [9, 10, 18],
+    ],
+  },
+};
 
-function mapPositionShort(posName = "", fallback = "CM") {
-  const p = posName.toLowerCase();
+function resolveFormationKey(formation = "") {
+  const f = String(formation || "").trim();
+  if (f.startsWith("3-4-2-1") || f.startsWith("3-4-3")) return "3-4-2-1";
+  if (f.startsWith("4-3-3") || f.startsWith("4-1-4-1")) return "4-3-3";
+  if (f.startsWith("4-4-2") || f.startsWith("4-4-1-1")) return "4-4-2";
+  if (f.startsWith("3-5-2") || f.startsWith("5-3-2")) return "3-5-2";
+  return "4-2-3-1";
+}
+
+function mapPositionShort(posName = "", posAbbr = "", fallback = "CM") {
+  const abbr = String(posAbbr || "").toUpperCase().trim();
+  if (abbr === "G" || abbr === "GK") return "GK";
+  if (abbr === "RB" || abbr === "RWB") return abbr;
+  if (abbr === "LB" || abbr === "LWB") return abbr;
+  if (abbr === "CD-R") return "RCB";
+  if (abbr === "CD-L") return "LCB";
+  if (abbr === "CD") return "CB";
+  if (abbr === "AM-L" || abbr === "LF") return "LW";
+  if (abbr === "AM-R" || abbr === "RF") return "RW";
+  if (abbr === "AM") return "CAM";
+  if (abbr === "CF-L") return "LAM";
+  if (abbr === "CF-R") return "RAM";
+  if (abbr === "F" || abbr === "ST" || abbr === "CF") return "ST";
+
+  const p = String(posName || "").toLowerCase();
   if (p.includes("goal")) return "GK";
-  if (p.includes("right back") || p.includes("right wing back")) return "RB";
-  if (p.includes("left back") || p.includes("left wing back")) return "LB";
+  if (p.includes("right wing back")) return "RWB";
+  if (p.includes("left wing back")) return "LWB";
+  if (p.includes("right back")) return "RB";
+  if (p.includes("left back")) return "LB";
   if (p.includes("center left def") || p.includes("left def")) return "LCB";
   if (p.includes("center right def") || p.includes("right def")) return "RCB";
-  if (p.includes("defend")) return "CB";
+  if (p.includes("center def") || p.includes("centre back") || p.includes("center back")) return "CB";
   if (p.includes("attacking mid") && p.includes("left")) return "LW";
   if (p.includes("attacking mid") && p.includes("right")) return "RW";
   if (p.includes("attacking mid")) return "CAM";
+  if (p.includes("left forward") || p.includes("left wing")) return "LW";
+  if (p.includes("right forward") || p.includes("right wing")) return "RW";
   if (p.includes("defensive mid")) return "DM";
-  if (p.includes("left mid") || p.includes("left wing")) return "LW";
-  if (p.includes("right mid") || p.includes("right wing")) return "RW";
-  if (p.includes("mid")) return "CM";
   if (p.includes("forward") || p.includes("striker")) return "ST";
   return fallback;
 }
 
-function buildStartingXIFromAthletes(athletes = [], clubInfo) {
+function normalizePosAbbr(athlete) {
+  const direct = String(athlete?.posAbbr || "").toUpperCase().trim();
+  if (direct) return direct;
+  const p = String(athlete?.posName || athlete?.position || "").toLowerCase();
+  if (p.includes("goal")) return "G";
+  if (p.includes("right wing back")) return "RWB";
+  if (p.includes("left wing back")) return "LWB";
+  if (p.includes("right back")) return "RB";
+  if (p.includes("left back")) return "LB";
+  if (p.includes("center left def")) return "CD-L";
+  if (p.includes("center right def")) return "CD-R";
+  if (p.includes("center def")) return "CD";
+  if (p.includes("attacking mid") && p.includes("left")) return "AM-L";
+  if (p.includes("attacking mid") && p.includes("right")) return "AM-R";
+  if (p.includes("attacking mid")) return "AM";
+  if (p.includes("center left mid")) return "CM-L";
+  if (p.includes("center right mid")) return "CM-R";
+  if (p.includes("center mid")) return "CM";
+  if (p.includes("left mid")) return "LM";
+  if (p.includes("right mid")) return "RM";
+  if (p.includes("center left forward")) return "CF-L";
+  if (p.includes("center right forward")) return "CF-R";
+  if (p.includes("left forward")) return "LF";
+  if (p.includes("right forward")) return "RF";
+  if (p.includes("forward") || p.includes("striker")) return "F";
+  return "";
+}
+
+function buildStartingXIFromAthletes(athletes = [], clubInfo, formation = "") {
   // Deduplicate athletes by ID and normalized display name so the same player can never appear twice
   const seenIds = new Set();
   const seenNames = new Set();
@@ -69,79 +235,21 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
     if (nameKey && seenNames.has(nameKey)) continue;
     if (idKey) seenIds.add(idKey);
     if (nameKey) seenNames.add(nameKey);
-    uniqueAthletes.push(a);
+    uniqueAthletes.push({
+      ...a,
+      _abbr: normalizePosAbbr(a),
+      _place: a.formationPlace ? Number(a.formationPlace) : null,
+      _isExactStarter: Boolean(a._abbr || a.posAbbr || a.formationPlace),
+    });
   }
 
-  // Bucket unique players by precise tactical line & position
-  const gks = [];
-  const rightBacks = [];
-  const leftBacks = [];
-  const centerBacks = [];
-  const mids = [];
-  const fwds = [];
-
-  for (const a of uniqueAthletes) {
-    const posStr = (a.posName || a.position || "").toLowerCase();
-    const nameStr = (a.name || "").toLowerCase();
-
-    if (posStr.includes("goal")) {
-      gks.push(a);
-    } else if (
-      posStr.includes("right back") ||
-      posStr.includes("right wing back") ||
-      posStr === "rb" ||
-      posStr === "rwb"
-    ) {
-      rightBacks.push(a);
-    } else if (
-      posStr.includes("left back") ||
-      posStr.includes("left wing back") ||
-      posStr === "lb" ||
-      posStr === "lwb"
-    ) {
-      leftBacks.push(a);
-    } else if (
-      posStr.includes("centre-back") ||
-      posStr.includes("center-back") ||
-      posStr.includes("center back") ||
-      posStr.includes("centre back") ||
-      posStr === "cb" ||
-      posStr === "lcb" ||
-      posStr === "rcb" ||
-      nameStr.includes("van dijk") ||
-      nameStr.includes("konate") ||
-      nameStr.includes("quansah") ||
-      nameStr.includes("jacquet") ||
-      nameStr.includes("saliba") ||
-      nameStr.includes("gabriel") ||
-      nameStr.includes("stones") ||
-      nameStr.includes("dias")
-    ) {
-      centerBacks.push(a);
-    } else if (
-      posStr.includes("def") ||
-      posStr.includes("back")
-    ) {
-      if (posStr.includes("right")) rightBacks.push(a);
-      else if (posStr.includes("left")) leftBacks.push(a);
-      else centerBacks.push(a);
-    } else if (
-      posStr.includes("forward") ||
-      posStr.includes("striker") ||
-      posStr.includes("wing") ||
-      posStr.includes("attacker") ||
-      posStr === "st" ||
-      posStr === "lw" ||
-      posStr === "rw" ||
-      posStr === "cf"
-    ) {
-      fwds.push(a);
-    } else {
-      mids.push(a);
-    }
-  }
+  const formationKey = resolveFormationKey(formation || clubInfo?.formation);
+  const template = FORMATION_TEMPLATES[formationKey] || FORMATION_TEMPLATES["4-2-3-1"];
+  const slots = template.slots;
 
   const used = new Set();
+  const ordered = new Array(11).fill(null);
+
   const take = (pool, predicate = null) => {
     for (const candidate of pool) {
       if (used.has(candidate)) continue;
@@ -153,36 +261,81 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
     return null;
   };
 
-  const posText = (a) => (a?.posName || a?.position || "").toLowerCase();
-  const ordered = new Array(11).fill(null);
+  // PASS 1: Exact ESPN match-summary position abbreviation match (highest fidelity)
+  // Match slots in priority order of specificity: exact abbrs first
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    const picked = take(uniqueAthletes, (a) => a._abbr && slot.abbrs.includes(a._abbr));
+    if (picked) ordered[i] = picked;
+  }
 
-  // 0: GK
-  ordered[0] = take(gks) || uniqueAthletes[0];
+  // PASS 2: Exact ESPN formationPlace match for any remaining unfilled slots
+  for (let i = 0; i < slots.length; i++) {
+    if (ordered[i]) continue;
+    const slot = slots[i];
+    const picked = take(
+      uniqueAthletes,
+      (a) => a._place !== null && slot.places.includes(a._place)
+    );
+    if (picked) ordered[i] = picked;
+  }
 
-  // 1: RB
-  ordered[1] = take(rightBacks) || take(mids) || take(centerBacks);
+  // PASS 3: Tactical line bucketing for generic roster fallback (/roster gives Goalkeeper/Defender/Midfielder/Forward)
+  const gks = [];
+  const defs = [];
+  const mids = [];
+  const fwds = [];
 
-  // 4: LB
-  ordered[4] = take(leftBacks) || take(mids) || take(centerBacks);
+  for (const a of uniqueAthletes) {
+    if (used.has(a)) continue;
+    const posStr = `${a.posName || a.position || ""} ${a._abbr || ""}`.toLowerCase();
+    if (posStr.includes("goal") || a._abbr === "G" || a._abbr === "GK") {
+      gks.push(a);
+    } else if (
+      posStr.includes("def") ||
+      posStr.includes("back") ||
+      a._abbr === "D" ||
+      a._abbr.startsWith("CD") ||
+      a._abbr === "RB" ||
+      a._abbr === "LB" ||
+      a._abbr === "RWB" ||
+      a._abbr === "LWB"
+    ) {
+      defs.push(a);
+    } else if (
+      posStr.includes("forward") ||
+      posStr.includes("striker") ||
+      posStr.includes("wing") ||
+      posStr.includes("attacker") ||
+      posStr.includes("attacking mid") ||
+      a._abbr === "F" ||
+      a._abbr.startsWith("AM-") ||
+      a._abbr.startsWith("CF") ||
+      a._abbr === "LF" ||
+      a._abbr === "RF"
+    ) {
+      fwds.push(a);
+    } else {
+      mids.push(a);
+    }
+  }
 
-  // 2 & 3: RCB & LCB (Centre Backs)
-  ordered[2] = take(centerBacks) || take(rightBacks) || take(mids);
-  ordered[3] = take(centerBacks) || take(leftBacks) || take(mids);
+  for (let i = 0; i < slots.length; i++) {
+    if (ordered[i]) continue;
+    const pos = slots[i].defaultPos;
+    if (pos === "GK") {
+      ordered[i] = take(gks);
+    } else if (["RB", "LB", "RCB", "LCB", "CB", "RWB", "LWB"].includes(pos)) {
+      ordered[i] = take(defs) || take(mids);
+    } else if (["RW", "LW", "ST", "RST", "LST", "RAM", "LAM"].includes(pos)) {
+      ordered[i] = take(fwds) || take(mids);
+    } else {
+      ordered[i] = take(mids) || take(fwds) || take(defs);
+    }
+  }
 
-  // 8 & 10: RW & LW (Wingers)
-  ordered[8] = take(fwds, (a) => posText(a).includes("right") || posText(a).includes("rw")) || take(fwds);
-  ordered[10] = take(fwds, (a) => posText(a).includes("left") || posText(a).includes("lw")) || take(fwds);
-
-  // 9: ST (Striker)
-  ordered[9] = take(fwds, (a) => posText(a).includes("striker") || posText(a).includes("st") || posText(a).includes("cf")) || take(fwds);
-
-  // 5, 6, 7: Midfielders (CAM, RDM, LDM)
-  ordered[7] = take(mids, (a) => posText(a).includes("attack") || posText(a).includes("cam")) || take(mids);
-  ordered[5] = take(mids, (a) => posText(a).includes("defens") || posText(a).includes("dm") || posText(a).includes("pivot")) || take(mids);
-  ordered[6] = take(mids);
-
-  // Fill any remaining unfilled slots strictly from unused athletes
-  const backfillPools = [mids, fwds, centerBacks, rightBacks, leftBacks, gks, uniqueAthletes];
+  // PASS 4: Final backfill from any remaining unused athletes
+  const backfillPools = [mids, fwds, defs, gks, uniqueAthletes];
   for (let i = 0; i < 11; i++) {
     if (!ordered[i]) {
       for (const pool of backfillPools) {
@@ -199,7 +352,7 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
     ordered.filter(Boolean).map((a) => String(a.name || "").trim().toLowerCase())
   );
 
-  return FORMATION_COORDS.map((slot, idx) => {
+  return slots.map((slot, idx) => {
     const captainUnused =
       idx === 3 &&
       clubInfo.captain &&
@@ -225,11 +378,18 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
     const baseObv = Number((0.28 + ((11 - idx) % 5) * 0.09).toFixed(2));
     const baseComp = idx === 0 ? 89 : idx <= 4 ? 92 : idx <= 7 ? 88 : 81;
 
+    // When matched from an official formation slot, use the tactical slot position label
+    // so e.g. LM in 4-2-3-1 displays as LDM (not LW) and AM-R displays as RW.
+    const resolvedPos =
+      athlete._abbr && slot.abbrs.includes(athlete._abbr)
+        ? slot.defaultPos
+        : mapPositionShort(athlete.posName, athlete._abbr, slot.defaultPos);
+
     return {
       id: String(athlete.id || `${clubInfo.shortName.toLowerCase()}-${idx + 1}`),
       name: athlete.name,
       number: parseInt(athlete.jersey, 10) || idx + 1,
-      pos: mapPositionShort(athlete.posName, slot.defaultPos),
+      pos: resolvedPos,
       x: slot.x,
       y: slot.y,
       touches: athlete.touches || baseTouches,
@@ -239,18 +399,11 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
   });
 }
 
-function buildPassLinks(xi = []) {
+function buildPassLinks(xi = [], formation = "") {
   if (xi.length < 11) return [];
-  const pairs = [
-    [0, 2, 16], [0, 3, 18],
-    [2, 3, 31], [2, 1, 24], [3, 4, 25],
-    [2, 5, 22], [3, 6, 24],
-    [1, 5, 19], [4, 6, 20],
-    [5, 6, 27], [5, 7, 21], [6, 7, 23],
-    [1, 8, 22], [4, 10, 21],
-    [7, 8, 18], [7, 10, 19], [7, 9, 17],
-    [8, 9, 14], [10, 9, 15],
-  ];
+  const formationKey = resolveFormationKey(formation);
+  const pairs =
+    (FORMATION_TEMPLATES[formationKey] || FORMATION_TEMPLATES["4-2-3-1"]).links;
   return pairs.map(([fromIdx, toIdx, count]) => ({
     from: xi[fromIdx].id,
     to: xi[toIdx].id,
@@ -325,32 +478,61 @@ export async function GET(request) {
 
     // Identify target event (requested eventId, or first upcoming, or most recent completed)
     const allKnownEvents = [...upcomingEvents, ...pastEvents];
-    const targetEvent =
+    let targetEvent =
       (cleanEventId ? allKnownEvents.find((e) => String(e.id) === String(cleanEventId)) : null) ||
       upcomingEvents[0] ||
       pastEvents[0] ||
       null;
 
-    // Also find most recent completed match to extract the real starting XI
-    const latestCompletedEvent =
-      (cleanEventId && pastEvents.find((e) => String(e.id) === String(cleanEventId))) ||
-      pastEvents[0] ||
-      null;
-
-    const summaryEventId = latestCompletedEvent?.id || targetEvent?.id;
+    // Fetch summary for requested event first (covers UCL/UEL/UECL or live/completed PL),
+    // and fall back to latest completed PL match for starting XI if the target match has no lineups yet
     let summaryData = null;
-    if (summaryEventId) {
+    let targetSummaryData = null;
+    const requestedOrFallbackId = cleanEventId || pastEvents[0]?.id || targetEvent?.id;
+    if (requestedOrFallbackId) {
       try {
         const sumRes = await fetch(
-          `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${summaryEventId}`,
+          `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${requestedOrFallbackId}`,
           { next: { revalidate: 300 } }
         );
         if (sumRes.ok) {
-          summaryData = await sumRes.json();
+          targetSummaryData = await sumRes.json();
         }
       } catch {
         // Ignore summary error
       }
+    }
+
+    // If cleanEventId wasn't in eng.1 schedule (e.g., Champions League / Europa League), hydrate targetEvent from summary header
+    if (cleanEventId && !allKnownEvents.some((e) => String(e.id) === String(cleanEventId)) && targetSummaryData?.header?.competitions?.[0]) {
+      targetEvent = {
+        id: cleanEventId,
+        date: targetSummaryData.header.competitions[0].date,
+        league: targetSummaryData.header.league,
+        competitions: targetSummaryData.header.competitions,
+      };
+    }
+
+    const hasTargetLineup = Boolean(
+      targetSummaryData?.rosters?.some((r) => (r.roster || []).some((p) => p.starter))
+    );
+
+    if (hasTargetLineup) {
+      summaryData = targetSummaryData;
+    } else if (pastEvents[0]?.id && String(pastEvents[0].id) !== String(requestedOrFallbackId)) {
+      try {
+        const fallbackSumRes = await fetch(
+          `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${pastEvents[0].id}`,
+          { next: { revalidate: 300 } }
+        );
+        if (fallbackSumRes.ok) {
+          summaryData = await fallbackSumRes.json();
+        }
+      } catch {
+        // Ignore fallback summary error
+      }
+    } else {
+      summaryData = targetSummaryData;
     }
 
     // Determine opponent and home/away for targetEvent
@@ -384,7 +566,9 @@ export async function GET(request) {
           id: p.athlete?.id,
           name: p.athlete?.displayName,
           jersey: p.jersey || p.athlete?.jersey,
-          posName: p.position?.displayName || p.position?.name,
+          posName: p.position?.displayName || p.position?.name || "",
+          posAbbr: p.position?.abbreviation || "",
+          formationPlace: p.formationPlace || null,
         }));
 
       opponentStarters = (oppRosterObj?.roster || [])
@@ -393,7 +577,9 @@ export async function GET(request) {
           id: p.athlete?.id,
           name: p.athlete?.displayName,
           jersey: p.jersey || p.athlete?.jersey,
-          posName: p.position?.displayName || p.position?.name,
+          posName: p.position?.displayName || p.position?.name || "",
+          posAbbr: p.position?.abbreviation || "",
+          formationPlace: p.formationPlace || null,
         }));
     }
 
@@ -402,6 +588,7 @@ export async function GET(request) {
       name: a.displayName,
       jersey: a.jersey,
       posName: a.position?.displayName || a.position?.name || "Midfielder",
+      posAbbr: a.position?.abbreviation || "",
     }));
 
     const starterPool =
@@ -409,8 +596,8 @@ export async function GET(request) {
         ? selectedStarters
         : [...selectedStarters, ...fullSquad];
 
-    const startingXI = buildStartingXIFromAthletes(starterPool, clubInfo);
-    const passLinks = buildPassLinks(startingXI);
+    const startingXI = buildStartingXIFromAthletes(starterPool, clubInfo, formationUsed);
+    const passLinks = buildPassLinks(startingXI, formationUsed);
 
     // Extract real match statistics & scoring details when viewing a completed or live match
     let liveStats = null;
@@ -418,8 +605,9 @@ export async function GET(request) {
     let awayScorers = [];
     let realShots = [];
 
-    if (summaryData) {
-      const boxTeams = summaryData.boxscore?.teams || [];
+    const statsSummary = targetSummaryData && (isCompleted || isLive) ? targetSummaryData : summaryData;
+    if (statsSummary) {
+      const boxTeams = statsSummary.boxscore?.teams || [];
       const selfBox = boxTeams.find((t) => String(t.team?.id) === String(teamId));
       const oppBox = boxTeams.find((t) => String(t.team?.id) !== String(teamId));
       const getBoxStat = (box, name, fallback) => {
@@ -443,7 +631,7 @@ export async function GET(request) {
         corners: isSelectedHome ? [selfCorners, oppCorners] : [oppCorners, selfCorners],
       };
 
-      const details = summaryData.header?.competitions?.[0]?.details || [];
+      const details = statsSummary.header?.competitions?.[0]?.details || [];
       for (const d of details) {
         if (d.scoringPlay) {
           const scorerName = d.participants?.[0]?.athlete?.shortName || d.participants?.[0]?.athlete?.displayName || "Scorer";
@@ -458,12 +646,15 @@ export async function GET(request) {
       }
     }
 
-    // Build realistic shots anchored to real players in startingXI
-    const striker = startingXI[9] || startingXI[8] || { name: clubInfo.captain };
-    const playmaker = startingXI[7] || startingXI[6] || { name: clubInfo.captain };
-    const wingerR = startingXI[8] || startingXI[9] || { name: clubInfo.captain };
-    const wingerL = startingXI[10] || startingXI[5] || { name: clubInfo.captain };
-    const centerBack = startingXI[3] || startingXI[2] || { name: clubInfo.captain };
+    // Build realistic shots anchored to real players by tactical role in startingXI
+    const findByPos = (posList, fallbackIdx) =>
+      startingXI.find((p) => posList.includes(p.pos)) || startingXI[fallbackIdx] || { name: clubInfo.captain };
+
+    const striker = findByPos(["ST", "CF", "RST", "LST"], 9);
+    const playmaker = findByPos(["CAM", "RAM", "LAM", "RCM", "LCM"], 7);
+    const wingerR = findByPos(["RW", "RAM", "RM", "RWB", "RST"], 8);
+    const wingerL = findByPos(["LW", "LAM", "LM", "LWB", "LST"], 10);
+    const centerBack = findByPos(["LCB", "RCB", "CB"], 3);
 
     realShots = [
       {
@@ -552,7 +743,7 @@ export async function GET(request) {
     const homeInfo = isSelectedHome ? clubInfo : oppInfo;
     const awayInfo = isSelectedHome ? oppInfo : clubInfo;
 
-    const matchVenue = tComp.venue?.fullName || homeInfo.stadium || clubInfo.stadium;
+    const matchVenue = tComp.venue?.fullName || targetSummaryData?.gameInfo?.venue?.fullName || homeInfo.stadium || clubInfo.stadium;
     const matchDateIso = targetEvent?.date || new Date().toISOString();
     const kickoffDate = new Date(matchDateIso);
     const kickoffHour = kickoffDate.getUTCHours() || 16;
@@ -566,8 +757,8 @@ export async function GET(request) {
       minute: "2-digit",
     });
 
-    const homeScoreVal = !targetEvent || !isCompleted ? null : (tHome.score?.displayValue ?? "0");
-    const awayScoreVal = !targetEvent || !isCompleted ? null : (tAway.score?.displayValue ?? "0");
+    const homeScoreVal = !targetEvent || (!isCompleted && !isLive) ? null : (tHome.score?.displayValue ?? tHome.score ?? "0");
+    const awayScoreVal = !targetEvent || (!isCompleted && !isLive) ? null : (tAway.score?.displayValue ?? tAway.score ?? "0");
 
     // Recent head-to-head or past results list
     const headToHead = pastEvents.slice(0, 5).map((ev) => {
