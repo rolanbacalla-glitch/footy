@@ -252,8 +252,8 @@ export default function FixturesTimelineRail({
           <div className="mt-4 space-y-4">
             {/* Only show external selection banner if user picked a match outside the visible window */}
             {activeMatch && !isSelectedInTimeline && (
-              <div className="p-3 rounded-[18px] border border-[#D2F865]/35 bg-[#1C2017]/80 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#D2F865]/15 border border-[#D2F865]/35 flex items-center justify-center text-[#D2F865] shrink-0">
+              <div className="px-3 py-2.5 rounded-xl bg-[#D2F865]/[0.07] flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-[#D2F865]/15 flex items-center justify-center text-[#D2F865] shrink-0">
                   <Radio className="w-3.5 h-3.5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -295,14 +295,14 @@ export default function FixturesTimelineRail({
             )}
 
             {timelineFixtures.length === 0 ? (
-              <div className="glass-tile p-5 text-center text-xs text-[#8A8D96]">
+              <div className="py-6 text-center text-xs text-[#8A8D96]">
                 Loading live {selectedClub?.name} schedule…
               </div>
             ) : (
               <>
-                {/* ═══ 1. PLAYED RESULTS (Recessed, Muted Glass, Semantic W/D/L + Bold Scoreline) ═══ */}
+                {/* ═══ 1. PLAYED RESULTS (Flat Hairline-Divided Schedule Rows) ═══ */}
                 {recentResults.length > 0 && (
-                  <section aria-label="Played results" className="space-y-2">
+                  <section aria-label="Played results" className="space-y-1.5">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6F727C]">
                         Played · Full Time
@@ -312,7 +312,7 @@ export default function FixturesTimelineRail({
                       </span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="divide-y divide-white/[0.05]">
                       {recentResults.map((fx) => {
                         const isSelected = fx.id === selectedMatchId;
                         const dateObj = fx.date ? new Date(fx.date) : null;
@@ -325,61 +325,68 @@ export default function FixturesTimelineRail({
                         const outcome = parseMatchOutcome(fx);
 
                         return (
-                          <div
-                            key={fx.id}
-                            className="grid grid-cols-[48px_1fr] items-center gap-2.5"
-                          >
-                            <span className="text-[11px] font-mono tabular-nums text-[#5A5D66] text-right pr-0.5">
-                              {shortDate}
-                            </span>
-
+                          <div key={fx.id} className="py-0.5 first:pt-0 last:pb-0">
                             <button
                               type="button"
                               onClick={() => onSelectMatch(fx.id)}
                               aria-pressed={isSelected}
                               aria-label={`Played result: ${fx.isHome ? "vs" : "at"} ${fx.opponent}, ${outcome.scoreDisplay}, ${outcome.label}`}
-                              className={`relative w-full text-left px-3 py-2.5 rounded-[18px] border transition-all cursor-pointer flex items-center gap-2.5 min-h-[54px] ${
+                              className={`w-full text-left px-2 py-2.5 rounded-xl transition-colors cursor-pointer grid grid-cols-[46px_1fr] items-center gap-2.5 ${
                                 isSelected
-                                  ? "bg-[#1D201B]/85 border-[#D2F865]/55 shadow-[0_6px_20px_-8px_rgba(210,248,101,0.22)]"
-                                  : "bg-white/[0.02] hover:bg-white/[0.045] border-white/[0.05] hover:border-white/[0.10]"
+                                  ? "bg-[#D2F865]/[0.08]"
+                                  : "hover:bg-white/[0.035]"
                               }`}
                             >
-                              {/* Semantic W / D / L Outcome Circle */}
-                              <div
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 font-mono text-[11px] font-bold ${outcome.badgeCls}`}
-                                title={outcome.label}
+                              <span
+                                className={`text-[11px] font-mono tabular-nums text-right ${
+                                  isSelected ? "text-[#D2F865]" : "text-[#6F727C]"
+                                }`}
                               >
-                                {outcome.code}
-                              </div>
+                                {shortDate}
+                              </span>
 
-                              <div className="min-w-0 flex-1">
-                                <div className="text-xs font-medium text-white/75 truncate">
-                                  {fx.isHome
-                                    ? `vs ${fx.opponent}`
-                                    : `@ ${fx.opponent}`}
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[10px] text-[#6F727C] truncate mt-0.5">
-                                  {fx.isEuropean && (
-                                    <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/20 border border-[#637AE0]/35 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
-                                      {fx.competitionCode || "EUR"}
-                                    </span>
-                                  )}
-                                  <span className="truncate">
-                                    {fx.isHome ? "Home" : "Away"} ·{" "}
-                                    {fx.competition || "Premier League"}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Right-aligned Final Score */}
-                              <div className="text-right shrink-0 pl-1">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                {/* Semantic W / D / L Outcome Indicator */}
                                 <div
-                                  className={`font-mono text-[13px] font-semibold tabular-nums leading-none ${outcome.scoreCls}`}
+                                  className={`w-7 h-7 rounded-full border flex items-center justify-center shrink-0 font-mono text-[10px] font-bold ${outcome.badgeCls}`}
+                                  title={outcome.label}
                                 >
-                                  {outcome.scoreDisplay}
+                                  {outcome.code}
                                 </div>
-                                <div className="text-[9px] font-mono uppercase tracking-wider text-[#5A5D66] mt-1">
-                                  FT
+
+                                <div className="min-w-0 flex-1">
+                                  <div
+                                    className={`text-[12.5px] font-medium truncate transition-colors ${
+                                      isSelected ? "text-white" : "text-white/80"
+                                    }`}
+                                  >
+                                    {fx.isHome
+                                      ? `vs ${fx.opponent}`
+                                      : `@ ${fx.opponent}`}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-[10.5px] text-[#6F727C] truncate mt-0.5">
+                                    {fx.isEuropean && (
+                                      <span className="font-mono text-[9.5px] font-semibold uppercase tracking-wider text-[#9BB0FF] shrink-0">
+                                        {fx.competitionCode || "EUR"} ·
+                                      </span>
+                                    )}
+                                    <span className="truncate">
+                                      {fx.isHome ? "Home" : "Away"} ·{" "}
+                                      {fx.competition || "Premier League"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Right-aligned Final Score */}
+                                <div className="text-right shrink-0 pl-1">
+                                  <div
+                                    className={`font-mono text-[13px] font-semibold tabular-nums leading-none ${outcome.scoreCls}`}
+                                  >
+                                    {outcome.scoreDisplay}
+                                  </div>
+                                  <div className="text-[9px] font-mono uppercase tracking-wider text-[#5A5D66] mt-1">
+                                    FT
+                                  </div>
                                 </div>
                               </div>
                             </button>
@@ -416,7 +423,7 @@ export default function FixturesTimelineRail({
 
                 {/* ═══ LIVE IN-PLAY FIXTURES (PL & European UCL/UEL/UECL) ═══ */}
                 {liveFixtures.length > 0 && (
-                  <section aria-label="Live matches in play" className="space-y-2">
+                  <section aria-label="Live matches in play" className="divide-y divide-white/[0.05]">
                     {liveFixtures.map((fx) => {
                       const isSelected = fx.id === selectedMatchId;
                       const scoreDisplay =
@@ -425,54 +432,53 @@ export default function FixturesTimelineRail({
                           : fx.statusText || "LIVE";
 
                       return (
-                        <div
-                          key={fx.id}
-                          className="grid grid-cols-[48px_1fr] items-center gap-2.5"
-                        >
-                          <span className="text-[11px] font-mono font-bold tabular-nums text-[#FF4D5A] text-right pr-0.5">
-                            {fx.displayClock || "LIVE"}
-                          </span>
-
+                        <div key={fx.id} className="py-0.5 first:pt-0 last:pb-0">
                           <button
                             type="button"
                             onClick={() => onSelectMatch(fx.id)}
                             aria-pressed={isSelected}
                             aria-label={`Live match: ${fx.isHome ? "vs" : "at"} ${fx.opponent}, ${scoreDisplay}, ${fx.displayClock || "Live"}`}
-                            className={`relative w-full text-left px-3 py-3 rounded-[18px] border transition-all cursor-pointer flex items-center gap-2.5 min-h-[58px] ${
+                            className={`w-full text-left px-2 py-2.5 rounded-xl transition-colors cursor-pointer grid grid-cols-[46px_1fr] items-center gap-2.5 ${
                               isSelected
-                                ? "bg-[#2A1418]/95 border-[#FF4D5A]/70 shadow-[0_10px_26px_-8px_rgba(255,38,54,0.35)]"
-                                : "bg-[#221216]/90 hover:bg-[#2A151A] border-[#FF2636]/35 hover:border-[#FF4D5A]/60"
+                                ? "bg-[#FF2636]/[0.12]"
+                                : "hover:bg-[#FF2636]/[0.06]"
                             }`}
                           >
-                            <div className="w-8 h-8 rounded-full border border-[#FF2636]/45 bg-[#FF2636]/20 flex items-center justify-center shrink-0">
-                              <span className="relative flex h-2.5 w-2.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
-                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF2636]" />
-                              </span>
-                            </div>
+                            <span className="text-[11px] font-mono font-bold tabular-nums text-[#FF4D5A] text-right">
+                              {fx.displayClock || "LIVE"}
+                            </span>
 
-                            <div className="min-w-0 flex-1">
-                              <div className="text-[12.5px] font-semibold text-white truncate">
-                                {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
-                              </div>
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#B7BAC3] truncate mt-0.5">
-                                {fx.isEuropean && (
-                                  <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/25 border border-[#637AE0]/45 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
-                                    {fx.competitionCode || "EUR"}
-                                  </span>
-                                )}
-                                <span className="truncate">
-                                  {fx.competition || "Premier League"}
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-7 h-7 rounded-full bg-[#FF2636]/18 flex items-center justify-center shrink-0">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF2636]" />
                                 </span>
                               </div>
-                            </div>
 
-                            <div className="text-right shrink-0 pl-1">
-                              <div className="font-mono text-[14px] font-bold tabular-nums leading-none text-white">
-                                {scoreDisplay}
+                              <div className="min-w-0 flex-1">
+                                <div className="text-[12.5px] font-semibold text-white truncate">
+                                  {fx.isHome ? `vs ${fx.opponent}` : `@ ${fx.opponent}`}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[10.5px] text-[#B7BAC3] truncate mt-0.5">
+                                  {fx.isEuropean && (
+                                    <span className="font-mono text-[9.5px] font-semibold uppercase tracking-wider text-[#A5B8FF] shrink-0">
+                                      {fx.competitionCode || "EUR"} ·
+                                    </span>
+                                  )}
+                                  <span className="truncate">
+                                    {fx.competition || "Premier League"}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4D5A] mt-1">
-                                LIVE
+
+                              <div className="text-right shrink-0 pl-1">
+                                <div className="font-mono text-[14px] font-bold tabular-nums leading-none text-white">
+                                  {scoreDisplay}
+                                </div>
+                                <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4D5A] mt-1">
+                                  LIVE
+                                </div>
                               </div>
                             </div>
                           </button>
@@ -482,9 +488,9 @@ export default function FixturesTimelineRail({
                   </section>
                 )}
 
-                {/* ═══ 2. UPCOMING FIXTURES (Bright Elevated Glass, Kick-off Time + Broadcast) ═══ */}
+                {/* ═══ 2. UPCOMING FIXTURES (Clean Cardless Schedule List) ═══ */}
                 {upcomingFixtures.length > 0 && (
-                  <section aria-label="Upcoming fixtures" className="space-y-2">
+                  <section aria-label="Upcoming fixtures" className="space-y-1.5">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D2F865]">
                         Upcoming · Scheduled
@@ -494,7 +500,7 @@ export default function FixturesTimelineRail({
                       </span>
                     </div>
 
-                    <div className="space-y-2.5">
+                    <div className="divide-y divide-white/[0.05]">
                       {upcomingFixtures.map((fx, idx) => {
                         const isSelected = fx.id === selectedMatchId;
                         const isNextUp = idx === 0;
@@ -513,77 +519,80 @@ export default function FixturesTimelineRail({
                           : "TBC";
 
                         return (
-                          <div
-                            key={fx.id}
-                            className="grid grid-cols-[48px_1fr] items-center gap-2.5"
-                          >
-                            <span
-                              className={`text-[11px] font-mono tabular-nums text-right pr-0.5 ${
-                                isNextUp
-                                  ? "text-[#D2F865] font-semibold"
-                                  : "text-[#B7BAC3]"
-                              }`}
-                            >
-                              {shortDate}
-                            </span>
-
+                          <div key={fx.id} className="py-0.5 first:pt-0 last:pb-0">
                             <button
                               type="button"
                               onClick={() => onSelectMatch(fx.id)}
                               aria-pressed={isSelected}
                               aria-label={`Upcoming fixture: ${fx.isHome ? "vs" : "at"} ${fx.opponent} on ${shortDate} at ${shortTime}`}
-                              className={`relative w-full text-left px-3 py-3 rounded-[18px] border transition-all cursor-pointer flex items-center gap-2.5 min-h-[58px] ${
+                              className={`w-full text-left px-2 py-2.5 rounded-xl transition-colors cursor-pointer grid grid-cols-[46px_1fr] items-center gap-2.5 ${
                                 isSelected
-                                  ? "bg-[#232722]/95 border-[#D2F865]/65 shadow-[0_10px_26px_-8px_rgba(0,0,0,0.65),0_0_0_1px_rgba(210,248,101,0.18)]"
-                                  : isNextUp
-                                  ? "bg-[#20232B]/95 hover:bg-[#262A34] border-[#D2F865]/28 hover:border-[#D2F865]/50 shadow-[0_8px_22px_-10px_rgba(0,0,0,0.65)]"
-                                  : "bg-[#1C1E26]/90 hover:bg-[#232631] border-white/[0.09] hover:border-white/[0.18] shadow-[0_6px_18px_-10px_rgba(0,0,0,0.55)]"
+                                  ? "bg-[#D2F865]/[0.08]"
+                                  : "hover:bg-white/[0.04]"
                               }`}
                             >
-                              {/* Semantic Upcoming Icon Well */}
-                              <div
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${
-                                  isNextUp
-                                    ? "bg-[#D2F865]/15 text-[#D2F865] border-[#D2F865]/35"
-                                    : "bg-[#637AE0]/16 text-[#9BB0FF] border-[#637AE0]/30"
+                              <span
+                                className={`text-[11px] font-mono tabular-nums text-right ${
+                                  isNextUp || isSelected
+                                    ? "text-[#D2F865] font-semibold"
+                                    : "text-[#9A9DA6]"
                                 }`}
                               >
-                                {isNextUp ? (
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                ) : (
-                                  <Clock className="w-3.5 h-3.5" />
-                                )}
-                              </div>
+                                {shortDate}
+                              </span>
 
-                              <div className="min-w-0 flex-1">
-                                <div className="text-[12.5px] font-semibold text-white truncate">
-                                  {fx.isHome
-                                    ? `vs ${fx.opponent}`
-                                    : `@ ${fx.opponent}`}
-                                </div>
-                                <div className="flex items-center gap-1.5 text-[11px] text-[#9A9DA6] truncate mt-0.5">
-                                  {fx.isEuropean && (
-                                    <span className="px-1.5 py-0.5 rounded bg-[#637AE0]/20 border border-[#637AE0]/35 text-[#A5B8FF] font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0">
-                                      {fx.competitionCode || "EUR"}
-                                    </span>
-                                  )}
-                                  <span className="truncate">
-                                    {fx.broadcast || fx.competition}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Right-aligned Kick-off Time */}
-                              <div className="text-right shrink-0 pl-1">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                {/* Semantic Upcoming Icon Indicator */}
                                 <div
-                                  className={`font-mono text-xs font-semibold tabular-nums leading-none ${
-                                    isNextUp ? "text-[#D2F865]" : "text-white"
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                                    isNextUp
+                                      ? "bg-[#D2F865]/15 text-[#D2F865]"
+                                      : "bg-white/[0.05] text-[#8A8D96]"
                                   }`}
                                 >
-                                  {shortTime}
+                                  {isNextUp ? (
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <Clock className="w-3.5 h-3.5" />
+                                  )}
                                 </div>
-                                <div className="text-[9px] font-mono uppercase tracking-wider text-[#8A8D96] mt-1">
-                                  {isNextUp ? "Next" : "UK"}
+
+                                <div className="min-w-0 flex-1">
+                                  <div
+                                    className={`text-[12.5px] truncate ${
+                                      isNextUp || isSelected
+                                        ? "font-semibold text-white"
+                                        : "font-medium text-white/90"
+                                    }`}
+                                  >
+                                    {fx.isHome
+                                      ? `vs ${fx.opponent}`
+                                      : `@ ${fx.opponent}`}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-[11px] text-[#8A8D96] truncate mt-0.5">
+                                    {fx.isEuropean && (
+                                      <span className="font-mono text-[9.5px] font-semibold uppercase tracking-wider text-[#A5B8FF] shrink-0">
+                                        {fx.competitionCode || "EUR"} ·
+                                      </span>
+                                    )}
+                                    <span className="truncate">
+                                      {fx.broadcast || fx.competition}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Right-aligned Kick-off Time */}
+                                <div className="text-right shrink-0 pl-1">
+                                  <div
+                                    className={`font-mono text-xs font-semibold tabular-nums leading-none ${
+                                      isNextUp ? "text-[#D2F865]" : "text-white"
+                                    }`}
+                                  >
+                                    {shortTime}
+                                  </div>
+                                  <div className="text-[9px] font-mono uppercase tracking-wider text-[#7D808B] mt-1">
+                                    {isNextUp ? "Next" : "UK"}
+                                  </div>
                                 </div>
                               </div>
                             </button>
@@ -598,60 +607,67 @@ export default function FixturesTimelineRail({
           </div>
         ) : (
           /* ─── Matchday T-75 Itinerary Mode ─── */
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-2.5">
             <div className="text-[11px] text-[#8A8D96] pb-1">
               {selectedClub?.stadium} Matchday Protocol · Select a stage to
               inspect
             </div>
 
-            {MATCHDAY_STEPS.map((step) => {
-              const Icon = step.icon;
-              const isCurrent = matchdayPhase === step.id;
+            <div className="divide-y divide-white/[0.05]">
+              {MATCHDAY_STEPS.map((step) => {
+                const Icon = step.icon;
+                const isCurrent = matchdayPhase === step.id;
 
-              return (
-                <div key={step.id} className="space-y-2">
-                  {isCurrent && (
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#D2F865] text-[#0E100C] text-[10px] font-semibold font-mono tabular-nums">
-                        {step.time}
-                      </span>
-                      <div className="h-[1.5px] flex-1 bg-gradient-to-r from-[#D2F865] via-[#D2F865]/35 to-transparent" />
-                    </div>
-                  )}
+                return (
+                  <div key={step.id} className="py-1 first:pt-0 last:pb-0">
+                    {isCurrent && (
+                      <div className="flex items-center gap-2 pb-1.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#D2F865] text-[#0E100C] text-[10px] font-semibold font-mono tabular-nums">
+                          {step.time}
+                        </span>
+                        <div className="h-[1.5px] flex-1 bg-gradient-to-r from-[#D2F865] via-[#D2F865]/35 to-transparent" />
+                      </div>
+                    )}
 
-                  <div className="grid grid-cols-[44px_1fr] items-center gap-2.5">
-                    <span className="text-[11px] font-mono tabular-nums text-[#6F727C] text-right">
-                      {step.time}
-                    </span>
                     <button
                       type="button"
                       onClick={() =>
                         onSelectPhasePreview && onSelectPhasePreview(step.id)
                       }
-                      className={`w-full text-left p-3 rounded-[18px] border transition-all cursor-pointer flex items-center gap-3 ${
+                      className={`w-full text-left px-2 py-2.5 rounded-xl transition-colors cursor-pointer grid grid-cols-[44px_1fr] items-center gap-2.5 ${
                         isCurrent
-                          ? "bg-[#23262E]/90 border-[#D2F865]/45"
-                          : "bg-[#1A1B20]/75 hover:bg-[#22242C]/85 border-white/[0.06]"
+                          ? "bg-[#D2F865]/[0.08]"
+                          : "hover:bg-white/[0.035]"
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${step.theme}`}
+                      <span
+                        className={`text-[11px] font-mono tabular-nums text-right ${
+                          isCurrent ? "text-[#D2F865] font-semibold" : "text-[#6F727C]"
+                        }`}
                       >
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs font-medium text-white truncate">
-                          {step.title}
+                        {step.time}
+                      </span>
+
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-7 h-7 rounded-full border flex items-center justify-center shrink-0 ${step.theme}`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
                         </div>
-                        <div className="text-[11px] text-[#8A8D96] truncate mt-0.5">
-                          {step.detail}
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-white truncate">
+                            {step.title}
+                          </div>
+                          <div className="text-[11px] text-[#8A8D96] truncate mt-0.5">
+                            {step.detail}
+                          </div>
                         </div>
                       </div>
                     </button>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
         </SlidingTabPanel>

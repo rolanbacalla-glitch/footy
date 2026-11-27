@@ -94,82 +94,83 @@ export default function FixturesCalendarModal({
         </div>
 
         {/* Fixtures List */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-2.5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 py-2">
           {filteredFixtures.length === 0 ? (
             <div className="py-10 text-center text-sm text-[#8A8D96]">
               No fixtures found for this filter.
             </div>
           ) : (
-            filteredFixtures.map((fx) => {
-              const dateObj = new Date(fx.date);
-              const dateStr = dateObj.toLocaleDateString("en-GB", {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-              });
-              const timeStr = dateObj.toLocaleTimeString("en-GB", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+            <div className="divide-y divide-white/[0.06]">
+              {filteredFixtures.map((fx) => {
+                const dateObj = new Date(fx.date);
+                const dateStr = dateObj.toLocaleDateString("en-GB", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                });
+                const timeStr = dateObj.toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
 
-              return (
-                <div
-                  key={fx.id}
-                  className="glass-tile p-3.5 flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-[10px] font-mono font-semibold ${
-                          fx.isHome ? "text-[#D2F865]" : "text-[#8BA3F5]"
-                        }`}
-                      >
-                        {fx.isHome ? "HOME" : "AWAY"}
-                      </span>
-                      <span className="text-sm font-medium text-white truncate">
-                        {fx.isHome
-                          ? `${clubName} vs ${fx.opponent}`
-                          : `${fx.opponent} vs ${clubName}`}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-xs text-[#8A8D96]">
-                      <span className="flex items-center gap-1 font-mono tabular-nums">
-                        <Clock className="w-3 h-3" />
-                        {dateStr} · {timeStr}
-                      </span>
-                      <span aria-hidden="true">·</span>
-                      <span className="flex items-center gap-1 truncate">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        {fx.venue}
-                      </span>
-                      {fx.broadcast && (
-                        <>
-                          <span aria-hidden="true">·</span>
-                          <span className="flex items-center gap-1">
-                            <Tv className="w-3 h-3 shrink-0" />
-                            {fx.broadcast}
+                return (
+                  <div key={fx.id} className="py-1 first:pt-1 last:pb-1">
+                    <div className="py-2.5 px-2 -mx-2 rounded-xl hover:bg-white/[0.035] transition-colors flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[10px] font-mono font-semibold ${
+                              fx.isHome ? "text-[#D2F865]" : "text-[#8BA3F5]"
+                            }`}
+                          >
+                            {fx.isHome ? "HOME" : "AWAY"}
                           </span>
-                        </>
-                      )}
+                          <span className="text-sm font-medium text-white truncate">
+                            {fx.isHome
+                              ? `${clubName} vs ${fx.opponent}`
+                              : `${fx.opponent} vs ${clubName}`}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 text-xs text-[#8A8D96]">
+                          <span className="flex items-center gap-1 font-mono tabular-nums">
+                            <Clock className="w-3 h-3" />
+                            {dateStr} · {timeStr}
+                          </span>
+                          <span aria-hidden="true">·</span>
+                          <span className="flex items-center gap-1 truncate">
+                            <MapPin className="w-3 h-3 shrink-0" />
+                            {fx.venue}
+                          </span>
+                          {fx.broadcast && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <span className="flex items-center gap-1">
+                                <Tv className="w-3 h-3 shrink-0" />
+                                {fx.broadcast}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onSelectFixture) onSelectFixture(fx.id);
+                          onClose();
+                        }}
+                        className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-[#D2F865] text-white hover:text-[#0E100C] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                        title="Load into Match Centre"
+                        aria-label={`Load ${fx.opponent} fixture into Match Centre`}
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onSelectFixture) onSelectFixture(fx.id);
-                      onClose();
-                    }}
-                    className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-[#D2F865] text-white hover:text-[#0E100C] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                    title="Load into Match Centre"
-                    aria-label={`Load ${fx.opponent} fixture into Match Centre`}
-                  >
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
 
