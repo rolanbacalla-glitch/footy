@@ -72,20 +72,68 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
     uniqueAthletes.push(a);
   }
 
-  // Bucket unique players by primary tactical line
+  // Bucket unique players by precise tactical line & position
   const gks = [];
-  const defs = [];
+  const rightBacks = [];
+  const leftBacks = [];
+  const centerBacks = [];
   const mids = [];
   const fwds = [];
 
   for (const a of uniqueAthletes) {
     const posStr = (a.posName || a.position || "").toLowerCase();
-    if (posStr.includes("goal")) gks.push(a);
-    else if (posStr.includes("def") || posStr.includes("back")) defs.push(a);
-    else if (
+    const nameStr = (a.name || "").toLowerCase();
+
+    if (posStr.includes("goal")) {
+      gks.push(a);
+    } else if (
+      posStr.includes("right back") ||
+      posStr.includes("right wing back") ||
+      posStr === "rb" ||
+      posStr === "rwb"
+    ) {
+      rightBacks.push(a);
+    } else if (
+      posStr.includes("left back") ||
+      posStr.includes("left wing back") ||
+      posStr === "lb" ||
+      posStr === "lwb"
+    ) {
+      leftBacks.push(a);
+    } else if (
+      posStr.includes("centre-back") ||
+      posStr.includes("center-back") ||
+      posStr.includes("center back") ||
+      posStr.includes("centre back") ||
+      posStr === "cb" ||
+      posStr === "lcb" ||
+      posStr === "rcb" ||
+      nameStr.includes("van dijk") ||
+      nameStr.includes("konate") ||
+      nameStr.includes("quansah") ||
+      nameStr.includes("jacquet") ||
+      nameStr.includes("saliba") ||
+      nameStr.includes("gabriel") ||
+      nameStr.includes("stones") ||
+      nameStr.includes("dias")
+    ) {
+      centerBacks.push(a);
+    } else if (
+      posStr.includes("def") ||
+      posStr.includes("back")
+    ) {
+      if (posStr.includes("right")) rightBacks.push(a);
+      else if (posStr.includes("left")) leftBacks.push(a);
+      else centerBacks.push(a);
+    } else if (
       posStr.includes("forward") ||
       posStr.includes("striker") ||
-      posStr.includes("wing")
+      posStr.includes("wing") ||
+      posStr.includes("attacker") ||
+      posStr === "st" ||
+      posStr === "lw" ||
+      posStr === "rw" ||
+      posStr === "cf"
     ) {
       fwds.push(a);
     } else {
@@ -109,35 +157,32 @@ function buildStartingXIFromAthletes(athletes = [], clubInfo) {
   const ordered = new Array(11).fill(null);
 
   // 0: GK
-  ordered[0] = take(gks);
+  ordered[0] = take(gks) || uniqueAthletes[0];
 
-  // 1-4: Back four (prefer natural side for full-backs)
-  ordered[1] = take(defs, (a) => posText(a).includes("right")) || take(defs);
-  ordered[4] = take(defs, (a) => posText(a).includes("left")) || take(defs);
-  ordered[2] = take(defs);
-  ordered[3] = take(defs);
+  // 1: RB
+  ordered[1] = take(rightBacks) || take(mids) || take(centerBacks);
 
-  // 8-10: Front three (prefer central striker and natural wingers)
-  ordered[9] =
-    take(fwds, (a) => !posText(a).includes("wing")) || take(fwds);
-  ordered[8] =
-    take(fwds, (a) => posText(a).includes("right")) ||
-    take(mids, (a) => posText(a).includes("right")) ||
-    take(fwds);
-  ordered[10] =
-    take(fwds, (a) => posText(a).includes("left")) ||
-    take(mids, (a) => posText(a).includes("left")) ||
-    take(fwds);
+  // 4: LB
+  ordered[4] = take(leftBacks) || take(mids) || take(centerBacks);
 
-  // 5-7: Midfield trio (prefer attacking mid at CAM, defensive/central mids in pivot)
-  ordered[7] =
-    take(mids, (a) => posText(a).includes("attack")) || take(mids);
-  ordered[5] =
-    take(mids, (a) => posText(a).includes("defens")) || take(mids);
+  // 2 & 3: RCB & LCB (Centre Backs)
+  ordered[2] = take(centerBacks) || take(rightBacks) || take(mids);
+  ordered[3] = take(centerBacks) || take(leftBacks) || take(mids);
+
+  // 8 & 10: RW & LW (Wingers)
+  ordered[8] = take(fwds, (a) => posText(a).includes("right") || posText(a).includes("rw")) || take(fwds);
+  ordered[10] = take(fwds, (a) => posText(a).includes("left") || posText(a).includes("lw")) || take(fwds);
+
+  // 9: ST (Striker)
+  ordered[9] = take(fwds, (a) => posText(a).includes("striker") || posText(a).includes("st") || posText(a).includes("cf")) || take(fwds);
+
+  // 5, 6, 7: Midfielders (CAM, RDM, LDM)
+  ordered[7] = take(mids, (a) => posText(a).includes("attack") || posText(a).includes("cam")) || take(mids);
+  ordered[5] = take(mids, (a) => posText(a).includes("defens") || posText(a).includes("dm") || posText(a).includes("pivot")) || take(mids);
   ordered[6] = take(mids);
 
   // Fill any remaining unfilled slots strictly from unused athletes
-  const backfillPools = [mids, fwds, defs, gks, uniqueAthletes];
+  const backfillPools = [mids, fwds, centerBacks, rightBacks, leftBacks, gks, uniqueAthletes];
   for (let i = 0; i < 11; i++) {
     if (!ordered[i]) {
       for (const pool of backfillPools) {

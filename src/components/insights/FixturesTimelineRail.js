@@ -542,10 +542,10 @@ export default function FixturesTimelineRail({
                               onClick={() => onSelectMatch(fx.id)}
                               aria-pressed={isSelected}
                               aria-label={`Upcoming fixture: ${fx.isHome ? "vs" : "at"} ${fx.opponent} on ${shortDate} at ${shortTime}`}
-                              className={`w-full text-left px-2 py-2.5 rounded-xl transition-colors cursor-pointer grid grid-cols-[46px_1fr] items-center gap-2.5 ${
+                              className={`w-full text-left px-1.5 py-2 transition-colors cursor-pointer grid grid-cols-[46px_1fr] items-center gap-2.5 ${
                                 isSelected
-                                  ? "bg-[#D2F865]/[0.08]"
-                                  : "hover:bg-white/[0.04]"
+                                  ? "text-[#D2F865]"
+                                  : "hover:text-white"
                               }`}
                             >
                               <span

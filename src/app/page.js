@@ -128,34 +128,41 @@ export default function FootballInsightsDashboard() {
     }
   };
 
-  // Fetch club schedule from ESPN live endpoint
+  // Fetch club schedule from ESPN live endpoint with automatic 30-second polling interval
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/schedule?teamId=${selectedClubId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled && data && data.isLive) {
-          const live = data.live || [];
-          const up = data.upcoming || [];
-          const rec = data.recent || [];
-          setLiveSchedule({ live, upcoming: up, recent: rec });
-          if (live.length > 0) {
-            setSelectedMatchId((prev) =>
-              prev && prev.startsWith("espn-") ? prev : live[0].id
-            );
-          } else {
-            const firstMatch = up[0] || rec[0];
-            if (firstMatch) {
+    const fetchSchedule = () => {
+      fetch(`/api/schedule?teamId=${selectedClubId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!cancelled && data && data.isLive) {
+            const live = data.live || [];
+            const up = data.upcoming || [];
+            const rec = data.recent || [];
+            setLiveSchedule({ live, upcoming: up, recent: rec });
+            if (live.length > 0) {
               setSelectedMatchId((prev) =>
-                prev && prev.startsWith("espn-") ? prev : firstMatch.id
+                prev && prev.startsWith("espn-") ? prev : live[0].id
               );
+            } else {
+              const firstMatch = up[0] || rec[0];
+              if (firstMatch) {
+                setSelectedMatchId((prev) =>
+                  prev && prev.startsWith("espn-") ? prev : firstMatch.id
+                );
+              }
             }
           }
-        }
-      })
-      .catch((err) => console.error("Error fetching live schedule:", err));
+        })
+        .catch((err) => console.error("Error fetching live schedule:", err));
+    };
+
+    fetchSchedule();
+    const pollInterval = setInterval(fetchSchedule, 30000);
+
     return () => {
       cancelled = true;
+      clearInterval(pollInterval);
     };
   }, [selectedClubId]);
 
