@@ -1,7 +1,7 @@
 /**
  * Authoritative UEFA European Club Competitions Registry (UCL, UEL, UECL)
  * Auto-synced & verified against live ESPN competition feeds.
- * Last verified: 2026-11-26
+ * Last verified: 2026-11-27
  *
  * Tier-2 lookup used when Premier League clubs face UEFA Champions League,
  * Europa League, or Conference League opponents.
