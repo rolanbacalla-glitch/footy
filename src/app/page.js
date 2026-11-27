@@ -98,7 +98,11 @@ export default function FootballInsightsDashboard() {
   const [selectedMatchId, setSelectedMatchId] = useState(MATCH_LIBRARY[0].id);
   const [overlayMode, setOverlayMode] = useState("pass"); // "pass" | "heat" | "shots" | "hub"
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [countdownSeconds, setCountdownSeconds] = useState(16155);
+  const [countdownSeconds, setCountdownSeconds] = useState(() => {
+    const defaultIso = "2026-11-29T12:00:00Z";
+    const ts = new Date(defaultIso).getTime();
+    return Math.max(0, Math.floor((ts - Date.now()) / 1000));
+  });
   const [previewOffset, setPreviewOffset] = useState(null);
   const [realCountdown, setRealCountdown] = useState(null);
   const [liveSchedule, setLiveSchedule] = useState({ live: [], upcoming: [], recent: [] });
@@ -479,13 +483,7 @@ export default function FootballInsightsDashboard() {
       ? liveFactData.nextFixture.date
       : null);
 
-  // Sync dashboard countdown with real matchday kick-off timestamp
-  useEffect(() => {
-    if (!matchdayKickoffIso || previewOffset !== null) return;
-    const ts = new Date(matchdayKickoffIso).getTime();
-    if (Number.isNaN(ts)) return;
-    setCountdownSeconds(Math.max(0, Math.floor((ts - Date.now()) / 1000)));
-  }, [matchdayKickoffIso, previewOffset]);
+
 
   const lineupStatus =
     activeMatch?.type === "MATCHDAY" || activeMatch?.isMatchday || isMatchdayToday

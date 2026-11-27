@@ -150,11 +150,12 @@ export default function ClubBadge({
     secondaryColor,
     logoUrl
   );
+  const [prevLogo, setPrevLogo] = useState(officialLogo);
   const [imgFailed, setImgFailed] = useState(false);
-
-  useEffect(() => {
+  if (prevLogo !== officialLogo) {
+    setPrevLogo(officialLogo);
     setImgFailed(false);
-  }, [officialLogo]);
+  }
 
   const dims = SIZE_MAP[size] || SIZE_MAP.md;
 

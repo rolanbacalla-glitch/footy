@@ -135,14 +135,11 @@ export default function LiveScoreboard({
   initialLiveFactData = null,
 }) {
   const [liveFactData, setLiveFactData] = useState(initialLiveFactData);
-  const [previewOffset, setPreviewOffset] = useState(null);
-  const [expandedStats, setExpandedStats] = useState(false);
-  const [showLineups, setShowLineups] = useState(false);
-  const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
-
-  useEffect(() => {
-    if (initialLiveFactData) setLiveFactData(initialLiveFactData);
-  }, [initialLiveFactData]);
+  const [prevInitial, setPrevInitial] = useState(initialLiveFactData);
+  if (initialLiveFactData !== prevInitial) {
+    setPrevInitial(initialLiveFactData);
+    setLiveFactData(initialLiveFactData);
+  }
 
   const club =
     selectedClub ||
@@ -184,7 +181,7 @@ export default function LiveScoreboard({
     return computed !== null ? computed : 0;
   });
 
-  const checkLiveFacts = useCallback(async () => {
+  const checkLiveFacts = async () => {
     if (typeof document !== "undefined" && document.hidden) return;
     const teamId = club?.id || activeMatch?.teamId || "364";
     try {
@@ -196,12 +193,10 @@ export default function LiveScoreboard({
     } catch {
       // Silent fallback
     }
-  }, [club?.id, activeMatch?.teamId]);
+  };
 
   // Adaptive Live Fact-Checking Polling scoped to the selected club
   useEffect(() => {
-    checkLiveFacts();
-
     const pollIntervalMs = isLive ? 15000 : isMatchdayPreMatch ? 45000 : 300000;
     const interval = setInterval(checkLiveFacts, pollIntervalMs);
 
@@ -218,7 +213,7 @@ export default function LiveScoreboard({
         document.removeEventListener("visibilitychange", handleVisibilityChange);
       }
     };
-  }, [isLive, isMatchdayPreMatch, checkLiveFacts]);
+  }, [checkLiveFacts, isLive, isMatchdayPreMatch]);
 
   // Real-time kick-off countdown anchored to ISO timestamp (zero drift)
   useEffect(() => {
@@ -451,9 +446,14 @@ export default function LiveScoreboard({
       ];
 
   // Auto-cycle through timeline events
-  useEffect(() => {
+  const [prevIncidentsKey, setPrevIncidentsKey] = useState(
+    `${incidents.length}-${isLive}-${isMatchdayPreMatch}`
+  );
+  const incidentsKey = `${incidents.length}-${isLive}-${isMatchdayPreMatch}`;
+  if (incidentsKey !== prevIncidentsKey) {
+    setPrevIncidentsKey(incidentsKey);
     setActiveIncidentIndex(0);
-  }, [incidents.length, isLive, isMatchdayPreMatch]);
+  }
 
   useEffect(() => {
     if (incidents.length <= 1) return;

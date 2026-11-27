@@ -56,57 +56,132 @@ function mapPositionShort(posName = "", fallback = "CM") {
 }
 
 function buildStartingXIFromAthletes(athletes = [], clubInfo) {
-  // Sort or bucket by GK, DEF, MID, FWD so each slot gets the right real player
+  // Deduplicate athletes by ID and normalized display name so the same player can never appear twice
+  const seenIds = new Set();
+  const seenNames = new Set();
+  const uniqueAthletes = [];
+
+  for (const a of athletes) {
+    if (!a) continue;
+    const idKey = a.id !== undefined && a.id !== null ? String(a.id).trim() : "";
+    const nameKey = String(a.name || "").trim().toLowerCase();
+    if (idKey && seenIds.has(idKey)) continue;
+    if (nameKey && seenNames.has(nameKey)) continue;
+    if (idKey) seenIds.add(idKey);
+    if (nameKey) seenNames.add(nameKey);
+    uniqueAthletes.push(a);
+  }
+
+  // Bucket unique players by primary tactical line
   const gks = [];
   const defs = [];
   const mids = [];
   const fwds = [];
 
-  for (const a of athletes) {
+  for (const a of uniqueAthletes) {
     const posStr = (a.posName || a.position || "").toLowerCase();
     if (posStr.includes("goal")) gks.push(a);
     else if (posStr.includes("def") || posStr.includes("back")) defs.push(a);
-    else if (posStr.includes("forward") || posStr.includes("striker")) fwds.push(a);
-    else mids.push(a);
-  }
-
-  const ordered = [
-    gks[0],
-    defs[0],
-    defs[1],
-    defs[2],
-    defs[3],
-    mids[0],
-    mids[1],
-    mids[2] || fwds[1],
-    fwds[2] || mids[3] || defs[4],
-    fwds[0] || mids[4],
-    fwds[1] || mids[2] || defs[5],
-  ];
-
-  // Fill any missing slots from remaining athletes
-  const usedIds = new Set(ordered.filter(Boolean).map((x) => x.id));
-  const remaining = athletes.filter((x) => !usedIds.has(x.id));
-  for (let i = 0; i < 11; i++) {
-    if (!ordered[i] && remaining.length > 0) {
-      ordered[i] = remaining.shift();
+    else if (
+      posStr.includes("forward") ||
+      posStr.includes("striker") ||
+      posStr.includes("wing")
+    ) {
+      fwds.push(a);
+    } else {
+      mids.push(a);
     }
   }
 
+  const used = new Set();
+  const take = (pool, predicate = null) => {
+    for (const candidate of pool) {
+      if (used.has(candidate)) continue;
+      if (!predicate || predicate(candidate)) {
+        used.add(candidate);
+        return candidate;
+      }
+    }
+    return null;
+  };
+
+  const posText = (a) => (a?.posName || a?.position || "").toLowerCase();
+  const ordered = new Array(11).fill(null);
+
+  // 0: GK
+  ordered[0] = take(gks);
+
+  // 1-4: Back four (prefer natural side for full-backs)
+  ordered[1] = take(defs, (a) => posText(a).includes("right")) || take(defs);
+  ordered[4] = take(defs, (a) => posText(a).includes("left")) || take(defs);
+  ordered[2] = take(defs);
+  ordered[3] = take(defs);
+
+  // 8-10: Front three (prefer central striker and natural wingers)
+  ordered[9] =
+    take(fwds, (a) => !posText(a).includes("wing")) || take(fwds);
+  ordered[8] =
+    take(fwds, (a) => posText(a).includes("right")) ||
+    take(mids, (a) => posText(a).includes("right")) ||
+    take(fwds);
+  ordered[10] =
+    take(fwds, (a) => posText(a).includes("left")) ||
+    take(mids, (a) => posText(a).includes("left")) ||
+    take(fwds);
+
+  // 5-7: Midfield trio (prefer attacking mid at CAM, defensive/central mids in pivot)
+  ordered[7] =
+    take(mids, (a) => posText(a).includes("attack")) || take(mids);
+  ordered[5] =
+    take(mids, (a) => posText(a).includes("defens")) || take(mids);
+  ordered[6] = take(mids);
+
+  // Fill any remaining unfilled slots strictly from unused athletes
+  const backfillPools = [mids, fwds, defs, gks, uniqueAthletes];
+  for (let i = 0; i < 11; i++) {
+    if (!ordered[i]) {
+      for (const pool of backfillPools) {
+        const picked = take(pool);
+        if (picked) {
+          ordered[i] = picked;
+          break;
+        }
+      }
+    }
+  }
+
+  const assignedNames = new Set(
+    ordered.filter(Boolean).map((a) => String(a.name || "").trim().toLowerCase())
+  );
+
   return FORMATION_COORDS.map((slot, idx) => {
+    const captainUnused =
+      idx === 3 &&
+      clubInfo.captain &&
+      !assignedNames.has(String(clubInfo.captain).trim().toLowerCase());
+
     const athlete = ordered[idx] || {
       id: `${clubInfo.shortName.toLowerCase()}-${idx + 1}`,
-      name: idx === 3 ? clubInfo.captain : `${clubInfo.shortName} Starter #${idx + 1}`,
+      name: captainUnused
+        ? clubInfo.captain
+        : `${clubInfo.shortName} Starter #${idx + 1}`,
       jersey: idx + 1,
       posName: slot.defaultPos,
     };
 
-    const baseTouches = idx === 0 ? 44 : idx <= 4 ? 76 - idx * 3 : idx <= 7 ? 72 - (idx - 5) * 4 : 54 - (idx - 8) * 3;
+    const baseTouches =
+      idx === 0
+        ? 44
+        : idx <= 4
+        ? 76 - idx * 3
+        : idx <= 7
+        ? 72 - (idx - 5) * 4
+        : 54 - (idx - 8) * 3;
     const baseObv = Number((0.28 + ((11 - idx) % 5) * 0.09).toFixed(2));
     const baseComp = idx === 0 ? 89 : idx <= 4 ? 92 : idx <= 7 ? 88 : 81;
 
     return {
-      id: String(athlete.id),
+      id: String(athlete.id || `${clubInfo.shortName.toLowerCase()}-${idx + 1}`),
       name: athlete.name,
       number: parseInt(athlete.jersey, 10) || idx + 1,
       pos: mapPositionShort(athlete.posName, slot.defaultPos),
@@ -284,11 +359,12 @@ export async function GET(request) {
       posName: a.position?.displayName || a.position?.name || "Midfielder",
     }));
 
-    if (selectedStarters.length < 11 && fullSquad.length > 0) {
-      selectedStarters = fullSquad;
-    }
+    const starterPool =
+      selectedStarters.length >= 11
+        ? selectedStarters
+        : [...selectedStarters, ...fullSquad];
 
-    const startingXI = buildStartingXIFromAthletes(selectedStarters, clubInfo);
+    const startingXI = buildStartingXIFromAthletes(starterPool, clubInfo);
     const passLinks = buildPassLinks(startingXI);
 
     // Extract real match statistics & scoring details when viewing a completed or live match

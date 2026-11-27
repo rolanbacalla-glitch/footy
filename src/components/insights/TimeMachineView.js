@@ -303,7 +303,6 @@ export default function TimeMachineView({
 
     return HISTORIC_MATCHES;
   }, [
-    isLfc,
     recentMatches,
     activeMatch?.startingXI,
     clubName,

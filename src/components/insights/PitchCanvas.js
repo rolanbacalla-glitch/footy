@@ -65,7 +65,21 @@ export default function PitchCanvas({
 
   const activePlayerId = selectedPlayer?.id || hoveredPlayer?.id || null;
 
-  const startingXI = activeMatch?.startingXI || [];
+  const rawStartingXI = activeMatch?.startingXI || [];
+  const startingXI = (() => {
+    const seenIds = new Set();
+    const seenNames = new Set();
+    return rawStartingXI.filter((p) => {
+      if (!p) return false;
+      const idKey = p.id !== undefined && p.id !== null ? String(p.id).trim() : "";
+      const nameKey = String(p.name || "").trim().toLowerCase();
+      if (idKey && seenIds.has(idKey)) return false;
+      if (nameKey && seenNames.has(nameKey)) return false;
+      if (idKey) seenIds.add(idKey);
+      if (nameKey) seenNames.add(nameKey);
+      return true;
+    });
+  })();
   const passLinks = activeMatch?.passLinks || [];
   const shots = activeMatch?.shots || [];
   const activeShot = selectedShot || shots[0] || null;
