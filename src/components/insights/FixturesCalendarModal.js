@@ -113,13 +113,59 @@ export default function FixturesCalendarModal({
                   minute: "2-digit",
                 });
 
+                const isLive = Boolean(fx.isLive);
+                const isFinished =
+                  !isLive &&
+                  (fx.status === "FT" ||
+                    fx.completed ||
+                    (fx.homeScore !== null &&
+                      fx.homeScore !== undefined &&
+                      fx.awayScore !== null &&
+                      fx.awayScore !== undefined));
+
                 return (
                   <div key={fx.id} className="py-1 first:pt-1 last:pb-1">
                     <div className="py-2.5 px-2 -mx-2 rounded-xl hover:bg-white/[0.035] transition-colors flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-[10px] font-mono font-semibold ${
+                            className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider shrink-0 ${
+                              isLive
+                                ? "text-[#FF4D5A] font-bold"
+                                : isFinished
+                                ? "text-[#6F727C]"
+                                : "text-[#D2F865]"
+                            }`}
+                          >
+                            {isLive ? (
+                              <span
+                                className="relative flex h-1.5 w-1.5 shrink-0"
+                                aria-hidden="true"
+                              >
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF2636]" />
+                              </span>
+                            ) : (
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                  isFinished ? "bg-[#6F727C]" : "bg-[#D2F865]"
+                                }`}
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span>
+                              {isLive
+                                ? "Live"
+                                : isFinished
+                                ? "Finished"
+                                : "Upcoming"}
+                            </span>
+                          </span>
+                          <span className="text-white/20" aria-hidden="true">
+                            ·
+                          </span>
+                          <span
+                            className={`text-[10px] font-mono font-semibold shrink-0 ${
                               fx.isHome ? "text-[#D2F865]" : "text-[#8BA3F5]"
                             }`}
                           >

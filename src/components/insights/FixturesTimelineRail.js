@@ -377,15 +377,22 @@ export default function FixturesTimelineRail({
                                   </div>
                                 </div>
 
-                                {/* Right-aligned Final Score */}
-                                <div className="text-right shrink-0 pl-1">
+                                {/* Right-aligned Final Score & Finished Status Indicator */}
+                                <div
+                                  className="text-right shrink-0 pl-1"
+                                  title="Finished"
+                                >
                                   <div
                                     className={`font-mono text-[13px] font-semibold tabular-nums leading-none ${outcome.scoreCls}`}
                                   >
                                     {outcome.scoreDisplay}
                                   </div>
-                                  <div className="text-[9px] font-mono uppercase tracking-wider text-[#5A5D66] mt-1">
-                                    FT
+                                  <div className="inline-flex items-center justify-end gap-1 text-[9px] font-mono uppercase tracking-wider text-[#6F727C] mt-1">
+                                    <span
+                                      className="w-1.5 h-1.5 rounded-full bg-[#6F727C] shrink-0"
+                                      aria-hidden="true"
+                                    />
+                                    <span>FT</span>
                                   </div>
                                 </div>
                               </div>
@@ -472,12 +479,22 @@ export default function FixturesTimelineRail({
                                 </div>
                               </div>
 
-                              <div className="text-right shrink-0 pl-1">
+                              <div
+                                className="text-right shrink-0 pl-1"
+                                title="Live in play"
+                              >
                                 <div className="font-mono text-[14px] font-bold tabular-nums leading-none text-white">
                                   {scoreDisplay}
                                 </div>
-                                <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4D5A] mt-1">
-                                  LIVE
+                                <div className="inline-flex items-center justify-end gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-[#FF4D5A] mt-1">
+                                  <span
+                                    className="relative flex h-1.5 w-1.5 shrink-0"
+                                    aria-hidden="true"
+                                  >
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF2636]" />
+                                  </span>
+                                  <span>LIVE</span>
                                 </div>
                               </div>
                             </div>
@@ -582,7 +599,11 @@ export default function FixturesTimelineRail({
                                 </div>
 
                                 {/* Right-aligned Kick-off Time */}
-                                <div className="text-right shrink-0 pl-1">
+                                {/* Right-aligned Kick-off Time & Upcoming Status Indicator */}
+                                <div
+                                  className="text-right shrink-0 pl-1"
+                                  title={isNextUp ? "Upcoming — Next match" : "Upcoming"}
+                                >
                                   <div
                                     className={`font-mono text-xs font-semibold tabular-nums leading-none ${
                                       isNextUp ? "text-[#D2F865]" : "text-white"
@@ -590,8 +611,20 @@ export default function FixturesTimelineRail({
                                   >
                                     {shortTime}
                                   </div>
-                                  <div className="text-[9px] font-mono uppercase tracking-wider text-[#7D808B] mt-1">
-                                    {isNextUp ? "Next" : "UK"}
+                                  <div
+                                    className={`inline-flex items-center justify-end gap-1 text-[9px] font-mono uppercase tracking-wider mt-1 ${
+                                      isNextUp ? "text-[#D2F865]" : "text-[#8A8D96]"
+                                    }`}
+                                  >
+                                    <span
+                                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                        isNextUp
+                                          ? "bg-[#D2F865] shadow-[0_0_8px_rgba(210,248,101,0.7)]"
+                                          : "bg-[#D2F865]/75"
+                                      }`}
+                                      aria-hidden="true"
+                                    />
+                                    <span>{isNextUp ? "Next" : "Upcoming"}</span>
                                   </div>
                                 </div>
                               </div>
@@ -614,9 +647,13 @@ export default function FixturesTimelineRail({
             </div>
 
             <div className="divide-y divide-white/[0.05]">
-              {MATCHDAY_STEPS.map((step) => {
+              {MATCHDAY_STEPS.map((step, idx) => {
                 const Icon = step.icon;
+                const activeIdx = MATCHDAY_STEPS.findIndex(
+                  (s) => s.id === matchdayPhase
+                );
                 const isCurrent = matchdayPhase === step.id;
+                const isDone = activeIdx >= 0 && idx < activeIdx;
 
                 return (
                   <div key={step.id} className="py-1 first:pt-0 last:pb-0">
@@ -654,13 +691,35 @@ export default function FixturesTimelineRail({
                         >
                           <Icon className="w-3.5 h-3.5" />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <div className="text-xs font-medium text-white truncate">
                             {step.title}
                           </div>
                           <div className="text-[11px] text-[#8A8D96] truncate mt-0.5">
                             {step.detail}
                           </div>
+                        </div>
+
+                        <div
+                          className={`inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider shrink-0 pl-1 ${
+                            isCurrent
+                              ? "text-[#D2F865]"
+                              : isDone
+                              ? "text-[#6F727C]"
+                              : "text-[#8A8D96]"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              isCurrent
+                                ? "bg-[#D2F865] shadow-[0_0_8px_rgba(210,248,101,0.7)]"
+                                : isDone
+                                ? "bg-[#6F727C]"
+                                : "bg-[#D2F865]/65"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span>{isCurrent ? "Now" : isDone ? "Done" : "Next"}</span>
                         </div>
                       </div>
                     </button>
@@ -675,8 +734,30 @@ export default function FixturesTimelineRail({
 
       {/* Bottom Footer + Signature Electric Lime Circular Floating Action Button */}
       <div className="pt-5 mt-6 border-t border-white/[0.06] flex items-center justify-between gap-3">
-        <div className="text-[11px] text-[#8A8D96] tabular-nums">
-          {rawRecent.length} played · {rawUpcoming.length} upcoming
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#8A8D96] tabular-nums">
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-[#6F727C]"
+              aria-hidden="true"
+            />
+            {rawRecent.length} finished
+          </span>
+          {rawLive.length > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-[#FF4D5A]">
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[#FF2636]"
+                aria-hidden="true"
+              />
+              {rawLive.length} live
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-[#D2F865]"
+              aria-hidden="true"
+            />
+            {rawUpcoming.length} upcoming
+          </span>
         </div>
 
         <button

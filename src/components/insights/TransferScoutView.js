@@ -529,13 +529,16 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
           </svg>
 
           {/* Attribute Delta Grid */}
-          <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="w-full mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
             {RADAR_AXES.map((axis) => {
               const targetVal = targetPlayer.stats[axis.key];
               const benchVal = benchmarkPlayer.stats[axis.key];
               const delta = targetVal - benchVal;
               return (
-                <div key={axis.key} className="glass-tile px-3.5 py-3">
+                <div
+                  key={axis.key}
+                  className="py-1.5 border-b border-white/[0.05]"
+                >
                   <div className="text-[11px] text-[#8A8D96] truncate">
                     {axis.label}
                   </div>
@@ -639,8 +642,8 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
           </div>
         </div>
 
-        <div className="glass-card p-5 space-y-3.5">
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-5 space-y-3">
+          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
             <h3 className="font-display text-sm font-semibold text-white">
               Shortlist ({filteredCandidates.length})
             </h3>
@@ -649,48 +652,68 @@ export default function TransferScoutView({ selectedClub, activeMatch }) {
             </span>
           </div>
 
-          <div className="space-y-2.5">
-            {filteredCandidates.length === 0 ? (
-              <div className="glass-tile p-5 text-center text-xs text-[#8A8D96]">
-                No candidates match these thresholds. Ease the sliders above.
-              </div>
-            ) : (
-              filteredCandidates.map((candidate) => {
+          {filteredCandidates.length === 0 ? (
+            <div className="py-8 text-center text-xs text-[#8A8D96]">
+              No candidates match these thresholds. Ease the sliders above.
+            </div>
+          ) : (
+            <div className="divide-y divide-white/[0.05]">
+              {filteredCandidates.map((candidate) => {
                 const isSelected = targetPlayer?.id === candidate.id;
                 return (
-                  <button
-                    type="button"
+                  <div
                     key={candidate.id}
-                    onClick={() => setTargetId(candidate.id)}
-                    aria-pressed={isSelected}
-                    className={`w-full text-left p-3.5 rounded-[18px] border transition-all cursor-pointer ${
-                      isSelected
-                        ? "bg-[#22261D]/90 border-[#D2F865]/45"
-                        : "glass-tile hover:border-white/15"
-                    }`}
+                    className="py-1 first:pt-0 last:pb-0"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-white">
-                        {candidate.name}
-                      </span>
-                      <span className="font-mono text-xs font-semibold text-[#D2F865] tabular-nums">
-                        {candidate.fitScore}% fit
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-[#8A8D96] mt-1">
-                      <span>{candidate.club}</span>
-                      <span className="font-mono text-white tabular-nums">
-                        {candidate.marketVal}
-                      </span>
-                    </div>
-                    <div className="text-[11px] font-mono text-[#6F727C] mt-1.5 tabular-nums">
-                      Press {candidate.pressing}/90 · Prog {candidate.progPasses}/90 · Age {candidate.age}
-                    </div>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setTargetId(candidate.id)}
+                      aria-pressed={isSelected}
+                      className={`w-full text-left px-2.5 py-2.5 rounded-xl transition-colors cursor-pointer ${
+                        isSelected
+                          ? "bg-[#D2F865]/[0.08]"
+                          : "hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-2 min-w-0">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${
+                              isSelected
+                                ? "bg-[#D2F865] shadow-[0_0_8px_rgba(210,248,101,0.7)]"
+                                : "bg-white/20"
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={`text-sm truncate ${
+                              isSelected
+                                ? "font-semibold text-white"
+                                : "font-medium text-white/90"
+                            }`}
+                          >
+                            {candidate.name}
+                          </span>
+                        </span>
+                        <span className="font-mono text-xs font-semibold text-[#D2F865] tabular-nums shrink-0">
+                          {candidate.fitScore}% fit
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-[#8A8D96] mt-1 pl-3.5">
+                        <span className="truncate">{candidate.club}</span>
+                        <span className="font-mono text-white/90 tabular-nums shrink-0">
+                          {candidate.marketVal}
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-mono text-[#6F727C] mt-1 pl-3.5 tabular-nums">
+                        Press {candidate.pressing}/90 · Prog {candidate.progPasses}/90 · Age {candidate.age}
+                      </div>
+                    </button>
+                  </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

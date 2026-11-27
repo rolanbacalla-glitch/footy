@@ -148,6 +148,9 @@ export default function FixturesView({
                     .includes("premier");
                   const oppName = fx.opponent || (fx.isHome ? fx.awayTeam : fx.homeTeam) || "Opponent";
 
+                  const isLive = Boolean(fx.isLive);
+                  const isFinished = scope === "recent" && !isLive;
+
                   return (
                     <button
                       key={fx.id}
@@ -166,6 +169,42 @@ export default function FixturesView({
 
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                            <span
+                              className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider shrink-0 ${
+                                isLive
+                                  ? "text-[#FF4D5A] font-bold"
+                                  : isFinished
+                                    ? "text-[#8A8D96]"
+                                    : "text-[#D2F865]"
+                              }`}
+                            >
+                              {isLive ? (
+                                <span
+                                  className="relative flex h-1.5 w-1.5 shrink-0"
+                                  aria-hidden="true"
+                                >
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF2636] opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF2636]" />
+                                </span>
+                              ) : (
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                    isFinished ? "bg-[#6F727C]" : "bg-[#D2F865]"
+                                  }`}
+                                  aria-hidden="true"
+                                />
+                              )}
+                              <span>
+                                {isLive
+                                  ? "Live"
+                                  : isFinished
+                                    ? "Finished"
+                                    : "Upcoming"}
+                              </span>
+                            </span>
+                            <span className="text-white/20" aria-hidden="true">
+                              ·
+                            </span>
                             <span
                               className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-bold uppercase ${
                                 isEuropean
